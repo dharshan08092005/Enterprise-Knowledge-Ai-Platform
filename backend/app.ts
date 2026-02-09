@@ -11,7 +11,11 @@ import cookieParser from "cookie-parser";
 const app = express();
 
 // Global middleware
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", // Vite default
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());

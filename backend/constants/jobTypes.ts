@@ -1,0 +1,3 @@
+export const JOB_TYPES = {
+  DOCUMENT_PROCESSING: "DOCUMENT_PROCESSING"
+} as const;
