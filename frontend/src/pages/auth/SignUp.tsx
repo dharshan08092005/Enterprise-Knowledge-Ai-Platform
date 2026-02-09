@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Mail, Lock, User, ArrowRight, Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { signup } from "@/services/authService";
+import { Link } from "react-router-dom";
 
 interface SignUpForm {
   name: string;
@@ -15,14 +18,39 @@ const SignUp = () => {
   });
   const [focusedField, setFocusedField] = useState<string>("");
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(form);
+    setError(null);
+    setLoading(true);
+
+    try {
+      const data = await signup({
+        name: form.name,
+        email: form.email,
+        password: form.password
+      });
+
+      // Store access token (short-lived)
+      localStorage.setItem("accessToken", data.token);
+
+      // Redirect to protected area
+      navigate("/");
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message || "Invalid email or password"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const features = [
@@ -52,6 +80,12 @@ const SignUp = () => {
           </div>
 
           {/* Form */}
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/30 p-3 text-sm text-red-400">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -133,13 +167,20 @@ const SignUp = () => {
 
             <button
               type="submit"
-              className="group w-full bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl py-3.5 text-sm font-semibold text-white
-                       hover:from-indigo-500 hover:to-purple-500 transition-all duration-200
-                       shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50
-                       flex items-center justify-center gap-2"
+              disabled={loading}
+              className={`group w-full rounded-xl py-3.5 text-sm font-semibold text-white
+                transition-all duration-200 flex items-center justify-center gap-2
+                ${
+                  loading
+                    ? "bg-slate-600 cursor-not-allowed"
+                    : "bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50"
+                }
+              `}
             >
-              Create Account
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {loading ? "Creating account..." : "Create Account"}
+              {!loading && (
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              )}
             </button>
           </form>
 
@@ -189,12 +230,12 @@ const SignUp = () => {
           {/* Footer */}
           <p className="text-sm text-slate-400 text-center mt-6">
             Already have an account?{" "}
-            <a
-              href="/login"
+            <Link
+              to="/login"
               className="text-indigo-400 font-medium hover:text-indigo-300 transition-colors"
             >
               Sign in
-            </a>
+            </Link>
           </p>
 
           {/* <p className="text-xs text-slate-500 text-center mt-3">

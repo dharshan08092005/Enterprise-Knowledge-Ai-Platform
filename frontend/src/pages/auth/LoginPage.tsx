@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Mail, Lock, ArrowRight, Shield } from "lucide-react";
+import { login } from "../../services/authService";
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [email, setEmail] = useState<string>("");
@@ -7,10 +9,36 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [focusedField, setFocusedField] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log({ email, password, rememberMe });
+    setError(null);
+    setLoading(true);
+
+    try {
+      const data = await login({
+        email,
+        password
+      });
+
+      // Store access token (short-lived)
+      localStorage.setItem("accessToken", data.token);
+
+      // Redirect to protected area
+      navigate("/");
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message || "Invalid email or password"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="h-full flex bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900">
@@ -93,6 +121,11 @@ const LoginPage = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-2">
+                {error}
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 Email address
@@ -172,14 +205,21 @@ const LoginPage = () => {
 
             <button
               type="submit"
-              className="group w-full bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl py-3.5 text-sm font-semibold text-white
-                       hover:from-indigo-500 hover:to-purple-500 transition-all duration-200
-                       shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50
-                       flex items-center justify-center gap-2"
+              disabled={loading}
+              className={`group w-full rounded-xl py-3.5 text-sm font-semibold text-white
+                transition-all duration-200 flex items-center justify-center gap-2
+                ${
+                  loading
+                    ? "bg-slate-700 cursor-not-allowed"
+                    : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50"
+                }`}
             >
-              Sign In
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              {loading ? "Signing in..." : "Sign In"}
+              {!loading && (
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              )}
             </button>
+
           </form>
 
           {/* Divider */}
