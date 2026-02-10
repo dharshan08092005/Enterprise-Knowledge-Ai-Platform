@@ -12,6 +12,8 @@ import ProtectedLayout from "@/layouts/ProtectedLayout";
 // Admin pages
 import ManageUsersPage from "@/pages/admin/ManageUsersPage";
 import ManageAuditorsPage from "@/pages/admin/ManageAuditorsPage";
+import AuditLogsPage from "@/pages/admin/AuditLogsPage";
+import AdminSettingsPage from "@/pages/admin/AdminSettingsPage";
 
 // Documents page
 import DocumentsPage from "@/pages/documents/DocumentsPage";
@@ -37,6 +39,8 @@ export default function AppRoutes() {
           {/* Admin routes */}
           <Route path="/manage-users" element={<ManageUsersPage />} />
           <Route path="/manage-auditors" element={<ManageAuditorsPage />} />
+          <Route path="/audit" element={<AuditLogsPage />} />
+          <Route path="/admin-settings" element={<AdminSettingsPage />} />
         </Route>
       </Route>
     </Routes>

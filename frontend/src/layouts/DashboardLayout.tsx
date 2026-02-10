@@ -19,8 +19,6 @@ import {
   IconFolder,
   IconKey,
   IconFileAnalytics,
-  IconShieldCheck,
-  IconActivity,
   IconUserCog,
   IconUserShield,
 } from "@tabler/icons-react";
@@ -57,15 +55,20 @@ export default function DashboardLayout() {
         return { title: "Manage Auditors", subtitle: "View and manage auditor accounts" };
       case "/settings":
         return { title: "Settings", subtitle: "Configure your platform preferences" };
+      case "/admin-settings":
+        return { title: "Platform Settings", subtitle: "Configure integrations, security and application behavior" };
       default:
         return { title: "Dashboard", subtitle: "" };
     }
   };
 
-  // Base navigation links (available to all roles)
+  // Base navigation links (role-aware)
   const mainLinks = [
     { label: "Dashboard", href: "/", icon: <IconHome className="w-5 h-5" /> },
-    { label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" />, badge: "New" },
+    // Auditors don't get the AI chat — their role is compliance-focused
+    ...(userRole !== "AUDITOR"
+      ? [{ label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" />, badge: "New" }]
+      : []),
     { label: "Knowledge Base", href: "/knowledge", icon: <IconDatabase className="w-5 h-5" /> },
     { label: "Documents", href: "/documents", icon: <IconFolder className="w-5 h-5" /> },
   ];
@@ -79,8 +82,6 @@ export default function DashboardLayout() {
   // Audit links (Auditor and Admin)
   const auditLinks = [
     { label: "Audit Logs", href: "/audit", icon: <IconFileAnalytics className="w-5 h-5" /> },
-    { label: "Security", href: "/security", icon: <IconShieldCheck className="w-5 h-5" /> },
-    { label: "Activity", href: "/activity", icon: <IconActivity className="w-5 h-5" /> },
   ];
 
   // User Management links (Admin only)
@@ -93,7 +94,7 @@ export default function DashboardLayout() {
   const adminLinks = [
     { label: "Team", href: "/team", icon: <IconUsers className="w-5 h-5" /> },
     { label: "API Keys", href: "/api-keys", icon: <IconKey className="w-5 h-5" /> },
-    { label: "Settings", href: "/settings", icon: <IconSettings className="w-5 h-5" /> },
+    { label: "Platform Settings", href: "/admin-settings", icon: <IconSettings className="w-5 h-5" /> },
   ];
 
   const pageInfo = getPageInfo();
