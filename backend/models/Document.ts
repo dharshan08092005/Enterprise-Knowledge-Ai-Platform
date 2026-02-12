@@ -1,7 +1,20 @@
-// models/Document.ts
-import { Schema, model, Types } from "mongoose";
+import { Schema, model, Types, Document } from "mongoose";
 
-const documentSchema = new Schema(
+interface IDocument extends Document {
+  title: string;
+  ownerId: Types.ObjectId;
+  accessScope: "public" | "department" | "restricted";
+  allowedRoles: Types.ObjectId[];
+  fileName: string;
+  filePath: string;
+  mimeType: string;
+  size: number;
+  status: "uploaded" | "processing" | "active";
+  pageCount?: number;
+  chunkCount?: number;
+}
+
+const documentSchema = new Schema<IDocument>(
   {
     // Basic metadata
     title: {
@@ -10,7 +23,7 @@ const documentSchema = new Schema(
     },
 
     ownerId: {
-      type: Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
       required: true
     },
@@ -24,7 +37,7 @@ const documentSchema = new Schema(
 
     allowedRoles: [
       {
-        type: Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Role"
       }
     ],
@@ -55,6 +68,16 @@ const documentSchema = new Schema(
       type: String,
       enum: ["uploaded", "processing", "active"],
       default: "uploaded"
+    },
+
+    pageCount: {
+      type: Number,
+      default: 0
+    },
+
+    chunkCount: {
+      type: Number,
+      default: 0
     }
   },
   {
@@ -62,4 +85,4 @@ const documentSchema = new Schema(
   }
 );
 
-export default model("Document", documentSchema);
+export default model<IDocument>("Document", documentSchema);

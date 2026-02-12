@@ -4,7 +4,7 @@ import Document from "../models/Document";
 import { logAudit } from "../utils/auditLogger";
 import { JOB_TYPES } from "../constants/jobTypes";
 import Job from "../models/Job";
-import { AUDIT_ACTIONS } from "../constants/audiitActions";
+import { AUDIT_ACTIONS } from "../constants/auditActions";
 
 export const createDocument = async (req: AuthRequest, res: Response) => {
   try {
