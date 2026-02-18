@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth";
-import { requireRole } from "../middleware/requireRole";
+// import { requireRole } from "../middleware/requireRole";
+import { requirePermission } from "../middleware/requirePermission";
 import {
   getAllUsers,
   getAuditors
@@ -14,7 +15,7 @@ const router = Router();
 router.get(
   "/users",
   authMiddleware,
-  requireRole("ADMIN"),
+  requirePermission("MANAGE_USERS"),
   getAllUsers
 );
 
@@ -24,7 +25,7 @@ router.get(
 router.get(
   "/users/auditors",
   authMiddleware,
-  requireRole("ADMIN"),
+  requirePermission("VIEW_LOGS"),
   getAuditors
 );
 

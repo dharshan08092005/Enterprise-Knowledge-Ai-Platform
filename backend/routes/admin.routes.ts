@@ -1,44 +1,49 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth";
-import { requireRole } from "../middleware/requireRole";
+import { requirePermission } from "../middleware/requirePermission";
 import { getAuditLogs } from "../controllers/adminLogs.controller";
-import { getSettings, updateSettings, testConnection } from "../controllers/settings.controller";
 import {
-  getAllUsers,
-  getAuditors
-} from "../controllers/adminUser.controller";
+  getSettings,
+  updateSettings,
+  testConnection
+} from "../controllers/settings.controller";
 
 const router = Router();
 
-// Audit Logs
+/**
+ * Audit Logs
+ * Permission: VIEW_LOGS
+ */
 router.get(
-    "/logs",
-    authMiddleware,
-    requireRole("ADMIN", "AUDITOR"),
-    getAuditLogs
+  "/logs",
+  authMiddleware,
+  requirePermission("VIEW_LOGS"),
+  getAuditLogs
 );
 
-// Settings
+/**
+ * System Settings
+ * Permission: CONFIGURE_SYSTEM
+ */
 router.get(
-    "/settings",
-    authMiddleware,
-    requireRole("ADMIN"),
-    getSettings
+  "/settings",
+  authMiddleware,
+  requirePermission("CONFIGURE_SYSTEM"),
+  getSettings
 );
 
 router.put(
-    "/settings",
-    authMiddleware,
-    requireRole("ADMIN"),
-    updateSettings
+  "/settings",
+  authMiddleware,
+  requirePermission("CONFIGURE_SYSTEM"),
+  updateSettings
 );
 
 router.post(
-    "/settings/test-connection",
-    authMiddleware,
-    requireRole("ADMIN"),
-    testConnection
+  "/settings/test-connection",
+  authMiddleware,
+  requirePermission("CONFIGURE_SYSTEM"),
+  testConnection
 );
-
 
 export default router;

@@ -4,9 +4,13 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 export interface AuthRequest extends Request {
   user?: {
     userId: string;
-    role: string;
+    roleName: string;
+    permissions: string[];
+    organizationId: string;
+    departmentId?: string;
   };
 }
+
 
 export const authMiddleware = (
   req: AuthRequest,
@@ -30,14 +34,17 @@ export const authMiddleware = (
     ) as JwtPayload;
 
     // 3️⃣ Validate expected payload
-    if (!decoded.userId || !decoded.role) {
+    if (!decoded.userId || !decoded.roleName) {
       return res.status(401).json({ message: "Invalid token payload" });
     }
 
     // 4️⃣ Attach safe user object
     req.user = {
       userId: decoded.userId,
-      role: decoded.role
+      roleName: decoded.roleName,
+      permissions: decoded.permissions,
+      organizationId: decoded.organizationId,
+      departmentId: decoded.departmentId
     };
 
     next();

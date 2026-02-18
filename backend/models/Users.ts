@@ -8,17 +8,32 @@ const userSchema = new Schema(
       required: true,
       lowercase: true
     },
+
     password: {
       type: String,
       required: true,
       select: false
     },
+
     name: String,
+
     roleId: {
       type: Types.ObjectId,
       ref: "Role",
       required: true
     },
+
+    organizationId: {
+      type: Types.ObjectId,
+      ref: "Organization",
+      required: true
+    },
+
+    departmentId: {
+      type: Types.ObjectId,
+      ref: "Department"
+    },
+
     isActive: {
       type: Boolean,
       default: true

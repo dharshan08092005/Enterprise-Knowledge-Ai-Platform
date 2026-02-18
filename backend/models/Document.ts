@@ -3,6 +3,8 @@ import { Schema, model, Types, Document } from "mongoose";
 interface IDocument extends Document {
   title: string;
   ownerId: Types.ObjectId;
+  organizationId: Types.ObjectId;
+  departmentId?: Types.ObjectId;
   accessScope: "public" | "department" | "restricted";
   allowedRoles: Types.ObjectId[];
   fileName: string;
@@ -26,6 +28,19 @@ const documentSchema = new Schema<IDocument>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true
+    },
+
+    organizationId: {
+      type: Types.ObjectId,
+      ref: "Organization",
+      required: true,
+      index: true
+    },
+
+    departmentId: {
+      type: Types.ObjectId,
+      ref: "Department",
+      index: true
     },
 
     // Access control (future RAG + RBAC)

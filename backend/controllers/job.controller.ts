@@ -3,28 +3,32 @@ import Job from "../models/Job";
 import Document from "../models/Document";
 import { AuthRequest } from "../middleware/auth";
 import { logAudit } from "../utils/auditLogger";
+import { applyScopeFilter } from "../utils/scopeFilter";
 
 export const getJobById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { role, userId } = req.user!;
+    const { roleName, userId, organizationId, departmentId } = req.user!;
 
     const job = await Job.findById(id);
     if (!job) {
       return res.status(404).json({ message: "Job not found" });
     }
 
-    // ADMIN & AUDITOR can see all jobs
-    if (role !== "ADMIN" && role !== "AUDITOR") {
-      // USER: must own the related document
-      const document = await Document.findById(job.documentId);
-      if (!document) {
-        return res.status(404).json({ message: "Related document not found" });
-      }
+    const document = await Document.findById(job.documentId);
+    if (!document) {
+      return res.status(404).json({ message: "Related document not found" });
+    }
 
-      if (document.ownerId.toString() !== userId) {
-        return res.status(403).json({ message: "Forbidden" });
-      }
+    // 🔐 Scope-based visibility
+    const scopedFilter = applyScopeFilter(req, {}, {
+      ownerField: "createdBy",
+      organizationField: "organizationId",
+      departmentField: "departmentId"
+    });
+
+    if (!scopedFilter) {
+      return res.status(403).json({ message: "Forbidden" });
     }
 
     res.json({
@@ -39,11 +43,13 @@ export const getJobById = async (req: AuthRequest, res: Response) => {
       createdAt: job.createdAt,
       updatedAt: job.updatedAt
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to fetch job status" });
   }
 };
+
 
 export const getDeadJobs = async (req: AuthRequest, res: Response) => {
   try {
@@ -57,6 +63,7 @@ export const getDeadJobs = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: "Failed to fetch dead jobs" });
   }
 };
+
 
 export const retryDeadJob = async (req: AuthRequest, res: Response) => {
   try {
@@ -73,7 +80,6 @@ export const retryDeadJob = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // 🔁 Reset job safely
     job.status = "PENDING";
     job.attempts = 0;
     job.error = null;
@@ -81,10 +87,9 @@ export const retryDeadJob = async (req: AuthRequest, res: Response) => {
 
     await job.save();
 
-    // 🧾 Audit admin retry
     await logAudit({
       userId: req.user!.userId,
-      action: "JOB_RETRIED_BY_ADMIN",
+      action: "JOB_RETRIED",
       resourceType: "job",
       resourceId: job._id.toString(),
       metadata: {
@@ -96,9 +101,11 @@ export const retryDeadJob = async (req: AuthRequest, res: Response) => {
       message: "Job retried successfully",
       jobId: job._id
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Failed to retry job" });
   }
 };
+
 

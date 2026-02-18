@@ -4,13 +4,13 @@ import Role from "../models/Roles";
 import { hashPassword, comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
 import { AuthRequest } from "../middleware/auth";
-import { logAudit } from "../utils/auditLogger"; 
+import { logAudit } from "../utils/auditLogger";
 import RefreshToken from "../models/refreshToken";
 import { generateRefreshToken } from "../utils/refreshToken";
 
 
 export const signup = async (req: Request, res: Response) => {
-  try{
+  try {
     const { email, password, name } = req.body;
 
     // 1️⃣ Check if user exists
@@ -48,7 +48,10 @@ export const signup = async (req: Request, res: Response) => {
     // 5️⃣ Generate token
     const token = signToken({
       userId: user._id,
-      role: userRole.name
+      roleName: userRole.name,
+      permissions: userRole.permissions,
+      organizationId: user.organizationId,
+      departmentId: user.departmentId
     });
 
     res.status(201).json({
@@ -64,11 +67,14 @@ export const signup = async (req: Request, res: Response) => {
 
 
 export const login = async (req: Request, res: Response) => {
-  try{
+  try {
     const { email, password } = req.body;
 
     // 1️⃣ Find user + password explicitly
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email })
+      .select("+password")
+      .populate("roleId");
+
     if (!user) {
       await logAudit({
         action: "LOGIN_FAILED",
@@ -110,12 +116,15 @@ export const login = async (req: Request, res: Response) => {
 
 
     // 4️⃣ Get role
-    const role = await Role.findById(user.roleId);
+    const role = user.roleId as any;
 
     // 5️⃣ Generate token
     const token = signToken({
       userId: user._id,
-      role: role?.name
+      roleName: role.name,
+      permissions: role.permissions,
+      organizationId: user.organizationId,
+      departmentId: user.departmentId
     });
 
     // 6️⃣ Generate refresh token
@@ -150,12 +159,15 @@ export const login = async (req: Request, res: Response) => {
 
 export const getMe = async (req: AuthRequest, res: Response) => {
   // If authMiddleware passed, req.user is guaranteed
-  try{
+  try {
     res.json({
       userId: req.user!.userId,
-      role: req.user!.role
+      role: req.user!.roleName,
+      permissions: req.user!.permissions,
+      organizationId: req.user!.organizationId,
+      departmentId: req.user!.departmentId
     });
-  }catch (err) {
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -215,7 +227,10 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
     // 9️⃣ Issue new access token
     const newAccessToken = signToken({
       userId: user._id,
-      role: role?.name
+      roleName: role?.name,
+      permissions: role?.permissions || [],
+      organizationId: user.organizationId,
+      departmentId: user.departmentId
     });
 
     res.json({ token: newAccessToken });

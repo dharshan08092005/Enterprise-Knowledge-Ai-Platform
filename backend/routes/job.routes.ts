@@ -1,30 +1,44 @@
 import { Router } from "express";
 import { authMiddleware } from "../middleware/auth";
-import { requireRole } from "../middleware/requireRole";
-import { getJobById } from "../controllers/job.controller";
-import { getDeadJobs } from "../controllers/job.controller";
-import { retryDeadJob } from "../controllers/job.controller";
+import { requirePermission } from "../middleware/requirePermission";
+import {
+  getJobById,
+  getDeadJobs,
+  retryDeadJob
+} from "../controllers/job.controller";
 
 const router = Router();
 
+/**
+ * Get job details
+ * Permission: VIEW_LOGS
+ */
 router.get(
   "/:id",
   authMiddleware,
-  requireRole("ADMIN", "USER", "AUDITOR"),
+  requirePermission("VIEW_LOGS"),
   getJobById
 );
 
+/**
+ * Get all dead jobs
+ * Permission: VIEW_LOGS
+ */
 router.get(
   "/dead",
   authMiddleware,
-  requireRole("ADMIN", "AUDITOR"),
+  requirePermission("VIEW_LOGS"),
   getDeadJobs
 );
 
+/**
+ * Retry dead job
+ * Permission: MANAGE_USERS
+ */
 router.post(
   "/retry/:id",
   authMiddleware,
-  requireRole("ADMIN"),
+  requirePermission("CONFIGURE_SYSTEM"),
   retryDeadJob
 );
 

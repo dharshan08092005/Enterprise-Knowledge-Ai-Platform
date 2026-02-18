@@ -15,6 +15,6 @@ router.post("/signup", signupRateLimiter, signup);
 router.post("/login", loginRateLimiter, login);
 router.get("/me", authMiddleware, getMe);
 router.post("/refresh", refreshAccessToken);
-router.post("/logout", logout);
+router.post("/logout", authMiddleware, logout);
 
 export default router;

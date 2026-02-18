@@ -1,49 +1,57 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/auth";
 import Document from "../models/Document";
+import { applyScopeFilter } from "../utils/scopeFilter";
 
 export const getKnowledgeBase = async (
   req: AuthRequest,
   res: Response
 ) => {
   try {
-    const { role, userId } = req.user!;
-    const isAdmin = role === "ADMIN";
+    const {
+      roleName,
+      userId,
+      organizationId,
+      departmentId
+    } = req.user!;
 
-    let query: any = {};
+    let query: any = {
+      status: "active" // Only processed documents
+    };
 
-    // USER: only own documents
-    if (role === "USER") {
-      query.ownerId = userId;
+    const filter = applyScopeFilter(req, {}, {
+      ownerField: "ownerId",
+      organizationField: "organizationId",
+      departmentField: "departmentId"
+    });
+
+    if (!filter) {
+      return res.status(403).json({ message: "Forbidden" });
     }
 
-    // Build the query with relevant fields
-    let dbQuery = Document.find(query)
-      .select("_id title fileName size mimeType accessScope status createdAt ownerId")
-      .sort({ createdAt: -1 });
+    const documents = await Document.find(filter)
+      .select(
+        "_id title fileName size mimeType accessScope status createdAt ownerId"
+      )
+      .sort({ createdAt: -1 })
+      .populate("ownerId", "name email");
 
-    // Populate owner details for admin users
-    if (isAdmin) {
-      dbQuery = dbQuery.populate("ownerId", "name email");
-    }
-
-    const documents = await dbQuery;
-
-    // Transform documents for frontend
     const transformedDocs = documents.map((doc: any) => ({
       id: doc._id.toString(),
       title: doc.title,
       fileName: doc.fileName,
       fileSize: doc.size,
       mimeType: doc.mimeType,
-      accessScope: doc.accessScope || "restricted",
-      status: doc.status === "uploaded" ? "processing" : doc.status,
+      accessScope: doc.accessScope,
+      status: doc.status,
       uploadDate: doc.createdAt,
-      owner: isAdmin && doc.ownerId ? {
-        id: doc.ownerId._id?.toString() || doc.ownerId.toString(),
-        name: doc.ownerId.name || "Unknown",
-        email: doc.ownerId.email || ""
-      } : undefined
+      owner: doc.ownerId
+        ? {
+            id: doc.ownerId._id.toString(),
+            name: doc.ownerId.name,
+            email: doc.ownerId.email
+          }
+        : undefined
     }));
 
     res.json(transformedDocs);

@@ -6,16 +6,18 @@ const roleSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      uppercase: true, // ADMIN, USER, AUDITOR
+      uppercase: true,
       trim: true
     },
-    description: {
-      type: String
-    }
+    permissions: [
+      {
+        type: String,
+        required: true
+      }
+    ],
+    description: String
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
 
 export default model("Role", roleSchema);
