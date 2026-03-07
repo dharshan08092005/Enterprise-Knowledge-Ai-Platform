@@ -35,6 +35,7 @@ import {
 } from "@tabler/icons-react";
 import { getUserRole, getToken } from "@/lib/auth";
 import { fetchKnowledgeBase } from "@/services/knowledgeBaseService";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // Types
 interface Document {
@@ -481,19 +482,16 @@ const UploadModal = ({
                                 {/* Access Scope */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-400 mb-2">Access Scope</label>
-                                    <div className="relative">
-                                        <select
-                                            value={accessScope}
-                                            onChange={(e) => setAccessScope(e.target.value as Document["accessScope"])}
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                                        >
-                                            <option value="private">Private - Only you</option>
-                                            <option value="team">Team - Your team members</option>
-                                            <option value="organization">Organization - Everyone in org</option>
-                                            <option value="public">Public - Anyone with link</option>
-                                        </select>
-                                        <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                    </div>
+                                    <CustomSelect
+                                        value={accessScope}
+                                        onChange={(val) => setAccessScope(val as Document["accessScope"])}
+                                        options={[
+                                            { value: "private", label: "Private - Only you" },
+                                            { value: "team", label: "Team - Your team members" },
+                                            { value: "organization", label: "Organization - Everyone in org" },
+                                            { value: "public", label: "Public - Anyone with link" }
+                                        ]}
+                                    />
                                 </div>
                             </div>
 
@@ -716,37 +714,33 @@ export default function KnowledgeBase() {
                 </div>
 
                 {/* Status Filter */}
-                <div className="relative">
-                    <IconFilter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="processing">Processing</option>
-                        <option value="failed">Failed</option>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-48"
+                    icon={IconFilter}
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    options={[
+                        { value: "all", label: "All Status" },
+                        { value: "active", label: "Active" },
+                        { value: "processing", label: "Processing" },
+                        { value: "failed", label: "Failed" }
+                    ]}
+                />
 
                 {/* Scope Filter */}
-                <div className="relative">
-                    <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={scopeFilter}
-                        onChange={(e) => setScopeFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Access</option>
-                        <option value="private">Private</option>
-                        <option value="team">Team</option>
-                        <option value="organization">Organization</option>
-                        <option value="public">Public</option>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-48"
+                    icon={IconLock}
+                    value={scopeFilter}
+                    onChange={setScopeFilter}
+                    options={[
+                        { value: "all", label: "All Access" },
+                        { value: "private", label: "Private" },
+                        { value: "team", label: "Team" },
+                        { value: "organization", label: "Organization" },
+                        { value: "public", label: "Public" }
+                    ]}
+                />
 
                 {/* View Toggle */}
                 <div className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl">

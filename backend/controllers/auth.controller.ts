@@ -1,17 +1,18 @@
 import { Request, Response } from "express";
 import User from "../models/Users";
 import Role from "../models/Roles";
+import Organization from "../models/Organization";
 import { hashPassword, comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
 import { AuthRequest } from "../middleware/auth";
-import { logAudit } from "../utils/auditLogger"; 
+import { logAudit } from "../utils/auditLogger";
 import RefreshToken from "../models/refreshToken";
 import { generateRefreshToken } from "../utils/refreshToken";
 
 
 export const signup = async (req: Request, res: Response) => {
-  try{
-    const { email, password, name } = req.body;
+  try {
+    const { email, password, name, organizationName, organizationSlug } = req.body;
 
     // 1️⃣ Check if user exists
     const existingUser = await User.findOne({ email });
@@ -19,25 +20,45 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    // 2️⃣ Assign default role
-    const userRole = await Role.findOne({ name: "USER" });
-    if (!userRole) {
-      return res.status(500).json({ message: "Role not configured" });
+    let organizationId = null;
+    let roleToAssign = "USER";
+
+    // 2️⃣ Handle Organization creation if organizationName is provided
+    if (organizationName && organizationSlug) {
+      const existingOrg = await Organization.findOne({ slug: organizationSlug });
+      if (existingOrg) {
+        return res.status(409).json({ message: "Organization slug already exists" });
+      }
+
+      const org = await Organization.create({
+        name: organizationName,
+        slug: organizationSlug
+      });
+      organizationId = org._id;
+      roleToAssign = "ORG_ADMIN"; // First user of an org is the admin
     }
 
-    // 3️⃣ Hash password
+    // 3️⃣ Assign role
+    const userRole = await Role.findOne({ name: roleToAssign });
+    if (!userRole) {
+      return res.status(500).json({ message: `Role ${roleToAssign} not configured` });
+    }
+
+    // 4️⃣ Hash password
     const hashedPassword = await hashPassword(password);
 
-    // 4️⃣ Create user
+    // 5️⃣ Create user
     const user = await User.create({
       email,
       password: hashedPassword,
       name,
-      roleId: userRole._id
+      roleId: userRole._id,
+      organizationId
     });
 
     await logAudit({
       userId: user._id.toString(),
+      organizationId: organizationId?.toString(),
       action: "USER_SIGNUP",
       resourceType: "auth",
       metadata: {
@@ -45,15 +66,23 @@ export const signup = async (req: Request, res: Response) => {
       }
     });
 
-    // 5️⃣ Generate token
+    // 6️⃣ Generate token
     const token = signToken({
       userId: user._id,
-      role: userRole.name
+      role: userRole.name,
+      organizationId: organizationId?.toString()
     });
 
     res.status(201).json({
       message: "Signup successful",
-      token
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: userRole.name,
+        organizationId
+      }
     });
   }
   catch (err) {
@@ -64,7 +93,7 @@ export const signup = async (req: Request, res: Response) => {
 
 
 export const login = async (req: Request, res: Response) => {
-  try{
+  try {
     const { email, password } = req.body;
 
     // 1️⃣ Find user + password explicitly
@@ -92,6 +121,7 @@ export const login = async (req: Request, res: Response) => {
     if (!isMatch) {
       await logAudit({
         userId: user._id.toString(),
+        organizationId: user.organizationId?.toString(),
         action: "AUTH_LOGIN_FAILED",
         resourceType: "auth",
         metadata: {
@@ -104,6 +134,7 @@ export const login = async (req: Request, res: Response) => {
 
     await logAudit({
       userId: user._id.toString(),
+      organizationId: user.organizationId?.toString(),
       action: "USER_LOGIN",
       resourceType: "auth"
     });
@@ -115,7 +146,8 @@ export const login = async (req: Request, res: Response) => {
     // 5️⃣ Generate token
     const token = signToken({
       userId: user._id,
-      role: role?.name
+      role: role?.name,
+      organizationId: user.organizationId?.toString()
     });
 
     // 6️⃣ Generate refresh token
@@ -150,12 +182,13 @@ export const login = async (req: Request, res: Response) => {
 
 export const getMe = async (req: AuthRequest, res: Response) => {
   // If authMiddleware passed, req.user is guaranteed
-  try{
+  try {
     res.json({
       userId: req.user!.userId,
-      role: req.user!.role
+      role: req.user!.role,
+      organizationId: req.user!.organizationId
     });
-  }catch (err) {
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -215,7 +248,8 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
     // 9️⃣ Issue new access token
     const newAccessToken = signToken({
       userId: user._id,
-      role: role?.name
+      role: role?.name,
+      organizationId: user.organizationId?.toString()
     });
 
     res.json({ token: newAccessToken });

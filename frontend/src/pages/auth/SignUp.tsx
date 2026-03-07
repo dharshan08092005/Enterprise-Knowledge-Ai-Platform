@@ -8,13 +8,19 @@ interface SignUpForm {
   name: string;
   email: string;
   password: string;
+  organizationName: string;
+  organizationSlug: string;
 }
+
+import { Building2, Globe } from "lucide-react";
 
 const SignUp = () => {
   const [form, setForm] = useState<SignUpForm>({
     name: "",
     email: "",
     password: "",
+    organizationName: "",
+    organizationSlug: "",
   });
   const [focusedField, setFocusedField] = useState<string>("");
 
@@ -24,7 +30,20 @@ const SignUp = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      const newState = { ...prev, [name]: value };
+
+      // Auto-generate slug if org name is changed
+      if (name === "organizationName") {
+        newState.organizationSlug = value
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "-")
+          .replace(/-+/g, "-")
+          .replace(/^-|-$/g, "");
+      }
+
+      return newState;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -36,7 +55,9 @@ const SignUp = () => {
       const data = await signup({
         name: form.name,
         email: form.email,
-        password: form.password
+        password: form.password,
+        organizationName: form.organizationName || undefined,
+        organizationSlug: form.organizationSlug || undefined
       });
 
       // Store access token (short-lived)
@@ -101,11 +122,10 @@ const SignUp = () => {
                   onChange={handleChange}
                   onFocus={() => setFocusedField("name")}
                   onBlur={() => setFocusedField("")}
-                  className={`w-full bg-slate-800/50 border ${
-                    focusedField === "name"
+                  className={`w-full bg-slate-800/50 border ${focusedField === "name"
                       ? "border-indigo-500 ring-2 ring-indigo-500/20"
                       : "border-slate-700"
-                  } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
+                    } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
                              focus:outline-none transition-all duration-200`}
                   placeholder="John Doe"
                 />
@@ -126,11 +146,10 @@ const SignUp = () => {
                   onChange={handleChange}
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField("")}
-                  className={`w-full bg-slate-800/50 border ${
-                    focusedField === "email"
+                  className={`w-full bg-slate-800/50 border ${focusedField === "email"
                       ? "border-indigo-500 ring-2 ring-indigo-500/20"
                       : "border-slate-700"
-                  } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
+                    } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
                              focus:outline-none transition-all duration-200`}
                   placeholder="you@company.com"
                 />
@@ -151,11 +170,10 @@ const SignUp = () => {
                   onChange={handleChange}
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField("")}
-                  className={`w-full bg-slate-800/50 border ${
-                    focusedField === "password"
+                  className={`w-full bg-slate-800/50 border ${focusedField === "password"
                       ? "border-indigo-500 ring-2 ring-indigo-500/20"
                       : "border-slate-700"
-                  } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
+                    } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
                              focus:outline-none transition-all duration-200`}
                   placeholder="Create a strong password"
                 />
@@ -165,15 +183,71 @@ const SignUp = () => {
               </p>
             </div>
 
+            <div className="pt-4 border-t border-slate-800">
+              <h3 className="text-sm font-semibold text-indigo-400 mb-4 uppercase tracking-wider">
+                Organization Details (Optional)
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Organization Name
+                  </label>
+                  <div className="relative">
+                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <input
+                      type="text"
+                      name="organizationName"
+                      value={form.organizationName}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField("orgName")}
+                      onBlur={() => setFocusedField("")}
+                      className={`w-full bg-slate-800/50 border ${focusedField === "orgName"
+                          ? "border-indigo-500 ring-2 ring-indigo-500/20"
+                          : "border-slate-700"
+                        } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
+                                 focus:outline-none transition-all duration-200`}
+                      placeholder="Acme Inc."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Portal Slug
+                  </label>
+                  <div className="relative">
+                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <input
+                      type="text"
+                      name="organizationSlug"
+                      value={form.organizationSlug}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField("orgSlug")}
+                      onBlur={() => setFocusedField("")}
+                      className={`w-full bg-slate-800/50 border ${focusedField === "orgSlug"
+                          ? "border-indigo-500 ring-2 ring-indigo-500/20"
+                          : "border-slate-700"
+                        } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
+                                 focus:outline-none transition-all duration-200 text-sm font-mono`}
+                      placeholder="acme-inc"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">
+                    Your portal will be at: {form.organizationSlug || "slug"}.platform.com
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
               className={`group w-full rounded-xl py-3.5 text-sm font-semibold text-white
                 transition-all duration-200 flex items-center justify-center gap-2
-                ${
-                  loading
-                    ? "bg-slate-600 cursor-not-allowed"
-                    : "bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50"
+                ${loading
+                  ? "bg-slate-600 cursor-not-allowed"
+                  : "bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50"
                 }
               `}
             >

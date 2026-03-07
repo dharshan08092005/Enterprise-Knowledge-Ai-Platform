@@ -24,6 +24,8 @@ import {
 } from "@tabler/icons-react";
 import { getToken } from "@/lib/auth";
 import { fetchAuditors as fetchAuditorsApi, type AdminUser } from "@/services/adminService";
+import { getDepartments } from "@/services/departmentService";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // Types
 interface Auditor {
@@ -31,6 +33,7 @@ interface Auditor {
     name: string;
     email: string;
     department: string;
+    departmentId: string | null;
     status: "active" | "inactive";
     assignedAudits: number;
     completedAudits: number;
@@ -38,12 +41,19 @@ interface Auditor {
     lastActive: string;
 }
 
+interface Department {
+    _id: string;
+    name: string;
+    description?: string;
+}
+
 // Convert backend user into UI shape
 const mapApiAuditor = (u: AdminUser): Auditor => ({
     id: u._id,
     name: u.name,
     email: u.email,
-    department: "—",
+    department: u.departmentName || "Unassigned",
+    departmentId: u.departmentId || null,
     status: u.isActive !== false ? "active" : "inactive",
     assignedAudits: 0,
     completedAudits: 0,
@@ -67,16 +77,11 @@ const StatusBadge = ({ status }: { status: Auditor["status"] }) => {
 
 // Department Badge Component
 const DepartmentBadge = ({ department }: { department: string }) => {
-    const colors: Record<string, string> = {
-        Security: "bg-red-500/20 text-red-400 border-red-500/30",
-        Compliance: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-        Finance: "bg-green-500/20 text-green-400 border-green-500/30",
-        IT: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-        Operations: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    };
-
+    if (department === "Unassigned") {
+        return <span className="text-xs text-gray-500 italic">Unassigned</span>;
+    }
     return (
-        <span className={`px-2.5 py-1 text-xs font-medium rounded-full border ${colors[department] || "bg-gray-500/20 text-gray-400 border-gray-500/30"}`}>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
             {department}
         </span>
     );
@@ -216,20 +221,26 @@ const PromoteUserModal = ({
     isOpen,
     onClose,
     onSubmit,
+    departments,
 }: {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (data: { email: string; department: string }) => void;
+    onSubmit: (data: { email: string; departmentId: string }) => void;
+    departments: Department[];
 }) => {
     const [formData, setFormData] = useState({
         email: "",
-        department: "Security",
+        departmentId: "",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formData.departmentId) {
+            alert("Please select a department");
+            return;
+        }
         onSubmit(formData);
-        setFormData({ email: "", department: "Security" });
+        setFormData({ email: "", departmentId: "" });
         onClose();
     };
 
@@ -286,21 +297,20 @@ const PromoteUserModal = ({
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-400 mb-2">Audit Department</label>
-                                    <div className="relative">
-                                        <select
-                                            value={formData.department}
-                                            onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                                        >
-                                            <option value="Security">Security</option>
-                                            <option value="Compliance">Compliance</option>
-                                            <option value="Finance">Finance</option>
-                                            <option value="IT">IT</option>
-                                            <option value="Operations">Operations</option>
-                                        </select>
-                                        <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                    </div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                                        Department <span className="text-red-400">*</span>
+                                    </label>
+                                    <CustomSelect
+                                        value={formData.departmentId}
+                                        onChange={(val) => setFormData({ ...formData, departmentId: val })}
+                                        placeholder="Select a department"
+                                        options={departments.map(d => ({ value: d._id, label: d.name }))}
+                                    />
+                                    {departments.length === 0 && (
+                                        <p className="text-xs text-amber-400 mt-1">
+                                            No departments found. Please create departments first.
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="flex gap-3 pt-4">
@@ -337,6 +347,17 @@ export default function ManageAuditorsPage() {
     const [showPromoteModal, setShowPromoteModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [departments, setDepartments] = useState<Department[]>([]);
+
+    // Fetch departments
+    const loadDepartments = async () => {
+        try {
+            const data = await getDepartments();
+            setDepartments(data);
+        } catch (err) {
+            console.error("Failed to fetch departments:", err);
+        }
+    };
 
     // Fetch real auditors from backend
     const loadAuditors = async () => {
@@ -357,6 +378,7 @@ export default function ManageAuditorsPage() {
 
     useEffect(() => {
         loadAuditors();
+        loadDepartments();
     }, []);
 
     // Filter auditors
@@ -395,12 +417,14 @@ export default function ManageAuditorsPage() {
         ));
     };
 
-    const handlePromoteUser = (data: { email: string; department: string }) => {
+    const handlePromoteUser = (data: { email: string; departmentId: string }) => {
+        const dept = departments.find((d) => d._id === data.departmentId);
         const newAuditor: Auditor = {
             id: Date.now().toString(),
             name: data.email.split("@")[0].replace(/\./g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
             email: data.email,
-            department: data.department,
+            department: dept?.name || "Unassigned",
+            departmentId: data.departmentId,
             status: "active",
             assignedAudits: 0,
             completedAudits: 0,
@@ -512,37 +536,29 @@ export default function ManageAuditorsPage() {
                     </div>
 
                     {/* Department Filter */}
-                    <div className="relative">
-                        <IconFilter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                        <select
-                            value={departmentFilter}
-                            onChange={(e) => setDepartmentFilter(e.target.value)}
-                            className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                        >
-                            <option value="all">All Departments</option>
-                            <option value="Security">Security</option>
-                            <option value="Compliance">Compliance</option>
-                            <option value="Finance">Finance</option>
-                            <option value="IT">IT</option>
-                            <option value="Operations">Operations</option>
-                        </select>
-                        <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
+                    <CustomSelect
+                        className="w-48"
+                        icon={IconFilter}
+                        value={departmentFilter}
+                        onChange={setDepartmentFilter}
+                        options={[
+                            { value: "all", label: "All Departments" },
+                            ...departments.map(dept => ({ value: dept.name, label: dept.name }))
+                        ]}
+                    />
 
                     {/* Status Filter */}
-                    <div className="relative">
-                        <IconShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                        <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
+                    <CustomSelect
+                        className="w-48"
+                        icon={IconShieldCheck}
+                        value={statusFilter}
+                        onChange={setStatusFilter}
+                        options={[
+                            { value: "all", label: "All Status" },
+                            { value: "active", label: "Active" },
+                            { value: "inactive", label: "Inactive" }
+                        ]}
+                    />
 
                     <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -617,6 +633,7 @@ export default function ManageAuditorsPage() {
                     isOpen={showPromoteModal}
                     onClose={() => setShowPromoteModal(false)}
                     onSubmit={handlePromoteUser}
+                    departments={departments}
                 />
             </>)}
         </div>

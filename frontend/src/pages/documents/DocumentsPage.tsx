@@ -33,6 +33,7 @@ import {
 } from "@tabler/icons-react";
 import { getUserRole, getToken } from "@/lib/auth";
 import { fetchDocuments, uploadDocument, deleteDocument as deleteDocumentAPI, type DocumentResponse } from "@/services/documentService";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // Types
 type FileType = "pdf" | "doc" | "docx" | "txt" | "xls" | "xlsx" | "csv" | "other";
@@ -152,17 +153,17 @@ const DocumentRow = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             whileHover={{ backgroundColor: "rgba(255,255,255,0.02)" }}
-            className="border-b border-white/5 group"
+            className="group" style={{ borderBottom: '1px solid var(--border-secondary)' }}
         >
             {/* Document Info */}
             <td className="py-4 px-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                    <div className="p-2.5 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}>
                         <FileIcon type={fileType} />
                     </div>
                     <div className="min-w-0">
-                        <p className="text-sm font-medium text-white truncate max-w-xs">{doc.title}</p>
-                        <p className="text-xs text-gray-500 truncate">{doc.fileName} • {formatFileSize(doc.size)}</p>
+                        <p className="text-sm font-medium truncate max-w-xs" style={{ color: 'var(--text-primary)' }}>{doc.title}</p>
+                        <p className="text-xs truncate" style={{ color: 'var(--text-disabled)' }}>{doc.fileName} • {formatFileSize(doc.size)}</p>
                     </div>
                 </div>
             </td>
@@ -205,7 +206,8 @@ const DocumentRow = ({
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    className="absolute right-0 top-full mt-1 w-44 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl z-20 overflow-hidden"
+                                    className="absolute right-0 top-full mt-1 w-44 rounded-xl shadow-2xl z-20 overflow-hidden"
+                                    style={{ background: 'var(--bg-modal)', border: '1px solid var(--border-primary)' }}
                                 >
                                     <button
                                         onClick={() => { onView(); setShowMenu(false); }}
@@ -322,15 +324,15 @@ const UploadModal = ({
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
                     >
-                        <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                        <div className="rounded-2xl shadow-2xl overflow-hidden" style={{ background: 'var(--bg-modal)', border: '1px solid var(--border-primary)' }}>
                             {/* Header */}
-                            <div className="p-6 border-b border-white/10">
+                            <div className="p-6" style={{ borderBottom: '1px solid var(--border-primary)' }}>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20">
                                             <IconCloudUpload className="w-5 h-5 text-purple-400" />
                                         </div>
-                                        <h3 className="text-lg font-semibold text-white">Upload Document</h3>
+                                        <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Upload Document</h3>
                                     </div>
                                     <button
                                         onClick={onClose}
@@ -345,13 +347,14 @@ const UploadModal = ({
                             <div className="p-6 space-y-6">
                                 {/* Title Input */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-400 mb-2">Document Title</label>
+                                    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-muted)' }}>Document Title</label>
                                     <input
                                         type="text"
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                         placeholder="Enter document title..."
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
+                                        className="w-full px-4 py-3 rounded-xl focus:outline-none"
+                                        style={{ background: 'var(--bg-input)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)' }}
                                     />
                                 </div>
 
@@ -413,7 +416,7 @@ const UploadModal = ({
                             </div>
 
                             {/* Footer */}
-                            <div className="p-6 border-t border-white/10 flex gap-3">
+                            <div className="p-6 flex gap-3" style={{ borderTop: '1px solid var(--border-primary)' }}>
                                 <button
                                     onClick={onClose}
                                     className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/10 transition-colors"
@@ -527,8 +530,8 @@ export default function DocumentsPage() {
                 className="flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Documents</h1>
-                    <p className="text-gray-400 mt-1">View and manage all uploaded documents</p>
+                    <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Documents</h1>
+                    <p className="mt-1" style={{ color: 'var(--text-muted)' }}>View and manage all uploaded documents</p>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -536,7 +539,8 @@ export default function DocumentsPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={loadDocuments}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 hover:bg-white/10 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-colors"
+                        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
                     >
                         <IconRefresh className="w-4 h-4" />
                         Refresh
@@ -567,15 +571,16 @@ export default function DocumentsPage() {
                 ].map((stat, index) => (
                     <div
                         key={index}
-                        className="p-4 rounded-xl bg-white/5 border border-white/10"
+                        className="p-4 rounded-xl"
+                        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
                     >
                         <div className="flex items-center gap-3 mb-2">
                             <div className={`p-2 rounded-lg bg-${stat.color}-500/20`}>
                                 <stat.icon className={`w-4 h-4 text-${stat.color}-400`} />
                             </div>
                         </div>
-                        <p className="text-2xl font-bold text-white">{stat.value}</p>
-                        <p className="text-sm text-gray-400">{stat.label}</p>
+                        <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
+                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
                     </div>
                 ))}
             </motion.div>
@@ -595,44 +600,41 @@ export default function DocumentsPage() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search documents..."
-                        className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
+                        className="w-full pl-12 pr-4 py-3 rounded-xl text-sm focus:outline-none"
+                        style={{ background: 'var(--bg-input)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)' }}
                     />
                 </div>
 
                 {/* Status Filter */}
-                <div className="relative">
-                    <IconFilter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="processing">Processing</option>
-                        <option value="uploaded">Queued</option>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-48"
+                    icon={IconFilter}
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    options={[
+                        { value: "all", label: "All Status" },
+                        { value: "active", label: "Active" },
+                        { value: "processing", label: "Processing" },
+                        { value: "uploaded", label: "Queued" }
+                    ]}
+                />
 
                 {/* Scope Filter */}
-                <div className="relative">
-                    <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={scopeFilter}
-                        onChange={(e) => setScopeFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Access</option>
-                        <option value="restricted">Restricted</option>
-                        <option value="department">Department</option>
-                        <option value="public">Public</option>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-48"
+                    icon={IconLock}
+                    value={scopeFilter}
+                    onChange={setScopeFilter}
+                    options={[
+                        { value: "all", label: "All Access" },
+                        { value: "restricted", label: "Restricted" },
+                        { value: "department", label: "Department" },
+                        { value: "public", label: "Public" }
+                    ]}
+                />
 
                 {/* View Toggle */}
-                <div className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}>
                     <button
                         onClick={() => setViewMode("list")}
                         className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-purple-500/20 text-purple-300" : "text-gray-400 hover:text-white"
@@ -685,12 +687,13 @@ export default function DocumentsPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden"
+                    className="rounded-2xl overflow-hidden"
+                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
                 >
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-white/10 text-left">
+                                <tr className="text-left" style={{ borderBottom: '1px solid var(--border-primary)' }}>
                                     <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
                                     <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Upload Date</th>
@@ -721,7 +724,7 @@ export default function DocumentsPage() {
                     )}
 
                     {/* Pagination */}
-                    <div className="px-4 py-3 border-t border-white/10 flex items-center justify-between">
+                    <div className="px-4 py-3 flex items-center justify-between" style={{ borderTop: '1px solid var(--border-primary)' }}>
                         <p className="text-sm text-gray-500">
                             Showing {filteredDocuments.length} of {documents.length} documents
                         </p>

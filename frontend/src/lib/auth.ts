@@ -49,8 +49,9 @@ function parseJwt(token: string): Record<string, unknown> {
 export function getUserFromToken(): {
   userId: string;
   email: string;
-  role: "ADMIN" | "AUDITOR" | "USER";
+  role: "ADMIN" | "ORG_ADMIN" | "AUDITOR" | "USER";
   name?: string;
+  organizationId?: string;
 } | null {
   const token = getToken();
   if (!token) return null;
@@ -60,15 +61,16 @@ export function getUserFromToken(): {
     return {
       userId: payload.userId as string,
       email: payload.email as string,
-      role: (payload.role as "ADMIN" | "AUDITOR" | "USER") || "USER",
+      role: (payload.role as "ADMIN" | "ORG_ADMIN" | "AUDITOR" | "USER") || "USER",
       name: payload.name as string | undefined,
+      organizationId: payload.organizationId as string | undefined
     };
   } catch {
     return null;
   }
 }
 
-export function getUserRole(): "ADMIN" | "AUDITOR" | "USER" | null {
+export function getUserRole(): "ADMIN" | "ORG_ADMIN" | "AUDITOR" | "USER" | null {
   const user = getUserFromToken();
   return user?.role || null;
 }

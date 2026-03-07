@@ -13,6 +13,8 @@ export const signup = async (data: {
   name: string;
   email: string;
   password: string;
+  organizationName?: string;
+  organizationSlug?: string;
 }) => {
   const res = await api.post("/signup", data);
   return res.data;

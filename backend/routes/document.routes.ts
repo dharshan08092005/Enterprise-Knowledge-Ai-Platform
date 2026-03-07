@@ -15,7 +15,7 @@ const router = Router();
 router.post(
   "/",
   authMiddleware,
-  requireRole("ADMIN", "USER"),
+  requireRole("ADMIN", "USER", "ORG_ADMIN"),
   upload.single("file"),
   createDocument
 );
@@ -23,21 +23,21 @@ router.post(
 router.get(
   "/",
   authMiddleware,
-  requireRole("ADMIN", "USER", "AUDITOR"),
+  requireRole("ADMIN", "USER", "AUDITOR", "ORG_ADMIN"),
   getDocuments
 );
 
 router.get(
   "/:id",
   authMiddleware,
-  requireRole("ADMIN", "USER", "AUDITOR"),
+  requireRole("ADMIN", "USER", "AUDITOR", "ORG_ADMIN"),
   getDocumentById
 );
 
 router.delete(
   "/:id",
   authMiddleware,
-  requireRole("ADMIN"),
+  requireRole("ADMIN", "ORG_ADMIN"),
   deleteDocument
 );
 

@@ -29,6 +29,7 @@ import {
 } from "@tabler/icons-react";
 import { getToken } from "@/lib/auth";
 import { fetchAuditLogs, type AuditLogEntry } from "@/services/adminService";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // ─── Action Configuration ────────────────────────────────────────────────────
 interface ActionConfig {
@@ -198,17 +199,17 @@ const DetailModal = ({
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
             >
-                <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div className="rounded-2xl shadow-2xl overflow-hidden" style={{ background: 'var(--bg-modal)', border: '1px solid var(--border-primary)' }}>
                     {/* Header */}
-                    <div className="p-6 border-b border-white/10">
+                    <div className="p-6" style={{ borderBottom: '1px solid var(--border-primary)' }}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className={`p-2.5 rounded-xl ${config.bgColor} border ${config.borderColor}`}>
                                     <Icon className={`w-5 h-5 ${config.color}`} />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white">{config.label}</h3>
-                                    <p className="text-xs text-gray-500 mt-0.5">{formatFullDateTime(log.createdAt)}</p>
+                                    <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{config.label}</h3>
+                                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-disabled)' }}>{formatFullDateTime(log.createdAt)}</p>
                                 </div>
                             </div>
                             <button
@@ -226,7 +227,7 @@ const DetailModal = ({
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wider mb-1.5">Action</p>
-                                <code className="text-sm text-white bg-white/5 px-2 py-1 rounded-md font-mono">{log.action}</code>
+                                <code className="text-sm bg-white/5 px-2 py-1 rounded-md font-mono" style={{ color: 'var(--text-primary)' }}>{log.action}</code>
                             </div>
                             <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wider mb-1.5">Resource Type</p>
@@ -470,15 +471,16 @@ export default function AuditLogsPage() {
                 className="flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Audit Logs</h1>
-                    <p className="text-gray-400 mt-1">Monitor system activity and security events</p>
+                    <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Audit Logs</h1>
+                    <p className="mt-1" style={{ color: 'var(--text-muted)' }}>Monitor system activity and security events</p>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 hover:bg-white/10 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-colors"
+                        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
                     >
                         <IconDownload className="w-4 h-4" />
                         Export
@@ -536,60 +538,51 @@ export default function AuditLogsPage() {
             >
                 {/* Search */}
                 <div className="relative flex-1">
-                    <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-disabled)' }} />
                     <input
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search logs by action, user, resource..."
-                        className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                        className="w-full pl-12 pr-4 py-3 rounded-xl text-sm focus:outline-none transition-colors"
+                        style={{ background: 'var(--bg-input)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)' }}
                     />
                 </div>
 
                 {/* Action Filter */}
-                <div className="relative">
-                    <IconFilter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={actionFilter}
-                        onChange={(e) => setActionFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Actions</option>
-                        <optgroup label="Authentication">
-                            <option value="USER_SIGNUP">User Signup</option>
-                            <option value="USER_LOGIN">User Login</option>
-                            <option value="LOGIN_FAILED">Login Failed</option>
-                            <option value="AUTH_LOGIN_FAILED">Auth Failed</option>
-                        </optgroup>
-                        <optgroup label="Documents">
-                            <option value="DOCUMENT_UPLOAD_QUEUED">Doc Uploaded</option>
-                        </optgroup>
-                        <optgroup label="Jobs">
-                            <option value="JOB_CREATED">Job Created</option>
-                            <option value="JOB_STARTED">Job Started</option>
-                            <option value="JOB_COMPLETED">Job Completed</option>
-                            <option value="JOB_FAILED">Job Failed</option>
-                            <option value="JOB_RETRY_SCHEDULED">Job Retry</option>
-                        </optgroup>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-56"
+                    icon={IconFilter}
+                    value={actionFilter}
+                    onChange={setActionFilter}
+                    options={[
+                        { value: "all", label: "All Actions" },
+                        { value: "USER_SIGNUP", label: "User Signup" },
+                        { value: "USER_LOGIN", label: "User Login" },
+                        { value: "LOGIN_FAILED", label: "Login Failed" },
+                        { value: "AUTH_LOGIN_FAILED", label: "Auth Failed" },
+                        { value: "DOCUMENT_UPLOAD_QUEUED", label: "Doc Uploaded" },
+                        { value: "JOB_CREATED", label: "Job Created" },
+                        { value: "JOB_STARTED", label: "Job Started" },
+                        { value: "JOB_COMPLETED", label: "Job Completed" },
+                        { value: "JOB_FAILED", label: "Job Failed" },
+                        { value: "JOB_RETRY_SCHEDULED", label: "Job Retry" }
+                    ]}
+                />
 
                 {/* Resource Type Filter */}
-                <div className="relative">
-                    <IconActivity className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={resourceFilter}
-                        onChange={(e) => setResourceFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Resources</option>
-                        <option value="auth">Auth</option>
-                        <option value="document">Document</option>
-                        <option value="job">Job</option>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-48"
+                    icon={IconActivity}
+                    value={resourceFilter}
+                    onChange={setResourceFilter}
+                    options={[
+                        { value: "all", label: "All Resources" },
+                        { value: "auth", label: "Auth" },
+                        { value: "document", label: "Document" },
+                        { value: "job", label: "Job" }
+                    ]}
+                />
             </motion.div>
 
             {/* Loading State */}
@@ -635,10 +628,11 @@ export default function AuditLogsPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden"
+                    className="rounded-2xl overflow-hidden"
+                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
                 >
                     {/* Live indicator bar */}
-                    <div className="px-4 py-2.5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                    <div className="px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-secondary)', background: 'var(--bg-elevated)' }}>
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                             <span className="text-xs text-gray-400">

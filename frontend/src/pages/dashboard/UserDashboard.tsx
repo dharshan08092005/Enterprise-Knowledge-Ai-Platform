@@ -32,18 +32,19 @@ const QuickActionCard = ({
         <motion.div
             whileHover={{ scale: 1.02, y: -4 }}
             whileTap={{ scale: 0.98 }}
-            className="relative group p-6 rounded-2xl bg-white/5 border border-white/10 overflow-hidden hover:border-purple-500/30 transition-all duration-300 cursor-pointer h-full"
+            className="relative group p-6 rounded-2xl border overflow-hidden transition-all duration-300 cursor-pointer h-full"
+            style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
         >
             <div className={`absolute inset-0 ${gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
             <div className="relative z-10">
                 <div className={`inline-flex p-3 rounded-xl ${gradient} mb-4`}>
                     <Icon className="w-6 h-6 text-white" />
                 </div>
-                <h4 className="font-semibold text-white mb-2 flex items-center gap-2">
+                <h4 className="font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                     {title}
                     <IconArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </h4>
-                <p className="text-sm text-gray-400">{description}</p>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{description}</p>
             </div>
         </motion.div>
     </Link>
@@ -67,9 +68,9 @@ const RecentQueryItem = ({
             <IconMessageCircle className="w-5 h-5 text-purple-400" />
         </div>
         <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{query}</p>
+            <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{query}</p>
             <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs text-gray-500">{time}</span>
+                <span className="text-xs" style={{ color: 'var(--text-disabled)' }}>{time}</span>
                 <span className="w-1 h-1 rounded-full bg-gray-600" />
                 <span className="text-xs text-purple-400">{category}</span>
             </div>
@@ -90,14 +91,15 @@ const SuggestedTopic = ({
 }) => (
     <motion.div
         whileHover={{ scale: 1.02 }}
-        className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/30 cursor-pointer transition-all"
+        className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
     >
         <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20">
             <Icon className="w-4 h-4 text-purple-400" />
         </div>
         <div className="flex-1">
-            <p className="text-sm font-medium text-white">{title}</p>
-            <p className="text-xs text-gray-500">{queries} related queries</p>
+            <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{title}</p>
+            <p className="text-xs" style={{ color: 'var(--text-disabled)' }}>{queries} related queries</p>
         </div>
     </motion.div>
 );
@@ -122,22 +124,23 @@ export default function UserDashboard() {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border border-white/10 p-8"
+                className="relative overflow-hidden rounded-3xl border p-8"
+                style={{ background: 'var(--gradient-card)', borderColor: 'var(--border-primary)' }}
             >
                 {/* Background decorations */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+                <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/15 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
                 <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                     <div>
-                        <div className="flex items-center gap-2 text-purple-300 mb-2">
+                        <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--accent-primary)' }}>
                             <IconClock className="w-4 h-4" />
                             <span className="text-sm">Good morning</span>
                         </div>
-                        <h1 className="text-3xl font-bold text-white mb-2">
+                        <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                             What would you like to know today?
                         </h1>
-                        <p className="text-gray-400 max-w-xl">
+                        <p className="max-w-xl" style={{ color: 'var(--text-secondary)' }}>
                             Ask questions about your enterprise knowledge base. I can help with documents, policies, reports, and more.
                         </p>
                     </div>
@@ -148,9 +151,9 @@ export default function UserDashboard() {
                         className="w-full lg:w-auto"
                     >
                         <Link to="/ask">
-                            <div className="flex items-center gap-3 px-6 py-4 bg-white/10 border border-white/20 rounded-2xl hover:bg-white/15 transition-colors cursor-pointer">
-                                <IconSearch className="w-5 h-5 text-gray-400" />
-                                <span className="text-gray-400">Ask anything...</span>
+                            <div className="flex items-center gap-3 px-6 py-4 rounded-2xl transition-colors cursor-pointer" style={{ background: 'var(--bg-input)', border: '1px solid var(--border-primary)' }}>
+                                <IconSearch className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+                                <span style={{ color: 'var(--text-muted)' }}>Ask anything...</span>
                                 <div className="flex items-center gap-1 ml-4">
                                     <kbd className="px-2 py-1 text-xs font-medium text-gray-500 bg-white/10 rounded">⌘</kbd>
                                     <kbd className="px-2 py-1 text-xs font-medium text-gray-500 bg-white/10 rounded">K</kbd>
@@ -193,7 +196,8 @@ export default function UserDashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="lg:col-span-2 p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl"
+                    className="lg:col-span-2 p-6 rounded-2xl border backdrop-blur-xl"
+                    style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
                 >
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
@@ -201,8 +205,8 @@ export default function UserDashboard() {
                                 <IconHistory className="w-5 h-5 text-purple-400" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold text-white">Recent Queries</h3>
-                                <p className="text-sm text-gray-400">Your conversation history</p>
+                                <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Recent Queries</h3>
+                                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Your conversation history</p>
                             </div>
                         </div>
                         <Link to="/history" className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
@@ -222,15 +226,16 @@ export default function UserDashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl"
+                    className="p-6 rounded-2xl border backdrop-blur-xl"
+                    style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
                 >
                     <div className="flex items-center gap-3 mb-6">
                         <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20">
                             <IconBulb className="w-5 h-5 text-amber-400" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-semibold text-white">Popular Topics</h3>
-                            <p className="text-sm text-gray-400">Trending in your org</p>
+                            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Popular Topics</h3>
+                            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Trending in your org</p>
                         </div>
                     </div>
 
@@ -243,9 +248,9 @@ export default function UserDashboard() {
                     <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
                         <div className="flex items-center gap-2 mb-2">
                             <IconStar className="w-4 h-4 text-amber-400" />
-                            <span className="text-sm font-medium text-white">Pro Tip</span>
+                            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Pro Tip</span>
                         </div>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                             Try asking follow-up questions to get more detailed answers from the AI.
                         </p>
                     </div>
@@ -257,7 +262,8 @@ export default function UserDashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="relative overflow-hidden rounded-2xl border border-purple-500/20 p-6"
+                className="relative overflow-hidden rounded-2xl p-6"
+                style={{ border: '1px solid var(--border-primary)', background: 'var(--gradient-card)' }}
             >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 via-pink-600/10 to-blue-600/10" />
                 <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
@@ -268,8 +274,8 @@ export default function UserDashboard() {
                             <IconSparkles className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <h4 className="font-semibold text-white">Need help getting started?</h4>
-                            <p className="text-sm text-gray-400">
+                            <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Need help getting started?</h4>
+                            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                                 Ask me anything about company policies, documentation, or reports.
                             </p>
                         </div>

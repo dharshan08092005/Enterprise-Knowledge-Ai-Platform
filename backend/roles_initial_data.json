@@ -1,0 +1,18 @@
+[
+    {
+        "name": "ADMIN",
+        "description": "Global Platform Administrator. Full access to all nested organizations, users, and platform settings."
+    },
+    {
+        "name": "ORG_ADMIN",
+        "description": "Organization Administrator. Full access to the specific organization's users, departments, and documents."
+    },
+    {
+        "name": "AUDITOR",
+        "description": "Compliance and Audit role. Read-only access to documents and activity logs within their organization."
+    },
+    {
+        "name": "USER",
+        "description": "Standard employee role. Access to personal documents and shared organization knowledge bases."
+    }
+]

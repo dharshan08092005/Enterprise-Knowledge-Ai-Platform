@@ -1,0 +1,36 @@
+# Required Node.js libraries (Main Dependencies)
+
+# Backend Dependencies
+bcrypt
+cookie-parser
+cors
+dotenv
+express
+express-rate-limit
+gpt-tokenizer
+jsonwebtoken
+mongoose
+morgan
+multer
+pdf-parse
+
+# Frontend Dependencies
+@heroicons/react
+@tabler/icons-react
+@tailwindcss/vite
+axios
+clsx
+lucide-react
+motion
+react
+react-dom
+react-router-dom
+tailwind-merge
+tailwindcss
+
+# Dev Tools
+typescript
+tsx
+vite
+nodemon
+ts-node

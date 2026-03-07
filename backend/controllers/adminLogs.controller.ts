@@ -1,8 +1,10 @@
-import { Request, Response } from "express";
+import { Response } from "express";
+import { AuthRequest } from "../middleware/auth";
 import AuditLog from "../models/AuditLog";
 
-export const getAuditLogs = async (req: Request, res: Response) => {
+export const getAuditLogs = async (req: AuthRequest, res: Response) => {
     try {
+        const { organizationId } = req.user!;
         const {
             limit = 50,
             page = 1,
@@ -12,6 +14,11 @@ export const getAuditLogs = async (req: Request, res: Response) => {
 
         const filter: any = {};
 
+        // If Org Admin, restrict to their organization's logs
+        if (organizationId) {
+            filter.organizationId = organizationId;
+        }
+
         if (action && action !== "all") filter.action = action;
         if (resourceType && resourceType !== "all") filter.resourceType = resourceType;
 
@@ -20,6 +27,7 @@ export const getAuditLogs = async (req: Request, res: Response) => {
 
         const logs = await AuditLog.find(filter)
             .populate("userId", "name email")
+            .populate("organizationId", "name")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(Number(limit));

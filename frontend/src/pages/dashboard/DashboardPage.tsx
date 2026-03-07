@@ -12,6 +12,7 @@ export default function DashboardPage() {
 
   switch (role) {
     case "ADMIN":
+    case "ORG_ADMIN":
       return <AdminDashboard />;
     case "AUDITOR":
       return <AuditorDashboard />;

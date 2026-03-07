@@ -20,11 +20,17 @@ export const createDocument = async (req: AuthRequest, res: Response) => {
     }
 
     const ownerId = req.user!.userId;
+    const organizationId = req.user!.organizationId;
+
+    if (!organizationId) {
+      return res.status(400).json({ message: "Organization ID is required" });
+    }
 
     // 1️⃣ Create document metadata
     const document = await Document.create({
       title,
       ownerId,
+      organizationId,
       fileName: file.originalname,
       filePath: file.path,
       mimeType: file.mimetype,
@@ -45,6 +51,7 @@ export const createDocument = async (req: AuthRequest, res: Response) => {
     // 🧾 Job created audit (ADD THIS)
     await logAudit({
       userId: ownerId,
+      organizationId,
       action: AUDIT_ACTIONS.JOB_CREATED,
       resourceType: "job",
       resourceId: job._id.toString(),
@@ -57,6 +64,7 @@ export const createDocument = async (req: AuthRequest, res: Response) => {
     // 3️⃣ Audit log for document upload queue
     await logAudit({
       userId: ownerId,
+      organizationId,
       action: "DOCUMENT_UPLOAD_QUEUED",
       resourceType: "document",
       resourceId: document._id.toString(),
@@ -81,17 +89,19 @@ export const createDocument = async (req: AuthRequest, res: Response) => {
 
 export const getDocuments = async (req: AuthRequest, res: Response) => {
   try {
-    const { role, userId } = req.user!;
+    const { role, userId, organizationId } = req.user!;
+    let documents: any[] = [];
 
-    let documents;
-
-    // ADMIN & AUDITOR → see all documents
-    if (role === "ADMIN" || role === "AUDITOR") {
-      documents = await Document.find();
-    }
-    // USER → see only own documents
-    else {
-      documents = await Document.find({ ownerId: userId });
+    // ORG_ADMIN / AUDITOR / USER (within an org) → see only documents within their organization
+    if (organizationId) {
+      if (role === "ORG_ADMIN" || role === "ADMIN" || role === "AUDITOR") {
+        documents = await Document.find({ organizationId });
+      } else {
+        documents = await Document.find({ organizationId, ownerId: userId });
+      }
+    } else {
+      // Global Admin (no organizationId) → Cannot see company documents
+      documents = [];
     }
 
     res.json(documents);
@@ -104,14 +114,20 @@ export const getDocuments = async (req: AuthRequest, res: Response) => {
 export const getDocumentById = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { role, userId } = req.user!;
+    const { role, userId, organizationId } = req.user!;
 
-    const document = await Document.findById(id);
+    if (!organizationId) {
+      return res.status(403).json({ message: "Global Admins cannot access company documents" });
+    }
+
+    const query: any = { _id: id, organizationId };
+
+    const document = await Document.findOne(query);
     if (!document) {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    // USER ownership check
+    // USER ownership check within organization
     if (role === "USER" && document.ownerId?.toString() !== userId) {
       return res.status(403).json({ message: "Forbidden" });
     }
@@ -126,13 +142,36 @@ export const getDocumentById = async (req: AuthRequest, res: Response) => {
 export const deleteDocument = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const { role, userId, organizationId } = req.user!;
 
-    const document = await Document.findById(id);
+    if (!organizationId) {
+      return res.status(403).json({ message: "Global Admins cannot delete company documents" });
+    }
+
+    const query: any = { _id: id, organizationId };
+
+    const document = await Document.findOne(query);
     if (!document) {
       return res.status(404).json({ message: "Document not found" });
     }
 
+    // Ownership check for deletion (Allowing ADMIN or OWNER)
+    if (role !== "ADMIN" && role !== "ORG_ADMIN" && document.ownerId?.toString() !== userId) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
     await document.deleteOne();
+
+    await logAudit({
+      userId: userId,
+      organizationId,
+      action: "DOCUMENT_DELETED",
+      resourceType: "document",
+      resourceId: id as string,
+      metadata: {
+        title: document.title
+      }
+    });
 
     res.json({ message: "Document deleted successfully" });
   } catch (err) {

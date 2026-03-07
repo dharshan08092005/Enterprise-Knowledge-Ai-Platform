@@ -18,9 +18,12 @@ import {
     IconRefresh,
     IconLoader2,
     IconAlertTriangle,
+    IconBuilding,
 } from "@tabler/icons-react";
 import { getToken } from "@/lib/auth";
-import { fetchAllUsers, type AdminUser } from "@/services/adminService";
+import { fetchAllUsers, createUser as createUserApi, updateUserDepartment as updateDeptApi, type AdminUser } from "@/services/adminService";
+import { getDepartments } from "@/services/departmentService";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // Types — mapped from backend
 interface User {
@@ -31,6 +34,14 @@ interface User {
     status: "active" | "inactive";
     createdAt: string;
     lastLogin: string;
+    departmentId: string | null;
+    departmentName: string | null;
+}
+
+interface Department {
+    _id: string;
+    name: string;
+    description?: string;
 }
 
 // Convert backend user into the UI shape
@@ -42,17 +53,20 @@ const mapApiUser = (u: AdminUser): User => ({
     status: u.isActive !== false ? "active" : "inactive",
     createdAt: new Date(u.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
     lastLogin: "—",
+    departmentId: u.departmentId || null,
+    departmentName: u.departmentName || null,
 });
 
 // Status Badge Component
 const StatusBadge = ({ status }: { status: User["status"] }) => {
     const styles = {
         active: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-        inactive: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+        inactive: "bg-red-500/20 text-red-400 border-red-500/30",
     };
 
     return (
-        <span className={`px-2.5 py-1 text-xs font-medium rounded-full border ${styles[status]}`}>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border ${styles[status]}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${status === "active" ? "bg-emerald-400" : "bg-red-400"}`} />
             {status.charAt(0).toUpperCase() + status.slice(1)}
         </span>
     );
@@ -60,15 +74,27 @@ const StatusBadge = ({ status }: { status: User["status"] }) => {
 
 // Role Badge Component
 const RoleBadge = ({ role }: { role: User["role"] }) => {
-    const styles = {
+    const styles: Record<string, string> = {
         USER: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-        AUDITOR: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-        ADMIN: "bg-pink-500/20 text-pink-400 border-pink-500/30",
+        AUDITOR: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+        ADMIN: "bg-purple-500/20 text-purple-400 border-purple-500/30",
     };
 
     return (
-        <span className={`px-2.5 py-1 text-xs font-medium rounded-full border ${styles[role]}`}>
+        <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border ${styles[role] || styles.USER}`}>
+            <IconShieldCheck className="w-3 h-3" />
             {role}
+        </span>
+    );
+};
+
+// Department Badge
+const DepartmentBadge = ({ name }: { name: string | null }) => {
+    if (!name) return <span className="text-xs text-gray-500 italic">Unassigned</span>;
+    return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+            <IconBuilding className="w-3 h-3" />
+            {name}
         </span>
     );
 };
@@ -79,11 +105,13 @@ const UserRow = ({
     onEdit,
     onDelete,
     onToggleStatus,
+    onChangeDepartment,
 }: {
     user: User;
     onEdit: (user: User) => void;
     onDelete: (user: User) => void;
     onToggleStatus: (user: User) => void;
+    onChangeDepartment: (user: User) => void;
 }) => {
     const [showMenu, setShowMenu] = useState(false);
 
@@ -110,6 +138,9 @@ const UserRow = ({
             </td>
             <td className="py-4 px-4">
                 <RoleBadge role={user.role} />
+            </td>
+            <td className="py-4 px-4">
+                <DepartmentBadge name={user.departmentName} />
             </td>
             <td className="py-4 px-4">
                 <StatusBadge status={user.status} />
@@ -142,8 +173,15 @@ const UserRow = ({
                                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                    className="absolute right-0 top-full mt-1 w-44 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl z-20 overflow-hidden"
+                                    className="absolute right-0 top-full mt-1 w-52 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl z-20 overflow-hidden"
                                 >
+                                    <button
+                                        onClick={() => { onChangeDepartment(user); setShowMenu(false); }}
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                                    >
+                                        <IconBuilding className="w-4 h-4" />
+                                        Change Department
+                                    </button>
                                     <button
                                         onClick={() => { onEdit(user); setShowMenu(false); }}
                                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
@@ -189,21 +227,28 @@ const AddUserModal = ({
     isOpen,
     onClose,
     onSubmit,
+    departments,
 }: {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (user: Partial<User>) => void;
+    onSubmit: (user: Partial<User> & { departmentId: string }) => void;
+    departments: Department[];
 }) => {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         role: "USER" as User["role"],
+        departmentId: "",
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (!formData.departmentId) {
+            alert("Please select a department");
+            return;
+        }
         onSubmit(formData);
-        setFormData({ name: "", email: "", role: "USER" });
+        setFormData({ name: "", email: "", role: "USER", departmentId: "" });
         onClose();
     };
 
@@ -264,18 +309,39 @@ const AddUserModal = ({
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-400 mb-2">Role</label>
-                                    <div className="relative">
-                                        <select
-                                            value={formData.role}
-                                            onChange={(e) => setFormData({ ...formData, role: e.target.value as User["role"] })}
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                                        >
-                                            <option value="USER">User</option>
-                                            <option value="AUDITOR">Auditor</option>
-                                            <option value="ADMIN">Admin</option>
-                                        </select>
-                                        <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                    </div>
+                                    <CustomSelect
+                                        value={formData.role}
+                                        onChange={(val) => setFormData({ ...formData, role: val as User["role"] })}
+                                        options={[
+                                            { value: "USER", label: "User" },
+                                            { value: "AUDITOR", label: "Auditor" }
+                                        ]}
+                                    />
+                                </div>
+
+                                {/* Department — Required */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                                        Department <span className="text-red-400">*</span>
+                                    </label>
+                                    <CustomSelect
+                                        value={formData.departmentId}
+                                        onChange={(val) => setFormData({ ...formData, departmentId: val })}
+                                        placeholder="Select a department"
+                                        icon={IconBuilding}
+                                        options={departments.map(d => ({ value: d._id, label: d.name }))}
+                                    />
+                                    {departments.length === 0 && (
+                                        <p className="text-xs text-amber-400 mt-1">
+                                            No departments found. Please create departments first.
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                                    <p className="text-xs text-purple-300">
+                                        <strong>Note:</strong> The initial password will be the username (the portion of the email before the @). Users can change this after logging in.
+                                    </p>
                                 </div>
 
                                 <div className="flex gap-3 pt-4">
@@ -290,9 +356,133 @@ const AddUserModal = ({
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         type="submit"
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-sm font-medium text-white shadow-lg shadow-purple-500/25"
+                                        disabled={departments.length === 0}
+                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-sm font-medium text-white shadow-lg shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Add User
+                                    </motion.button>
+                                </div>
+                            </form>
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+    );
+};
+
+// Change Department Modal
+const ChangeDepartmentModal = ({
+    isOpen,
+    onClose,
+    user,
+    departments,
+    onSubmit,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    user: User | null;
+    departments: Department[];
+    onSubmit: (userId: string, departmentId: string) => void;
+}) => {
+    const [selectedDept, setSelectedDept] = useState("");
+
+    useEffect(() => {
+        if (user?.departmentId) {
+            setSelectedDept(user.departmentId);
+        } else {
+            setSelectedDept("");
+        }
+    }, [user]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user || !selectedDept) return;
+        onSubmit(user.id, selectedDept);
+        onClose();
+    };
+
+    if (!user) return null;
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                    />
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-50"
+                    >
+                        <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                            <div className="p-6 border-b border-white/10">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-lg font-semibold text-white">Change Department</h3>
+                                    <button
+                                        onClick={onClose}
+                                        className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                                    >
+                                        <IconX className="w-5 h-5 text-gray-400" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                                {/* User info */}
+                                <div className="p-4 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-semibold text-white">
+                                        {user.name.charAt(0)}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-white">{user.name}</p>
+                                        <p className="text-xs text-gray-400">{user.email}</p>
+                                    </div>
+                                </div>
+
+                                {/* Current department */}
+                                {user.departmentName && (
+                                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                                        <IconBuilding className="w-4 h-4" />
+                                        Current: <span className="text-cyan-400 font-medium">{user.departmentName}</span>
+                                    </div>
+                                )}
+
+                                {/* New department */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                                        New Department <span className="text-red-400">*</span>
+                                    </label>
+                                    <CustomSelect
+                                        value={selectedDept}
+                                        onChange={setSelectedDept}
+                                        placeholder="Select a department"
+                                        icon={IconBuilding}
+                                        options={departments.map(d => ({ value: d._id, label: d.name }))}
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/10 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        type="submit"
+                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-xl text-sm font-medium text-white shadow-lg shadow-cyan-500/25"
+                                    >
+                                        Update Department
                                     </motion.button>
                                 </div>
                             </form>
@@ -312,6 +502,19 @@ export default function ManageUsersPage() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [showDeptModal, setShowDeptModal] = useState(false);
+    const [selectedUserForDept, setSelectedUserForDept] = useState<User | null>(null);
+
+    // Fetch departments
+    const loadDepartments = async () => {
+        try {
+            const data = await getDepartments();
+            setDepartments(data);
+        } catch (err) {
+            console.error("Failed to fetch departments:", err);
+        }
+    };
 
     // Fetch real users from backend
     const loadUsers = async () => {
@@ -332,6 +535,7 @@ export default function ManageUsersPage() {
 
     useEffect(() => {
         loadUsers();
+        loadDepartments();
     }, []);
 
     // Filter users
@@ -371,40 +575,82 @@ export default function ManageUsersPage() {
         ));
     };
 
-    const handleAddUser = (userData: Partial<User>) => {
-        const newUser: User = {
-            id: Date.now().toString(),
-            name: userData.name || "",
-            email: userData.email || "",
-            role: userData.role || "USER",
-            status: "active",
-            createdAt: new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
-            lastLogin: "Never",
-        };
-        setUsers([newUser, ...users]);
+    const handleAddUser = async (userData: Partial<User> & { departmentId: string }) => {
+        try {
+            const token = getToken();
+            if (!token) return;
+
+            const res = await createUserApi(token, {
+                email: userData.email!,
+                name: userData.name!,
+                role: userData.role!,
+                departmentId: userData.departmentId,
+            });
+
+            const newUser = mapApiUser(res);
+            setUsers([newUser, ...users]);
+        } catch (err: any) {
+            alert(err.response?.data?.message || "Failed to create user");
+        }
+    };
+
+    const handleChangeDepartment = (user: User) => {
+        setSelectedUserForDept(user);
+        setShowDeptModal(true);
+    };
+
+    const handleUpdateDepartment = async (userId: string, departmentId: string) => {
+        try {
+            const token = getToken();
+            if (!token) return;
+
+            const res = await updateDeptApi(token, userId, departmentId);
+
+            // Update user in local state
+            setUsers(users.map((u) =>
+                u.id === userId
+                    ? { ...u, departmentId: res.user.departmentId, departmentName: res.user.departmentName }
+                    : u
+            ));
+        } catch (err: any) {
+            alert(err.response?.data?.message || "Failed to update department");
+        }
     };
 
     return (
         <div className="space-y-6">
             {/* Loading State */}
             {isLoading && (
-                <div className="flex flex-col items-center justify-center py-20">
-                    <IconLoader2 className="w-10 h-10 text-purple-400 animate-spin mb-3" />
-                    <p className="text-gray-400">Loading users...</p>
+                <div className="flex items-center justify-center py-20">
+                    <div className="text-center">
+                        <IconLoader2 className="w-8 h-8 text-purple-400 animate-spin mx-auto mb-4" />
+                        <p className="text-gray-400">Loading users...</p>
+                    </div>
                 </div>
             )}
 
             {/* Error State */}
             {error && !isLoading && (
-                <div className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-3">
-                    <IconAlertTriangle className="w-6 h-6 text-red-400" />
-                    <div>
-                        <p className="text-red-400 font-medium">Failed to load users</p>
-                        <p className="text-sm text-gray-400 mt-1">{error}</p>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-4"
+                >
+                    <IconAlertTriangle className="w-6 h-6 text-red-400 flex-shrink-0" />
+                    <div className="flex-1">
+                        <p className="text-sm font-medium text-red-400">Failed to load users</p>
+                        <p className="text-xs text-red-300/70 mt-1">{error}</p>
                     </div>
-                </div>
+                    <button
+                        onClick={loadUsers}
+                        className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-xl text-sm text-red-300 hover:bg-red-500/30 transition-colors"
+                    >
+                        Retry
+                    </button>
+                </motion.div>
             )}
 
+            {/* Main Content */}
             {!isLoading && !error && (<>
                 {/* Header */}
                 <motion.div
@@ -413,8 +659,8 @@ export default function ManageUsersPage() {
                     className="flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Manage Users</h1>
-                        <p className="text-gray-400 mt-1">View and manage all user accounts in your organization</p>
+                        <h1 className="text-2xl font-bold text-white">User Management</h1>
+                        <p className="text-gray-400 mt-1">Manage users, roles, and departments</p>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -438,7 +684,7 @@ export default function ManageUsersPage() {
                     </div>
                 </motion.div>
 
-                {/* Stats Cards */}
+                {/* Stats */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -446,17 +692,17 @@ export default function ManageUsersPage() {
                     className="grid grid-cols-2 md:grid-cols-4 gap-4"
                 >
                     {[
-                        { label: "Total Users", value: stats.total, color: "purple" },
-                        { label: "Active", value: stats.active, color: "emerald" },
-                        { label: "Inactive", value: stats.inactive, color: "gray" },
-                        { label: "Admins", value: stats.admins, color: "amber" },
-                    ].map((stat, index) => (
-                        <div
-                            key={index}
-                            className="p-4 rounded-xl bg-white/5 border border-white/10"
-                        >
+                        { label: 'Total Users', value: stats.total, color: 'purple' },
+                        { label: 'Active', value: stats.active, color: 'emerald' },
+                        { label: 'Inactive', value: stats.inactive, color: 'red' },
+                        { label: 'Admins', value: stats.admins, color: 'amber' },
+                    ].map((stat, i) => (
+                        <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div className={`w-8 h-8 rounded-lg bg-${stat.color}-500/20 flex items-center justify-center mb-3`}>
+                                <div className={`w-3 h-3 rounded-full bg-${stat.color}-500`} />
+                            </div>
+                            <p className="text-2xl font-bold text-white">{stat.value}</p>
                             <p className="text-sm text-gray-400">{stat.label}</p>
-                            <p className={`text-2xl font-bold text-${stat.color}-400 mt-1`}>{stat.value}</p>
                         </div>
                     ))}
                 </motion.div>
@@ -481,35 +727,31 @@ export default function ManageUsersPage() {
                     </div>
 
                     {/* Role Filter */}
-                    <div className="relative">
-                        <IconFilter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                        <select
-                            value={roleFilter}
-                            onChange={(e) => setRoleFilter(e.target.value)}
-                            className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                        >
-                            <option value="all">All Roles</option>
-                            <option value="USER">Users Only</option>
-                            <option value="AUDITOR">Auditors Only</option>
-                            <option value="ADMIN">Admins Only</option>
-                        </select>
-                        <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
+                    <CustomSelect
+                        className="w-48"
+                        icon={IconFilter}
+                        value={roleFilter}
+                        onChange={setRoleFilter}
+                        options={[
+                            { value: "all", label: "All Roles" },
+                            { value: "USER", label: "Users Only" },
+                            { value: "AUDITOR", label: "Auditors Only" },
+                            { value: "ADMIN", label: "Admins Only" }
+                        ]}
+                    />
 
                     {/* Status Filter */}
-                    <div className="relative">
-                        <IconShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                        <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                    </div>
+                    <CustomSelect
+                        className="w-48"
+                        icon={IconShieldCheck}
+                        value={statusFilter}
+                        onChange={setStatusFilter}
+                        options={[
+                            { value: "all", label: "All Status" },
+                            { value: "active", label: "Active" },
+                            { value: "inactive", label: "Inactive" }
+                        ]}
+                    />
 
                     <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -534,6 +776,7 @@ export default function ManageUsersPage() {
                                 <tr className="border-b border-white/10 text-left">
                                     <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                                     <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                                     <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                                     <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Last Login</th>
@@ -548,6 +791,7 @@ export default function ManageUsersPage() {
                                         onEdit={handleEdit}
                                         onDelete={handleDelete}
                                         onToggleStatus={handleToggleStatus}
+                                        onChangeDepartment={handleChangeDepartment}
                                     />
                                 ))}
                             </tbody>
@@ -587,6 +831,16 @@ export default function ManageUsersPage() {
                     isOpen={showAddModal}
                     onClose={() => setShowAddModal(false)}
                     onSubmit={handleAddUser}
+                    departments={departments}
+                />
+
+                {/* Change Department Modal */}
+                <ChangeDepartmentModal
+                    isOpen={showDeptModal}
+                    onClose={() => { setShowDeptModal(false); setSelectedUserForDept(null); }}
+                    user={selectedUserForDept}
+                    departments={departments}
+                    onSubmit={handleUpdateDepartment}
                 />
             </>)}
         </div>

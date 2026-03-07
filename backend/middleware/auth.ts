@@ -5,6 +5,8 @@ export interface AuthRequest extends Request {
   user?: {
     userId: string;
     role: string;
+    organizationId?: string;
+    departmentId?: string;
   };
 }
 
@@ -37,7 +39,9 @@ export const authMiddleware = (
     // 4️⃣ Attach safe user object
     req.user = {
       userId: decoded.userId,
-      role: decoded.role
+      role: decoded.role,
+      organizationId: decoded.organizationId,
+      departmentId: decoded.departmentId
     };
 
     next();

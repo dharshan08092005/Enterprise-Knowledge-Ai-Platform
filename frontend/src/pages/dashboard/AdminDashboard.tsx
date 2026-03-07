@@ -40,7 +40,7 @@ const StatCard = ({
     className="relative group"
   >
     <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-    <div className="relative p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl overflow-hidden">
+    <div className="relative p-6 rounded-2xl border backdrop-blur-xl overflow-hidden" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
       {/* Background gradient orb */}
       <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full ${gradient} opacity-20 blur-3xl`} />
 
@@ -54,9 +54,9 @@ const StatCard = ({
           </button>
         </div>
 
-        <h3 className="text-sm font-medium text-gray-400 mb-1">{title}</h3>
+        <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--text-muted)' }}>{title}</h3>
         <div className="flex items-end justify-between">
-          <p className="text-3xl font-bold text-white">{value}</p>
+          <p className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{value}</p>
           <div className={`flex items-center gap-1 text-sm ${changeType === "up" ? "text-emerald-400" : "text-red-400"
             }`}>
             {changeType === "up" ? (
@@ -94,10 +94,10 @@ const ActivityItem = ({
       <Icon className="w-5 h-5 text-white" />
     </div>
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium text-white truncate">{title}</p>
-      <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+      <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{title}</p>
+      <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{description}</p>
     </div>
-    <span className="text-xs text-gray-500 whitespace-nowrap">{time}</span>
+    <span className="text-xs whitespace-nowrap" style={{ color: 'var(--text-disabled)' }}>{time}</span>
   </motion.div>
 );
 
@@ -131,15 +131,16 @@ const QuickActionCard = ({
   <motion.button
     whileHover={{ scale: 1.02, y: -2 }}
     whileTap={{ scale: 0.98 }}
-    className="relative group p-5 rounded-2xl bg-white/5 border border-white/10 text-left overflow-hidden hover:border-purple-500/30 transition-colors"
+    className="relative group p-5 rounded-2xl border text-left overflow-hidden transition-colors"
+    style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
   >
     <div className={`absolute inset-0 ${gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
     <div className="relative z-10">
       <div className={`inline-flex p-2.5 rounded-xl ${gradient} mb-3`}>
         <Icon className="w-5 h-5 text-white" />
       </div>
-      <h4 className="font-medium text-white mb-1">{title}</h4>
-      <p className="text-xs text-gray-400">{description}</p>
+      <h4 className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{title}</h4>
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{description}</p>
     </div>
   </motion.button>
 );
@@ -244,7 +245,8 @@ export default function AdminDashboard() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-blue-600/20 border border-white/10 p-8"
+        className="relative overflow-hidden rounded-3xl border p-8"
+        style={{ background: 'var(--gradient-card)', borderColor: 'var(--border-primary)' }}
       >
         {/* Background decorations */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
@@ -255,10 +257,10 @@ export default function AdminDashboard() {
             <IconClock className="w-4 h-4" />
             <span className="text-sm">Good morning</span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Welcome back, <span className="gradient-text">Dharshan</span> 👋
           </h1>
-          <p className="text-gray-400 max-w-xl">
+          <p className="max-w-xl" style={{ color: 'var(--text-secondary)' }}>
             Your enterprise AI platform is running smoothly. You have{" "}
             <span className="text-purple-400 font-medium">3 pending tasks</span> and{" "}
             <span className="text-emerald-400 font-medium">5 new insights</span> waiting for you.
@@ -297,12 +299,13 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="lg:col-span-2 p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl"
+          className="lg:col-span-2 p-6 rounded-2xl border backdrop-blur-xl"
+          style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-white">Query Analytics</h3>
-              <p className="text-sm text-gray-400">Last 30 days performance</p>
+              <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Query Analytics</h3>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Last 30 days performance</p>
             </div>
             <div className="flex items-center gap-2">
               <button className="px-3 py-1.5 text-xs font-medium text-purple-400 bg-purple-500/20 rounded-lg border border-purple-500/30">
@@ -321,18 +324,18 @@ export default function AdminDashboard() {
             <MiniChart />
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-white/10">
+          <div className="grid grid-cols-3 gap-4 mt-6 pt-6" style={{ borderTop: '1px solid var(--border-primary)' }}>
             <div>
-              <p className="text-sm text-gray-400">Total Queries</p>
-              <p className="text-2xl font-bold text-white mt-1">45.2K</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Total Queries</p>
+              <p className="text-2xl font-bold mt-1" style={{ color: 'var(--text-primary)' }}>45.2K</p>
             </div>
             <div>
-              <p className="text-sm text-gray-400">Avg. Response Time</p>
-              <p className="text-2xl font-bold text-white mt-1">1.2s</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Avg. Response Time</p>
+              <p className="text-2xl font-bold mt-1" style={{ color: 'var(--text-primary)' }}>1.2s</p>
             </div>
             <div>
-              <p className="text-sm text-gray-400">Satisfaction Rate</p>
-              <p className="text-2xl font-bold text-white mt-1">98.5%</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Satisfaction Rate</p>
+              <p className="text-2xl font-bold mt-1" style={{ color: 'var(--text-primary)' }}>98.5%</p>
             </div>
           </div>
         </motion.div>
@@ -342,10 +345,11 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl"
+          className="p-6 rounded-2xl border backdrop-blur-xl"
+          style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Recent Activity</h3>
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Recent Activity</h3>
             <button className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
               View all
             </button>
@@ -365,7 +369,7 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
       >
-        <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+        <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {quickActions.map((action, index) => (
             <QuickActionCard key={index} {...action} />
@@ -378,7 +382,8 @@ export default function AdminDashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="relative overflow-hidden rounded-2xl border border-purple-500/20 p-6"
+        className="relative overflow-hidden rounded-2xl p-6"
+        style={{ border: '1px solid var(--border-primary)', background: 'var(--gradient-card)' }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 via-pink-600/10 to-blue-600/10" />
         <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
@@ -389,8 +394,8 @@ export default function AdminDashboard() {
               <IconSparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h4 className="font-semibold text-white">AI-Powered Insights Available</h4>
-              <p className="text-sm text-gray-400">
+              <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>AI-Powered Insights Available</h4>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 We've analyzed your data and found 5 actionable insights to improve efficiency.
               </p>
             </div>
