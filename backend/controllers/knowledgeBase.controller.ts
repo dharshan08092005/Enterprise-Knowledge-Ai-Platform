@@ -14,7 +14,10 @@ export const getKnowledgeBase = async (
       return res.json([]);
     }
 
-    let query: any = { organizationId };
+    let query: any = {
+      organizationId,
+      status: { $ne: "failed" } // Do not show failed documents in Knowledge Base
+    };
 
     // USER: only own documents (or those shared in dept - future enhancement)
     if (role === "USER") {

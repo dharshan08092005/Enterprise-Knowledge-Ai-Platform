@@ -615,7 +615,6 @@ export default function KnowledgeBase() {
         total: documents.length,
         active: documents.filter((d) => d.status === "active").length,
         processing: documents.filter((d) => d.status === "processing").length,
-        failed: documents.filter((d) => d.status === "failed").length,
     };
 
     const handleDelete = (doc: Document) => {
@@ -677,7 +676,6 @@ export default function KnowledgeBase() {
                     { label: "Total Documents", value: stats.total, icon: IconFolder, color: "purple" },
                     { label: "Active", value: stats.active, icon: IconCheck, color: "emerald" },
                     { label: "Processing", value: stats.processing, icon: IconClock, color: "blue" },
-                    { label: "Failed", value: stats.failed, icon: IconAlertTriangle, color: "red" },
                 ].map((stat, index) => (
                     <div
                         key={index}
@@ -722,8 +720,7 @@ export default function KnowledgeBase() {
                     options={[
                         { value: "all", label: "All Status" },
                         { value: "active", label: "Active" },
-                        { value: "processing", label: "Processing" },
-                        { value: "failed", label: "Failed" }
+                        { value: "processing", label: "Processing" }
                     ]}
                 />
 
