@@ -12,7 +12,7 @@ import { logAudit } from "../utils/auditLogger";
 
 import { extractPdfText } from "../services/extraction/pdfExtractor";
 import { chunkText } from "../services/chunking/chunker";
-import { generateEmbeddingsBatch } from "../services/embeddings/geminiEmbedder";
+import { generateEmbeddingsBatch } from "../services/embeddings/ollamaEmbedder";
 import { upsertChunksToPinecone } from "../services/vectorDb/pineconeService";
 
 let isConnected = false;
@@ -151,7 +151,7 @@ const processJob = async (job: any) => {
       text: chunk.text,
       tokenCount: chunk.tokenCount,
       embeddingStatus: "pending",
-      embeddingModel: "text-embedding-004"
+      embeddingModel: "nomic-embed-text"
     }));
 
     const insertedChunks = await DocumentChunk.insertMany(chunkDocs);

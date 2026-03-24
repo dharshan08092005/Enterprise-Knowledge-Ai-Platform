@@ -148,6 +148,7 @@ const SECTION_FIELDS: Record<string, FieldDef[]> = {
                 { label: "OpenAI", value: "openai" },
                 { label: "Cohere", value: "cohere" },
                 { label: "HuggingFace", value: "huggingface" },
+                { label: "Ollama (Local)", value: "ollama" },
                 { label: "Custom", value: "custom" },
             ]
         },

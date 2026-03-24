@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import ReactMarkdown from "react-markdown";
 import {
   IconSend,
   IconHistory,
@@ -27,7 +28,13 @@ import {
   IconLink,
   IconRefresh,
 } from "@tabler/icons-react";
-import { sendChatQuery } from "../../services/chatService"; 
+import {
+  sendChatQuery,
+  getChatSessions,
+  getChatSessionById,
+  deleteChatSessionById,
+  type ChatSessionSummary,
+} from "../../services/chatService";
 
 // Types
 interface Message {
@@ -47,25 +54,6 @@ interface Source {
   url?: string;
   relevance: number;
 }
-
-interface ChatSession {
-  id: string;
-  title: string;
-  lastMessage: string;
-  timestamp: Date;
-  messageCount: number;
-}
-
-// Mock data for chat history
-const mockChatHistory: ChatSession[] = [
-  { id: "1", title: "Q4 Financial Analysis", lastMessage: "The Q4 revenue increased by 15%...", timestamp: new Date(Date.now() - 1000 * 60 * 30), messageCount: 8 },
-  { id: "2", title: "Employee Benefits Policy", lastMessage: "According to the policy document...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), messageCount: 5 },
-  { id: "3", title: "Product Roadmap 2024", lastMessage: "The key milestones for Q1 include...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), messageCount: 12 },
-  { id: "4", title: "Security Compliance", lastMessage: "Based on the SOC 2 guidelines...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), messageCount: 6 },
-  { id: "5", title: "Marketing Strategy", lastMessage: "The target audience analysis shows...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72), messageCount: 10 },
-];
-
-// no mockSources
 
 // Helper function
 const formatTime = (date: Date) => {
@@ -174,7 +162,13 @@ const ChatMessage = ({ message }: { message: Message }) => {
             ? "bg-gradient-to-br from-blue-600/30 to-sky-600/30 border border-blue-500/20"
             : "bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10"
           }`}>
-          <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{message.content}</p>
+          {message.role === "assistant" ? (
+            <div className="text-sm text-gray-900 dark:text-white markdown-body">
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{message.content}</p>
+          )}
         </div>
 
         <div className={`flex items-center gap-2 mt-2 ${message.role === "user" ? "justify-end" : ""}`}>
@@ -219,7 +213,7 @@ const ChatHistoryItem = ({
   onClick,
   onDelete,
 }: {
-  session: ChatSession;
+  session: ChatSessionSummary;
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;
@@ -250,7 +244,7 @@ const ChatHistoryItem = ({
       <div className="flex items-center gap-2 mt-2">
         <span className="text-xs text-gray-500 dark:text-slate-500 flex items-center gap-1">
           <IconClock className="w-3 h-3" />
-          {formatTime(session.timestamp)}
+          {formatTime(new Date(session.timestamp))}
         </span>
         <span className="text-xs text-gray-600">•</span>
         <span className="text-xs text-gray-500 dark:text-slate-500">{session.messageCount} messages</span>
@@ -303,8 +297,9 @@ export default function AskAI() {
   const [isLoading, setIsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(true);
   const [showSources, setShowSources] = useState(true);
-  const [chatHistory, setChatHistory] = useState<ChatSession[]>(mockChatHistory);
-  const [activeSession, setActiveSession] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatSessionSummary[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -313,6 +308,49 @@ export default function AskAI() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Load chat history on mount
+  useEffect(() => {
+    loadChatHistory();
+  }, []);
+
+  const loadChatHistory = async () => {
+    try {
+      setIsLoadingHistory(true);
+      const sessions = await getChatSessions();
+      setChatHistory(sessions);
+    } catch (err) {
+      console.error("Failed to load chat history:", err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  // Load a specific session
+  const loadSession = async (sessionId: string) => {
+    try {
+      setActiveSessionId(sessionId);
+      const session = await getChatSessionById(sessionId);
+
+      const loadedMessages: Message[] = session.messages.map((msg, idx) => ({
+        id: `${sessionId}-${idx}`,
+        role: msg.role,
+        content: msg.content,
+        timestamp: new Date(msg.createdAt),
+        sources: msg.sources?.map((s, sIdx) => ({
+          id: s.documentId || sIdx.toString(),
+          title: s.title || "Retrieved Document",
+          type: "pdf" as const,
+          excerpt: s.excerpt || `Retrieval Score: ${((s.score || 0) * 100).toFixed(2)}%`,
+          relevance: Math.round((s.score || 0) * 100),
+        })),
+      }));
+
+      setMessages(loadedMessages);
+    } catch (err) {
+      console.error("Failed to load session:", err);
+    }
+  };
 
   // Handle send message
   const handleSend = async () => {
@@ -330,12 +368,12 @@ export default function AskAI() {
     setIsLoading(true);
 
     try {
-      const response = await sendChatQuery(userMessage.content);
-      
-      const mappedSources: Source[] = response.sources.map((s: any, idx) => ({
+      const response = await sendChatQuery(userMessage.content, activeSessionId || undefined);
+
+      const mappedSources: Source[] = response.sources.map((s: any, idx: number) => ({
         id: s.documentId || idx.toString(),
         title: s.title || "Retrieved Document",
-        type: "pdf", // default type for now
+        type: "pdf",
         excerpt: s.excerpt || `Retrieval Score: ${(s.score * 100).toFixed(2)}%`,
         relevance: Math.round(s.score * 100)
       }));
@@ -349,6 +387,14 @@ export default function AskAI() {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
+
+      // Update active session ID (for new sessions)
+      if (!activeSessionId && response.sessionId) {
+        setActiveSessionId(response.sessionId);
+      }
+
+      // Refresh the sidebar history
+      await loadChatHistory();
     } catch (err) {
       console.error(err);
       const errorMessage: Message = {
@@ -374,15 +420,20 @@ export default function AskAI() {
   // Start new chat
   const handleNewChat = () => {
     setMessages([]);
-    setActiveSession(null);
+    setActiveSessionId(null);
   };
 
   // Delete chat
-  const handleDeleteChat = (id: string) => {
-    setChatHistory(chatHistory.filter((c) => c.id !== id));
-    if (activeSession === id) {
-      setMessages([]);
-      setActiveSession(null);
+  const handleDeleteChat = async (id: string) => {
+    try {
+      await deleteChatSessionById(id);
+      setChatHistory((prev) => prev.filter((c) => c.id !== id));
+      if (activeSessionId === id) {
+        setMessages([]);
+        setActiveSessionId(null);
+      }
+    } catch (err) {
+      console.error("Failed to delete session:", err);
     }
   };
 
@@ -439,18 +490,29 @@ export default function AskAI() {
 
             {/* History List */}
             <div className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-thin">
-              {filteredHistory.map((session) => (
-                <ChatHistoryItem
-                  key={session.id}
-                  session={session}
-                  isActive={activeSession === session.id}
-                  onClick={() => setActiveSession(session.id)}
-                  onDelete={() => handleDeleteChat(session.id)}
-                />
-              ))}
-              {filteredHistory.length === 0 && (
+              {isLoadingHistory ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <IconLoader2 className="w-6 h-6 text-blue-400 animate-spin mb-2" />
+                  <p className="text-xs text-gray-500 dark:text-slate-500">Loading chats...</p>
+                </div>
+              ) : filteredHistory.length > 0 ? (
+                filteredHistory.map((session) => (
+                  <ChatHistoryItem
+                    key={session.id}
+                    session={session}
+                    isActive={activeSessionId === session.id}
+                    onClick={() => loadSession(session.id)}
+                    onDelete={() => handleDeleteChat(session.id)}
+                  />
+                ))
+              ) : (
                 <div className="text-center py-8">
-                  <p className="text-sm text-gray-500 dark:text-slate-500">No chats found</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-500">
+                    {searchHistory ? "No chats found" : "No chat history yet"}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
+                    {!searchHistory && "Start a conversation to see it here"}
+                  </p>
                 </div>
               )}
             </div>
