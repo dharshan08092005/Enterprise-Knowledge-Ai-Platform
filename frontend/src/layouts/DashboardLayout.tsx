@@ -21,6 +21,7 @@ import {
   IconFileAnalytics,
   IconUserCog,
   IconUserShield,
+  IconMessages,
 } from "@tabler/icons-react";
 import { Outlet, useLocation } from "react-router-dom";
 import { getUserFromToken } from "@/lib/auth";
@@ -39,6 +40,8 @@ export default function DashboardLayout() {
         return { title: "Dashboard", subtitle: "Welcome back! Here's your overview" };
       case "/ask":
         return { title: "Ask AI", subtitle: "Chat with your enterprise knowledge base" };
+      case "/channels":
+        return { title: "Team Channels", subtitle: "Collaborate securely right alongside the AI" };
       case "/knowledge":
         return { title: "Knowledge Base", subtitle: "Manage your documents and data sources" };
       case "/documents":
@@ -73,7 +76,10 @@ export default function DashboardLayout() {
     { label: "Dashboard", href: "/", icon: <IconHome className="w-5 h-5" /> },
     // Auditors and Global Admins don't get the AI chat
     ...(!isGlobalAdmin && userRole !== "AUDITOR"
-      ? [{ label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" />, badge: "New" }]
+      ? [
+          { label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" /> },
+          { label: "Channels", href: "/channels", icon: <IconMessages className="w-5 h-5" />, badge: "New" }
+        ]
       : []),
     ...(!isGlobalAdmin
       ? [

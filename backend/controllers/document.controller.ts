@@ -26,13 +26,18 @@ export const createDocument = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Organization ID is required" });
     }
 
+    // Extract S3 URL if multer-s3 intercepted, otherwise fallback locally
+    const filePath = (file as any).location || file.path;
+    const s3Key = (file as any).key || null;
+
     // 1️⃣ Create document metadata
     const document = await Document.create({
       title,
       ownerId,
       organizationId,
       fileName: file.originalname,
-      filePath: file.path,
+      filePath,
+      s3Key,
       mimeType: file.mimetype,
       size: file.size,
       status: "uploaded"

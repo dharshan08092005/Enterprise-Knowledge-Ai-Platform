@@ -14,6 +14,7 @@ interface IDocument extends Document {
   status: "uploaded" | "processing" | "active";
   pageCount?: number;
   chunkCount?: number;
+  s3Key?: string | null;
 }
 
 const documentSchema = new Schema<IDocument>(
@@ -91,6 +92,11 @@ const documentSchema = new Schema<IDocument>(
     chunkCount: {
       type: Number,
       default: 0
+    },
+
+    s3Key: {
+      type: String,
+      default: null // The direct AWS Bucket object key for streaming retrievals
     }
   },
   {

@@ -44,24 +44,24 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
     return (
         <div className={`relative ${className}`} ref={containerRef}>
-            {label && <label className="block text-sm font-medium text-gray-400 mb-2">{label}</label>}
+            {label && <label className="block text-sm font-medium text-slate-400 mb-2">{label}</label>}
 
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full h-11 flex items-center justify-between px-4 py-2 border rounded-xl text-sm transition-all duration-300 glass hover:bg-white/5"
+                className="w-full h-11 flex items-center justify-between px-4 py-2 border rounded-lg text-sm transition-all duration-300 glass hover:bg-white/5"
                 style={{
                     borderColor: isOpen ? 'var(--accent-primary)' : 'var(--border-primary)',
                     color: 'var(--text-primary)'
                 }}
             >
                 <div className="flex items-center gap-3 truncate">
-                    {Icon && <Icon className="w-4 h-4 text-gray-500" />}
+                    {Icon && <Icon className="w-4 h-4 text-slate-500" />}
                     <span className={selectedOption ? "text-primary" : "text-muted"}>
                         {selectedOption ? selectedOption.label : placeholder}
                     </span>
                 </div>
-                <IconChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+                <IconChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
             </button>
 
             <AnimatePresence>
@@ -71,7 +71,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                        className="absolute z-50 w-full mt-2 py-2 border rounded-2xl shadow-2xl backdrop-blur-xl"
+                        className="absolute z-50 w-full mt-2 py-2 border rounded-lg shadow-xl backdrop-blur-xl"
                         style={{
                             background: 'var(--bg-modal)',
                             borderColor: 'var(--border-primary)',
