@@ -35,6 +35,7 @@ import {
 } from "@tabler/icons-react";
 import { getUserRole, getToken } from "@/lib/auth";
 import { fetchKnowledgeBase } from "@/services/knowledgeBaseService";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // Types
 interface Document {
@@ -81,11 +82,11 @@ const FileIcon = ({ type, size = 24 }: { type: Document["fileType"]; size?: numb
         pdf: <IconFileTypePdf className={`${iconClass} text-red-400`} />,
         doc: <IconFileTypeDoc className={`${iconClass} text-blue-400`} />,
         docx: <IconFileTypeDoc className={`${iconClass} text-blue-400`} />,
-        txt: <IconFileTypeTxt className={`${iconClass} text-gray-400`} />,
+        txt: <IconFileTypeTxt className={`${iconClass} text-gray-500 dark:text-slate-400`} />,
         xls: <IconFileTypeXls className={`${iconClass} text-green-400`} />,
         xlsx: <IconFileTypeXls className={`${iconClass} text-green-400`} />,
         csv: <IconFileTypeCsv className={`${iconClass} text-emerald-400`} />,
-        other: <IconFile className={`${iconClass} text-gray-400`} />,
+        other: <IconFile className={`${iconClass} text-gray-500 dark:text-slate-400`} />,
     };
     return icons[type] || icons.other;
 };
@@ -100,7 +101,7 @@ const StatusBadge = ({ status, progress }: { status: Document["status"]; progres
                     Processing
                 </span>
                 {progress !== undefined && (
-                    <div className="w-20 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="w-20 h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300"
                             style={{ width: `${progress}%` }}
@@ -133,7 +134,7 @@ const AccessScopeBadge = ({ scope }: { scope: Document["accessScope"] }) => {
     const config: Record<Document["accessScope"], { icon: typeof IconLock; label: string; color: string }> = {
         private: { icon: IconLock, label: "Private", color: "gray" },
         team: { icon: IconUsers, label: "Team", color: "blue" },
-        organization: { icon: IconFolder, label: "Organization", color: "purple" },
+        organization: { icon: IconFolder, label: "Organization", color: "blue" },
         public: { icon: IconWorld, label: "Public", color: "emerald" },
         restricted: { icon: IconLock, label: "Restricted", color: "red" },
         department: { icon: IconUsers, label: "Department", color: "amber" },
@@ -175,21 +176,21 @@ const DocumentRow = ({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 whileHover={{ backgroundColor: "rgba(255,255,255,0.02)" }}
-                className="border-b border-white/5 group"
+                className="border-b border-gray-100 dark:border-white/5 group"
             >
                 {/* Document Info */}
                 <td className="py-4 px-4">
                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                        <div className="p-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
                             <FileIcon type={doc.fileType} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-medium text-white truncate max-w-xs">{doc.title}</p>
-                            <p className="text-xs text-gray-500 truncate">{doc.fileName} • {formatFileSize(doc.fileSize)}</p>
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-xs">{doc.title}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-500 truncate">{doc.fileName} • {formatFileSize(doc.fileSize)}</p>
                             {doc.tags && doc.tags.length > 0 && (
                                 <div className="flex items-center gap-1 mt-1">
                                     {doc.tags.slice(0, 3).map((tag) => (
-                                        <span key={tag} className="px-1.5 py-0.5 text-xs text-gray-400 bg-white/5 rounded">
+                                        <span key={tag} className="px-1.5 py-0.5 text-xs text-gray-500 dark:text-slate-400 bg-white dark:bg-white/5 rounded">
                                             {tag}
                                         </span>
                                     ))}
@@ -215,7 +216,7 @@ const DocumentRow = ({
 
                 {/* Upload Date */}
                 <td className="py-4 px-4">
-                    <div className="flex items-center gap-1.5 text-sm text-gray-400">
+                    <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
                         <IconCalendar className="w-4 h-4" />
                         {formatDate(doc.uploadDate)}
                     </div>
@@ -225,12 +226,12 @@ const DocumentRow = ({
                 {isAdmin && doc.owner && (
                     <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-medium text-white">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-xs font-medium text-gray-900 dark:text-white">
                                 {doc.owner.name?.charAt(0) || "?"}
                             </div>
                             <div>
-                                <p className="text-sm text-white">{doc.owner.name || "Unknown"}</p>
-                                <p className="text-xs text-gray-500">{doc.owner.email || ""}</p>
+                                <p className="text-sm text-gray-900 dark:text-white">{doc.owner.name || "Unknown"}</p>
+                                <p className="text-xs text-gray-500 dark:text-slate-500">{doc.owner.email || ""}</p>
                             </div>
                         </div>
                     </td>
@@ -248,9 +249,9 @@ const DocumentRow = ({
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => setShowMenu(!showMenu)}
-                            className="p-2 rounded-lg hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-2 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
                         >
-                            <IconDotsVertical className="w-4 h-4 text-gray-400" />
+                            <IconDotsVertical className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                         </motion.button>
 
                         <AnimatePresence>
@@ -261,23 +262,23 @@ const DocumentRow = ({
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
-                                        className="absolute right-0 top-full mt-1 w-44 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl z-20 overflow-hidden"
+                                        className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl z-20 overflow-hidden"
                                     >
                                         <button
                                             onClick={() => { onView(); setShowMenu(false); }}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 transition-colors"
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:bg-white/5 transition-colors"
                                         >
                                             <IconEye className="w-4 h-4" />
                                             View Details
                                         </button>
                                         <button
                                             onClick={() => { onEdit(); setShowMenu(false); }}
-                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 transition-colors"
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:bg-white/5 transition-colors"
                                         >
                                             <IconEdit className="w-4 h-4" />
                                             Edit
                                         </button>
-                                        <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 transition-colors">
+                                        <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:bg-white/5 transition-colors">
                                             <IconDownload className="w-4 h-4" />
                                             Download
                                         </button>
@@ -314,12 +315,12 @@ const DocumentRow = ({
                         exit={{ opacity: 0, height: 0 }}
                     >
                         <td colSpan={isAdmin ? 6 : 5} className="px-4 pb-4">
-                            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
                                 <div className="flex items-start gap-3">
                                     <IconAlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                                     <div className="flex-1">
                                         <p className="text-sm font-medium text-red-400">Processing Error</p>
-                                        <p className="text-sm text-gray-400 mt-1">{doc.processingError}</p>
+                                        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{doc.processingError}</p>
                                         <div className="flex items-center gap-2 mt-3">
                                             <motion.button
                                                 whileHover={{ scale: 1.02 }}
@@ -334,7 +335,7 @@ const DocumentRow = ({
                                                 whileHover={{ scale: 1.02 }}
                                                 whileTap={{ scale: 0.98 }}
                                                 onClick={() => setShowError(false)}
-                                                className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-colors"
+                                                className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-slate-400 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors"
                                             >
                                                 Dismiss
                                             </motion.button>
@@ -403,21 +404,21 @@ const UploadModal = ({
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
                     >
-                        <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                        <div className="bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl overflow-hidden">
                             {/* Header */}
-                            <div className="p-6 border-b border-white/10">
+                            <div className="p-6 border-b border-gray-200 dark:border-white/10">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-                                            <IconCloudUpload className="w-5 h-5 text-purple-400" />
+                                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-sky-500/20">
+                                            <IconCloudUpload className="w-5 h-5 text-blue-400" />
                                         </div>
-                                        <h3 className="text-lg font-semibold text-white">Upload Documents</h3>
+                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Upload Documents</h3>
                                     </div>
                                     <button
                                         onClick={onClose}
-                                        className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                                        className="p-2 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors"
                                     >
-                                        <IconX className="w-5 h-5 text-gray-400" />
+                                        <IconX className="w-5 h-5 text-gray-500 dark:text-slate-400" />
                                     </button>
                                 </div>
                             </div>
@@ -429,9 +430,9 @@ const UploadModal = ({
                                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                                     onDragLeave={() => setDragOver(false)}
                                     onDrop={handleDrop}
-                                    className={`relative p-8 border-2 border-dashed rounded-xl text-center transition-all ${dragOver
-                                        ? "border-purple-500 bg-purple-500/10"
-                                        : "border-white/20 hover:border-white/30"
+                                    className={`relative p-8 border-2 border-dashed rounded-lg text-center transition-all ${dragOver
+                                        ? "border-blue-500 bg-blue-500/10"
+                                        : "border-gray-300 dark:border-white/20 hover:border-white/30"
                                         }`}
                                 >
                                     <input
@@ -441,9 +442,9 @@ const UploadModal = ({
                                         className="absolute inset-0 opacity-0 cursor-pointer"
                                         accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.csv"
                                     />
-                                    <IconCloudUpload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-white font-medium">Drag & drop files here</p>
-                                    <p className="text-sm text-gray-500 mt-1">or click to browse</p>
+                                    <IconCloudUpload className="w-12 h-12 text-gray-500 dark:text-slate-400 mx-auto mb-4" />
+                                    <p className="text-gray-900 dark:text-white font-medium">Drag & drop files here</p>
+                                    <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">or click to browse</p>
                                     <p className="text-xs text-gray-600 mt-3">
                                         Supported: PDF, DOC, DOCX, TXT, XLS, XLSX, CSV
                                     </p>
@@ -452,25 +453,25 @@ const UploadModal = ({
                                 {/* Selected Files */}
                                 {files.length > 0 && (
                                     <div className="space-y-2">
-                                        <p className="text-sm font-medium text-gray-400">Selected Files ({files.length})</p>
+                                        <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Selected Files ({files.length})</p>
                                         <div className="max-h-40 overflow-y-auto space-y-2 scrollbar-thin">
                                             {files.map((file, index) => (
                                                 <div
                                                     key={index}
-                                                    className="flex items-center justify-between p-3 bg-white/5 rounded-lg"
+                                                    className="flex items-center justify-between p-3 bg-white dark:bg-white/5 rounded-lg"
                                                 >
                                                     <div className="flex items-center gap-3 min-w-0">
                                                         <IconFileCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                                                         <div className="min-w-0">
-                                                            <p className="text-sm text-white truncate">{file.name}</p>
-                                                            <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                                                            <p className="text-sm text-gray-900 dark:text-white truncate">{file.name}</p>
+                                                            <p className="text-xs text-gray-500 dark:text-slate-500">{formatFileSize(file.size)}</p>
                                                         </div>
                                                     </div>
                                                     <button
                                                         onClick={() => removeFile(index)}
-                                                        className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                        className="p-1 hover:bg-gray-100 dark:bg-white/10 rounded transition-colors"
                                                     >
-                                                        <IconX className="w-4 h-4 text-gray-400" />
+                                                        <IconX className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                                                     </button>
                                                 </div>
                                             ))}
@@ -480,28 +481,25 @@ const UploadModal = ({
 
                                 {/* Access Scope */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-400 mb-2">Access Scope</label>
-                                    <div className="relative">
-                                        <select
-                                            value={accessScope}
-                                            onChange={(e) => setAccessScope(e.target.value as Document["accessScope"])}
-                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                                        >
-                                            <option value="private">Private - Only you</option>
-                                            <option value="team">Team - Your team members</option>
-                                            <option value="organization">Organization - Everyone in org</option>
-                                            <option value="public">Public - Anyone with link</option>
-                                        </select>
-                                        <IconChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                    </div>
+                                    <label className="block text-sm font-medium text-gray-500 dark:text-slate-400 mb-2">Access Scope</label>
+                                    <CustomSelect
+                                        value={accessScope}
+                                        onChange={(val) => setAccessScope(val as Document["accessScope"])}
+                                        options={[
+                                            { value: "private", label: "Private - Only you" },
+                                            { value: "team", label: "Team - Your team members" },
+                                            { value: "organization", label: "Organization - Everyone in org" },
+                                            { value: "public", label: "Public - Anyone with link" }
+                                        ]}
+                                    />
                                 </div>
                             </div>
 
                             {/* Footer */}
-                            <div className="p-6 border-t border-white/10 flex gap-3">
+                            <div className="p-6 border-t border-gray-200 dark:border-white/10 flex gap-3">
                                 <button
                                     onClick={onClose}
-                                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/10 transition-colors"
+                                    className="flex-1 px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/10 transition-colors"
                                 >
                                     Cancel
                                 </button>
@@ -510,9 +508,9 @@ const UploadModal = ({
                                     whileTap={{ scale: 0.98 }}
                                     onClick={handleUpload}
                                     disabled={files.length === 0}
-                                    className={`flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all ${files.length > 0
-                                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                                        : "bg-white/10 text-gray-500 cursor-not-allowed"
+                                    className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all ${files.length > 0
+                                        ? "bg-gradient-to-r from-blue-600 to-sky-600 text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                                        : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-slate-500 cursor-not-allowed"
                                         }`}
                                 >
                                     Upload {files.length > 0 ? `(${files.length})` : ""}
@@ -617,7 +615,6 @@ export default function KnowledgeBase() {
         total: documents.length,
         active: documents.filter((d) => d.status === "active").length,
         processing: documents.filter((d) => d.status === "processing").length,
-        failed: documents.filter((d) => d.status === "failed").length,
     };
 
     const handleDelete = (doc: Document) => {
@@ -643,15 +640,15 @@ export default function KnowledgeBase() {
                 className="flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Knowledge Base</h1>
-                    <p className="text-gray-400 mt-1">Manage your documents and data sources</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Knowledge Base</h1>
+                    <p className="text-gray-500 dark:text-slate-400 mt-1">Manage your documents and data sources</p>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 hover:bg-white/10 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/10 transition-colors"
                     >
                         <IconRefresh className="w-4 h-4" />
                         Sync
@@ -660,7 +657,7 @@ export default function KnowledgeBase() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setShowUploadModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-sm font-medium text-white shadow-lg shadow-purple-500/25"
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
                     >
                         <IconUpload className="w-4 h-4" />
                         Upload Documents
@@ -676,22 +673,21 @@ export default function KnowledgeBase() {
                 className="grid grid-cols-2 md:grid-cols-4 gap-4"
             >
                 {[
-                    { label: "Total Documents", value: stats.total, icon: IconFolder, color: "purple" },
+                    { label: "Total Documents", value: stats.total, icon: IconFolder, color: "blue" },
                     { label: "Active", value: stats.active, icon: IconCheck, color: "emerald" },
                     { label: "Processing", value: stats.processing, icon: IconClock, color: "blue" },
-                    { label: "Failed", value: stats.failed, icon: IconAlertTriangle, color: "red" },
                 ].map((stat, index) => (
                     <div
                         key={index}
-                        className="p-4 rounded-xl bg-white/5 border border-white/10"
+                        className="p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10"
                     >
                         <div className="flex items-center gap-3 mb-2">
                             <div className={`p-2 rounded-lg bg-${stat.color}-500/20`}>
                                 <stat.icon className={`w-4 h-4 text-${stat.color}-400`} />
                             </div>
                         </div>
-                        <p className="text-2xl font-bold text-white">{stat.value}</p>
-                        <p className="text-sm text-gray-400">{stat.label}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                        <p className="text-sm text-gray-500 dark:text-slate-400">{stat.label}</p>
                     </div>
                 ))}
             </motion.div>
@@ -705,61 +701,56 @@ export default function KnowledgeBase() {
             >
                 {/* Search */}
                 <div className="relative flex-1">
-                    <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-slate-500" />
                     <input
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search documents..."
-                        className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
+                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
                     />
                 </div>
 
                 {/* Status Filter */}
-                <div className="relative">
-                    <IconFilter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="processing">Processing</option>
-                        <option value="failed">Failed</option>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-48"
+                    icon={IconFilter}
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    options={[
+                        { value: "all", label: "All Status" },
+                        { value: "active", label: "Active" },
+                        { value: "processing", label: "Processing" }
+                    ]}
+                />
 
                 {/* Scope Filter */}
-                <div className="relative">
-                    <IconLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={scopeFilter}
-                        onChange={(e) => setScopeFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Access</option>
-                        <option value="private">Private</option>
-                        <option value="team">Team</option>
-                        <option value="organization">Organization</option>
-                        <option value="public">Public</option>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-48"
+                    icon={IconLock}
+                    value={scopeFilter}
+                    onChange={setScopeFilter}
+                    options={[
+                        { value: "all", label: "All Access" },
+                        { value: "private", label: "Private" },
+                        { value: "team", label: "Team" },
+                        { value: "organization", label: "Organization" },
+                        { value: "public", label: "Public" }
+                    ]}
+                />
 
                 {/* View Toggle */}
-                <div className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center gap-1 p-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg">
                     <button
                         onClick={() => setViewMode("list")}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-purple-500/20 text-purple-300" : "text-gray-400 hover:text-white"
+                        className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-blue-500/20 text-blue-300" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
                             }`}
                     >
                         <IconList className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => setViewMode("grid")}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-purple-500/20 text-purple-300" : "text-gray-400 hover:text-white"
+                        className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-blue-500/20 text-blue-300" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
                             }`}
                     >
                         <IconGridDots className="w-5 h-5" />
@@ -774,8 +765,8 @@ export default function KnowledgeBase() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-16"
                 >
-                    <IconLoader2 className="w-12 h-12 text-purple-400 animate-spin mb-4" />
-                    <p className="text-gray-400">Loading documents...</p>
+                    <IconLoader2 className="w-12 h-12 text-blue-400 animate-spin mb-4" />
+                    <p className="text-gray-500 dark:text-slate-400">Loading documents...</p>
                 </motion.div>
             )}
 
@@ -784,13 +775,13 @@ export default function KnowledgeBase() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20"
+                    className="p-6 rounded-lg bg-red-500/10 border border-red-500/20"
                 >
                     <div className="flex items-center gap-3">
                         <IconAlertTriangle className="w-6 h-6 text-red-400" />
                         <div>
                             <p className="text-red-400 font-medium">Failed to load documents</p>
-                            <p className="text-sm text-gray-400 mt-1">{error}</p>
+                            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{error}</p>
                         </div>
                     </div>
                 </motion.div>
@@ -802,20 +793,20 @@ export default function KnowledgeBase() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden"
+                    className="rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 overflow-hidden"
                 >
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-white/10 text-left">
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Upload Date</th>
+                                <tr className="border-b border-gray-200 dark:border-white/10 text-left">
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Document</th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Upload Date</th>
                                     {isAdmin && (
-                                        <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
+                                        <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Owner</th>
                                     )}
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Access</th>
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Access</th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -837,24 +828,24 @@ export default function KnowledgeBase() {
                     {filteredDocuments.length === 0 && (
                         <div className="py-12 text-center">
                             <IconFolder className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-500">No documents found</p>
+                            <p className="text-gray-500 dark:text-slate-500">No documents found</p>
                             <p className="text-sm text-gray-600 mt-1">Upload your first document to get started</p>
                         </div>
                     )}
 
                     {/* Pagination */}
-                    <div className="px-4 py-3 border-t border-white/10 flex items-center justify-between">
-                        <p className="text-sm text-gray-500">
+                    <div className="px-4 py-3 border-t border-gray-200 dark:border-white/10 flex items-center justify-between">
+                        <p className="text-sm text-gray-500 dark:text-slate-500">
                             Showing {filteredDocuments.length} of {documents.length} documents
                         </p>
                         <div className="flex items-center gap-2">
-                            <button className="px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                            <button className="px-3 py-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10 rounded-lg transition-colors">
                                 Previous
                             </button>
-                            <button className="px-3 py-1.5 text-sm bg-purple-500/20 text-purple-300 rounded-lg">
+                            <button className="px-3 py-1.5 text-sm bg-blue-500/20 text-blue-300 rounded-lg">
                                 1
                             </button>
-                            <button className="px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                            <button className="px-3 py-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10 rounded-lg transition-colors">
                                 Next
                             </button>
                         </div>

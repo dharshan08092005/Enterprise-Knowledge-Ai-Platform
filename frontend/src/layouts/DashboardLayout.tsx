@@ -21,14 +21,17 @@ import {
   IconFileAnalytics,
   IconUserCog,
   IconUserShield,
+  IconMessages,
 } from "@tabler/icons-react";
 import { Outlet, useLocation } from "react-router-dom";
-import { getUserRole } from "@/lib/auth";
+import { getUserFromToken } from "@/lib/auth";
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(true);
   const location = useLocation();
-  const userRole = getUserRole();
+  const userData = getUserFromToken();
+  const userRole = userData?.role || null;
+  const isGlobalAdmin = userRole === "ADMIN" && !userData?.organizationId;
 
   // Get page title based on current route
   const getPageInfo = () => {
@@ -37,6 +40,8 @@ export default function DashboardLayout() {
         return { title: "Dashboard", subtitle: "Welcome back! Here's your overview" };
       case "/ask":
         return { title: "Ask AI", subtitle: "Chat with your enterprise knowledge base" };
+      case "/channels":
+        return { title: "Team Channels", subtitle: "Collaborate securely right alongside the AI" };
       case "/knowledge":
         return { title: "Knowledge Base", subtitle: "Manage your documents and data sources" };
       case "/documents":
@@ -57,6 +62,10 @@ export default function DashboardLayout() {
         return { title: "Settings", subtitle: "Configure your platform preferences" };
       case "/admin-settings":
         return { title: "Platform Settings", subtitle: "Configure integrations, security and application behavior" };
+      case "/manage-organizations":
+        return { title: "Manage Organizations", subtitle: "Global control over multi-tenant accounts" };
+      case "/manage-departments":
+        return { title: "Departments", subtitle: "Organize your company into functional teams" };
       default:
         return { title: "Dashboard", subtitle: "" };
     }
@@ -65,17 +74,24 @@ export default function DashboardLayout() {
   // Base navigation links (role-aware)
   const mainLinks = [
     { label: "Dashboard", href: "/", icon: <IconHome className="w-5 h-5" /> },
-    // Auditors don't get the AI chat — their role is compliance-focused
-    ...(userRole !== "AUDITOR"
-      ? [{ label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" />, badge: "New" }]
+    // Auditors and Global Admins don't get the AI chat
+    ...(!isGlobalAdmin && userRole !== "AUDITOR"
+      ? [
+          { label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" /> },
+          { label: "Channels", href: "/channels", icon: <IconMessages className="w-5 h-5" />, badge: "New" }
+        ]
       : []),
-    { label: "Knowledge Base", href: "/knowledge", icon: <IconDatabase className="w-5 h-5" /> },
-    { label: "Documents", href: "/documents", icon: <IconFolder className="w-5 h-5" /> },
+    ...(!isGlobalAdmin
+      ? [
+        { label: "Knowledge Base", href: "/knowledge", icon: <IconDatabase className="w-5 h-5" /> },
+        { label: "Documents", href: "/documents", icon: <IconFolder className="w-5 h-5" /> }
+      ]
+      : []),
   ];
 
   // Workspace links (Admin only)
   const workspaceLinks = [
-    { label: "AI Models", href: "/models", icon: <IconBrain className="w-5 h-5" /> },
+    ...(!isGlobalAdmin ? [{ label: "AI Models", href: "/models", icon: <IconBrain className="w-5 h-5" /> }] : []),
     { label: "Analytics", href: "/analytics", icon: <IconChartBar className="w-5 h-5" /> },
   ];
 
@@ -84,10 +100,16 @@ export default function DashboardLayout() {
     { label: "Audit Logs", href: "/audit", icon: <IconFileAnalytics className="w-5 h-5" /> },
   ];
 
-  // User Management links (Admin only)
+  // User Management links (Org Admin only)
   const userManagementLinks = [
     { label: "Manage Users", href: "/manage-users", icon: <IconUserCog className="w-5 h-5" /> },
     { label: "Manage Auditors", href: "/manage-auditors", icon: <IconUserShield className="w-5 h-5" /> },
+    { label: "Departments", href: "/manage-departments", icon: <IconUsers className="w-5 h-5" /> }
+  ];
+
+  // Organization links (Global Admin only)
+  const orgLinks = [
+    { label: "Organizations", href: "/manage-organizations", icon: <IconDatabase className="w-5 h-5" /> },
   ];
 
   // Admin links (Admin only)
@@ -100,7 +122,7 @@ export default function DashboardLayout() {
   const pageInfo = getPageInfo();
 
   return (
-    <div className="min-h-screen flex bg-[#0a0a14] text-white overflow-hidden">
+    <div className="min-h-screen flex overflow-hidden" style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}>
       {/* Sidebar */}
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody>
@@ -116,8 +138,8 @@ export default function DashboardLayout() {
                 ))}
               </div>
 
-              {/* Workspace Section - Admin Only */}
-              {userRole === "ADMIN" && (
+              {/* Workspace Section - Admin and Org Admin */}
+              {(userRole === "ADMIN" || userRole === "ORG_ADMIN") && (
                 <SidebarSection title="Workspace" open={open}>
                   {workspaceLinks.map((link) => (
                     <SidebarLink key={link.href} link={link} />
@@ -125,8 +147,8 @@ export default function DashboardLayout() {
                 </SidebarSection>
               )}
 
-              {/* Audit Section - Auditor and Admin */}
-              {(userRole === "AUDITOR" || userRole === "ADMIN") && (
+              {/* Audit Section - Auditor, Admin and Org Admin */}
+              {(userRole === "AUDITOR" || userRole === "ADMIN" || userRole === "ORG_ADMIN") && (
                 <SidebarSection title="Audit & Compliance" open={open}>
                   {auditLinks.map((link) => (
                     <SidebarLink key={link.href} link={link} />
@@ -134,8 +156,8 @@ export default function DashboardLayout() {
                 </SidebarSection>
               )}
 
-              {/* User Management Section - Admin Only */}
-              {userRole === "ADMIN" && (
+              {/* User Management Section - Org Admin Only */}
+              {userRole === "ORG_ADMIN" && (
                 <SidebarSection title="User Management" open={open}>
                   {userManagementLinks.map((link) => (
                     <SidebarLink key={link.href} link={link} />
@@ -146,6 +168,9 @@ export default function DashboardLayout() {
               {/* Administration Section - Admin Only */}
               {userRole === "ADMIN" && (
                 <SidebarSection title="Administration" open={open}>
+                  {isGlobalAdmin && orgLinks.map((link) => (
+                    <SidebarLink key={link.href} link={link} />
+                  ))}
                   {adminLinks.map((link) => (
                     <SidebarLink key={link.href} link={link} />
                   ))}
@@ -172,7 +197,7 @@ export default function DashboardLayout() {
         <NavBar title={pageInfo.title} subtitle={pageInfo.subtitle} />
 
         {/* Page Content */}
-        <main className="flex-1 p-6 overflow-y-auto bg-gradient-to-br from-[#0a0a14] via-[#0f0f1a] to-[#0a0a14]">
+        <main className="flex-1 p-6 overflow-y-auto" style={{ background: 'var(--bg-page)' }}>
           <Outlet />
         </main>
       </div>

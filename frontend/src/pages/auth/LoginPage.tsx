@@ -41,42 +41,42 @@ const LoginPage = () => {
 
 
   return (
-    <div className="h-full flex bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900">
+    <div className="h-full flex" style={{ background: 'var(--bg-auth)' }}>
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-8 bg-linear-to-br from-indigo-600/10 to-purple-600/10 backdrop-blur-3xl border-r border-slate-800/50">
+      <div className="hidden lg:flex flex-1 items-center justify-center p-8 backdrop-blur-2xl" style={{ borderRight: '1px solid var(--border-primary)' }}>
         <div className="max-w-md">
-          <div className="w-16 h-16 bg-linear-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-8">
-            <div className="w-8 h-8 border-3 border-white rounded-xl"></div>
+          <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-8">
+            <div className="w-8 h-8 border-3 border-white rounded-lg"></div>
           </div>
-          
-          <h2 className="text-4xl font-bold text-white mb-4">
+
+          <h2 className="text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
             Welcome back to your workspace
           </h2>
-          <p className="text-slate-400 text-lg mb-12">
+          <p className="text-lg mb-12" style={{ color: 'var(--text-muted)' }}>
             Securely access your account and continue where you left off
           </p>
 
           <div className="space-y-6">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center flex-shrink-0">
-                <Shield className="w-5 h-5 text-indigo-400" />
+              <div className="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-5 h-5 text-blue-400" />
               </div>
               <div>
-                <h3 className="text-white font-semibold mb-1">Bank-level security</h3>
-                <p className="text-slate-400 text-sm">
+                <h3 className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Bank-level security</h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                   Your data is protected with 256-bit encryption
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-white font-semibold mb-1">Lightning fast</h3>
-                <p className="text-slate-400 text-sm">
+                <h3 className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Lightning fast</h3>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                   Optimized performance for seamless productivity
                 </p>
               </div>
@@ -94,8 +94,8 @@ const LoginPage = () => {
                 />
               ))}
             </div>
-            <div className="text-slate-400 text-sm">
-              <span className="text-white font-semibold">10,000+</span> teams trust us
+            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>10,000+</span> teams trust us
             </div>
           </div>
         </div>
@@ -106,15 +106,15 @@ const LoginPage = () => {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8">
-            <div className="w-12 h-12 bg-linear-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
               <div className="w-6 h-6 border-2 border-white rounded-lg"></div>
             </div>
           </div>
 
           {/* Header */}
           <div className="mb-10">
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
-            <p className="text-slate-400">
+            <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Welcome back</h1>
+            <p style={{ color: 'var(--text-muted)' }}>
               Enter your credentials to access your account
             </p>
           </div>
@@ -127,11 +127,11 @@ const LoginPage = () => {
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
                 Email address
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-slate-500" />
                 <input
                   type="email"
                   required
@@ -141,12 +141,12 @@ const LoginPage = () => {
                   }
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField("")}
-                  className={`w-full bg-slate-800/50 border ${
-                    focusedField === "email"
-                      ? "border-indigo-500 ring-2 ring-indigo-500/20"
-                      : "border-slate-700"
-                  } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
+                  className={`w-full border ${focusedField === "email"
+                    ? "border-blue-500 ring-2 ring-blue-500/20"
+                    : ""
+                    } rounded-lg px-12 py-3.5 placeholder-gray-400
                              focus:outline-none transition-all duration-200`}
+                  style={{ background: 'var(--bg-input)', borderColor: focusedField === 'email' ? undefined : 'var(--border-input)', color: 'var(--text-primary)' }}
                   placeholder="you@company.com"
                 />
               </div>
@@ -154,18 +154,18 @@ const LoginPage = () => {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-slate-300">
+                <label className="block text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                   Password
                 </label>
                 <a
                   href="#"
-                  className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+                  className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
                 >
                   Forgot password?
                 </a>
               </div>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-slate-500" />
                 <input
                   type="password"
                   required
@@ -175,12 +175,12 @@ const LoginPage = () => {
                   }
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField("")}
-                  className={`w-full bg-slate-800/50 border ${
-                    focusedField === "password"
-                      ? "border-indigo-500 ring-2 ring-indigo-500/20"
-                      : "border-slate-700"
-                  } rounded-xl px-12 py-3.5 text-white placeholder-slate-500
+                  className={`w-full border ${focusedField === "password"
+                    ? "border-blue-500 ring-2 ring-blue-500/20"
+                    : ""
+                    } rounded-lg px-12 py-3.5 placeholder-gray-400
                              focus:outline-none transition-all duration-200`}
+                  style={{ background: 'var(--bg-input)', borderColor: focusedField === 'password' ? undefined : 'var(--border-input)', color: 'var(--text-primary)' }}
                   placeholder="Enter your password"
                 />
               </div>
@@ -192,12 +192,12 @@ const LoginPage = () => {
                 id="remember"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-700 bg-slate-800/50 text-indigo-600 
-                         focus:ring-2 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                className="w-4 h-4 rounded border-slate-700 bg-slate-800/50 text-blue-600 
+                         focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
               />
               <label
                 htmlFor="remember"
-                className="ml-2 text-sm text-slate-400 cursor-pointer"
+                className="ml-2 text-sm cursor-pointer" style={{ color: 'var(--text-muted)' }}
               >
                 Remember me for 30 days
               </label>
@@ -206,12 +206,11 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`group w-full rounded-xl py-3.5 text-sm font-semibold text-white
+              className={`group w-full rounded-lg py-3.5 text-sm font-semibold text-gray-900 dark:text-white
                 transition-all duration-200 flex items-center justify-center gap-2
-                ${
-                  loading
-                    ? "bg-slate-700 cursor-not-allowed"
-                    : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50"
+                ${loading
+                  ? "bg-slate-700 cursor-not-allowed"
+                  : "bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-500 hover:to-blue-500 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50"
                 }`}
             >
               {loading ? "Signing in..." : "Sign In"}
@@ -228,7 +227,7 @@ const LoginPage = () => {
               <div className="w-full border-t border-slate-700"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-slate-900 text-slate-400">
+              <span className="px-4" style={{ background: 'var(--bg-base)', color: 'var(--text-muted)' }}>
                 Or continue with
               </span>
             </div>
@@ -236,7 +235,7 @@ const LoginPage = () => {
 
           {/* Social Login */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center gap-2 bg-slate-800/50 border border-slate-700 rounded-xl py-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:border-slate-600 transition-all">
+            <button className="flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium transition-all" style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-secondary)' }}>
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
@@ -257,7 +256,7 @@ const LoginPage = () => {
               </svg>
               Google
             </button>
-            <button className="flex items-center justify-center gap-2 bg-slate-800/50 border border-slate-700 rounded-xl py-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:border-slate-600 transition-all">
+            <button className="flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-medium transition-all" style={{ background: 'var(--bg-input)', border: '1px solid var(--border-input)', color: 'var(--text-secondary)' }}>
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
@@ -266,24 +265,24 @@ const LoginPage = () => {
           </div>
 
           {/* Footer */}
-          <p className="text-sm text-slate-400 text-center mt-8">
+          <p className="text-sm text-center mt-8" style={{ color: 'var(--text-muted)' }}>
             Don't have an account?{" "}
             <a
               href="/signup"
-              className="text-indigo-400 font-medium hover:text-indigo-300 transition-colors"
+              className="text-blue-400 font-medium hover:text-blue-300 transition-colors"
             >
               Create one
             </a>
           </p>
 
-          {/* <div className="mt-8 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
+          {/* <div className="mt-8 p-4 rounded-lg bg-slate-800/30 border border-slate-700/50">
             <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-indigo-400 flex-shrink-0 mt-0.5" />
+              <Shield className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm text-slate-300 font-medium mb-1">
                   Secure Sign In
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-gray-500 dark:text-slate-500">
                   Your connection is encrypted and your data is protected with industry-leading security measures
                 </p>
               </div>

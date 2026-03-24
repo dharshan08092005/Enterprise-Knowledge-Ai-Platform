@@ -5,7 +5,7 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import LoginPage from "@/pages/auth/LoginPage";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import AskAI from "@/pages/ask/AskAi";
-import KnowledgeBase from "@/pages/knowledge/knowledgeBase";
+import KnowledgeBase from "@/pages/knowledge/KnowledgeBase";
 import SignUp from "@/pages/auth/SignUp";
 import ProtectedLayout from "@/layouts/ProtectedLayout";
 
@@ -14,9 +14,15 @@ import ManageUsersPage from "@/pages/admin/ManageUsersPage";
 import ManageAuditorsPage from "@/pages/admin/ManageAuditorsPage";
 import AuditLogsPage from "@/pages/admin/AuditLogsPage";
 import AdminSettingsPage from "@/pages/admin/AdminSettingsPage";
+import OrganizationsPage from "@/pages/admin/OrganizationsPage";
+import DepartmentsPage from "@/pages/admin/DepartmentsPage";
 
 // Documents page
 import DocumentsPage from "@/pages/documents/DocumentsPage";
+
+// Channels page
+import ChannelList from "@/pages/channels/ChannelList";
+import ChannelChat from "@/pages/channels/ChannelChat";
 
 export default function AppRoutes() {
   return (
@@ -35,12 +41,16 @@ export default function AppRoutes() {
           <Route path="/ask" element={<AskAI />} />
           <Route path="/knowledge" element={<KnowledgeBase />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/channels" element={<ChannelList />} />
+          <Route path="/channels/:channelId" element={<ChannelChat />} />
 
           {/* Admin routes */}
           <Route path="/manage-users" element={<ManageUsersPage />} />
           <Route path="/manage-auditors" element={<ManageAuditorsPage />} />
           <Route path="/audit" element={<AuditLogsPage />} />
           <Route path="/admin-settings" element={<AdminSettingsPage />} />
+          <Route path="/manage-organizations" element={<OrganizationsPage />} />
+          <Route path="/manage-departments" element={<DepartmentsPage />} />
         </Route>
       </Route>
     </Routes>

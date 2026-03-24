@@ -8,12 +8,14 @@ import AuditLog from "../models/AuditLog";
  */
 export const logAudit = async ({
   userId,
+  organizationId,
   action,
   resourceType,
   resourceId,
   metadata
 }: {
   userId?: string;
+  organizationId?: string;
   action: string;
   resourceType?: string;
   resourceId?: string;
@@ -22,6 +24,7 @@ export const logAudit = async ({
   try {
     await AuditLog.create({
       userId,
+      organizationId,
       action,
       resourceType,
       resourceId,

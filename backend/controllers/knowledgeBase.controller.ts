@@ -7,12 +7,19 @@ export const getKnowledgeBase = async (
   res: Response
 ) => {
   try {
-    const { role, userId } = req.user!;
-    const isAdmin = role === "ADMIN";
+    const { role, userId, organizationId } = req.user!;
 
-    let query: any = {};
+    // Global Admin (no organizationId) → Cannot see company documents
+    if (!organizationId) {
+      return res.json([]);
+    }
 
-    // USER: only own documents
+    let query: any = {
+      organizationId,
+      status: { $ne: "failed" } // Do not show failed documents in Knowledge Base
+    };
+
+    // USER: only own documents (or those shared in dept - future enhancement)
     if (role === "USER") {
       query.ownerId = userId;
     }
@@ -22,8 +29,9 @@ export const getKnowledgeBase = async (
       .select("_id title fileName size mimeType accessScope status createdAt ownerId")
       .sort({ createdAt: -1 });
 
-    // Populate owner details for admin users
-    if (isAdmin) {
+    // Populate owner details for admin/auditor roles
+    const shouldPopulate = role === "ADMIN" || role === "ORG_ADMIN" || role === "AUDITOR";
+    if (shouldPopulate) {
       dbQuery = dbQuery.populate("ownerId", "name email");
     }
 
@@ -39,10 +47,10 @@ export const getKnowledgeBase = async (
       accessScope: doc.accessScope || "restricted",
       status: doc.status === "uploaded" ? "processing" : doc.status,
       uploadDate: doc.createdAt,
-      owner: isAdmin && doc.ownerId ? {
-        id: doc.ownerId._id?.toString() || doc.ownerId.toString(),
-        name: doc.ownerId.name || "Unknown",
-        email: doc.ownerId.email || ""
+      owner: shouldPopulate && doc.ownerId ? {
+        id: (doc.ownerId as any)._id?.toString() || doc.ownerId.toString(),
+        name: (doc.ownerId as any).name || "Unknown",
+        email: (doc.ownerId as any).email || ""
       } : undefined
     }));
 

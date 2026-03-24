@@ -29,6 +29,7 @@ import {
 } from "@tabler/icons-react";
 import { getToken } from "@/lib/auth";
 import { fetchAuditLogs, type AuditLogEntry } from "@/services/adminService";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // ─── Action Configuration ────────────────────────────────────────────────────
 interface ActionConfig {
@@ -71,16 +72,16 @@ const ACTION_CONFIG: Record<string, ActionConfig> = {
     USER_LOGOUT: {
         label: "User Logout",
         icon: IconLogout,
-        color: "text-gray-400",
+        color: "text-gray-500 dark:text-slate-400",
         bgColor: "bg-gray-500/15",
         borderColor: "border-gray-500/30",
     },
     DOCUMENT_UPLOAD_QUEUED: {
         label: "Doc Uploaded",
         icon: IconUpload,
-        color: "text-purple-400",
-        bgColor: "bg-purple-500/15",
-        borderColor: "border-purple-500/30",
+        color: "text-blue-400",
+        bgColor: "bg-blue-500/15",
+        borderColor: "border-blue-500/30",
     },
     JOB_CREATED: {
         label: "Job Created",
@@ -122,7 +123,7 @@ const ACTION_CONFIG: Record<string, ActionConfig> = {
 const DEFAULT_ACTION_CONFIG: ActionConfig = {
     label: "Unknown",
     icon: IconActivity,
-    color: "text-gray-400",
+    color: "text-gray-500 dark:text-slate-400",
     bgColor: "bg-gray-500/15",
     borderColor: "border-gray-500/30",
 };
@@ -134,12 +135,12 @@ const getActionConfig = (action: string): ActionConfig => {
 // ─── Resource Type Badge ─────────────────────────────────────────────────────
 const RESOURCE_COLORS: Record<string, { color: string; bg: string; border: string }> = {
     auth: { color: "text-blue-400", bg: "bg-blue-500/15", border: "border-blue-500/30" },
-    document: { color: "text-purple-400", bg: "bg-purple-500/15", border: "border-purple-500/30" },
+    document: { color: "text-blue-400", bg: "bg-blue-500/15", border: "border-blue-500/30" },
     job: { color: "text-amber-400", bg: "bg-amber-500/15", border: "border-amber-500/30" },
 };
 
 const ResourceTypeBadge = ({ type }: { type: string }) => {
-    const config = RESOURCE_COLORS[type] || { color: "text-gray-400", bg: "bg-gray-500/15", border: "border-gray-500/30" };
+    const config = RESOURCE_COLORS[type] || { color: "text-gray-500 dark:text-slate-400", bg: "bg-gray-500/15", border: "border-gray-500/30" };
     return (
         <span className={`px-2 py-0.5 text-xs font-medium rounded-md border ${config.color} ${config.bg} ${config.border}`}>
             {type || "—"}
@@ -198,24 +199,24 @@ const DetailModal = ({
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
             >
-                <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+                <div className="rounded-lg shadow-xl overflow-hidden" style={{ background: 'var(--bg-modal)', border: '1px solid var(--border-primary)' }}>
                     {/* Header */}
-                    <div className="p-6 border-b border-white/10">
+                    <div className="p-6" style={{ borderBottom: '1px solid var(--border-primary)' }}>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className={`p-2.5 rounded-xl ${config.bgColor} border ${config.borderColor}`}>
+                                <div className={`p-2.5 rounded-lg ${config.bgColor} border ${config.borderColor}`}>
                                     <Icon className={`w-5 h-5 ${config.color}`} />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-semibold text-white">{config.label}</h3>
-                                    <p className="text-xs text-gray-500 mt-0.5">{formatFullDateTime(log.createdAt)}</p>
+                                    <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>{config.label}</h3>
+                                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-disabled)' }}>{formatFullDateTime(log.createdAt)}</p>
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                                className="p-2 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors"
                             >
-                                <IconX className="w-5 h-5 text-gray-400" />
+                                <IconX className="w-5 h-5 text-gray-500 dark:text-slate-400" />
                             </button>
                         </div>
                     </div>
@@ -225,54 +226,54 @@ const DetailModal = ({
                         {/* Action & Resource */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1.5">Action</p>
-                                <code className="text-sm text-white bg-white/5 px-2 py-1 rounded-md font-mono">{log.action}</code>
+                                <p className="text-xs text-gray-500 dark:text-slate-500 uppercase tracking-wider mb-1.5">Action</p>
+                                <code className="text-sm bg-white dark:bg-white/5 px-2 py-1 rounded-md font-mono" style={{ color: 'var(--text-primary)' }}>{log.action}</code>
                             </div>
                             <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1.5">Resource Type</p>
+                                <p className="text-xs text-gray-500 dark:text-slate-500 uppercase tracking-wider mb-1.5">Resource Type</p>
                                 <ResourceTypeBadge type={log.resourceType} />
                             </div>
                         </div>
 
                         {/* User */}
                         <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1.5">User</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-500 uppercase tracking-wider mb-1.5">User</p>
                             {log.userId ? (
                                 <div className="flex items-center gap-2.5">
-                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
+                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-xs font-semibold text-gray-900 dark:text-white flex-shrink-0">
                                         {log.userId.name?.charAt(0) || "?"}
                                     </div>
                                     <div>
-                                        <p className="text-sm text-white font-medium">{log.userId.name}</p>
-                                        <p className="text-xs text-gray-500">{log.userId.email}</p>
+                                        <p className="text-sm text-gray-900 dark:text-white font-medium">{log.userId.name}</p>
+                                        <p className="text-xs text-gray-500 dark:text-slate-500">{log.userId.email}</p>
                                     </div>
                                 </div>
                             ) : (
-                                <p className="text-sm text-gray-500 italic">System / Anonymous</p>
+                                <p className="text-sm text-gray-500 dark:text-slate-500 italic">System / Anonymous</p>
                             )}
                         </div>
 
                         {/* Resource ID */}
                         {log.resourceId && (
                             <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1.5">Resource ID</p>
-                                <code className="text-xs text-gray-300 bg-white/5 px-2 py-1 rounded-md font-mono break-all">{log.resourceId}</code>
+                                <p className="text-xs text-gray-500 dark:text-slate-500 uppercase tracking-wider mb-1.5">Resource ID</p>
+                                <code className="text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 px-2 py-1 rounded-md font-mono break-all">{log.resourceId}</code>
                             </div>
                         )}
 
                         {/* Metadata */}
                         {log.metadata && Object.keys(log.metadata).length > 0 && (
                             <div>
-                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1.5">Metadata</p>
-                                <div className="bg-black/30 rounded-xl border border-white/5 p-4 overflow-auto max-h-48">
-                                    <pre className="text-xs text-gray-300 font-mono whitespace-pre-wrap">{JSON.stringify(log.metadata, null, 2)}</pre>
+                                <p className="text-xs text-gray-500 dark:text-slate-500 uppercase tracking-wider mb-1.5">Metadata</p>
+                                <div className="bg-black/30 rounded-lg border border-gray-100 dark:border-white/5 p-4 overflow-auto max-h-48">
+                                    <pre className="text-xs text-gray-700 dark:text-gray-300 font-mono whitespace-pre-wrap">{JSON.stringify(log.metadata, null, 2)}</pre>
                                 </div>
                             </div>
                         )}
 
                         {/* Timestamps */}
-                        <div className="pt-2 border-t border-white/5">
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <div className="pt-2 border-t border-gray-100 dark:border-white/5">
+                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-500">
                                 <IconClock className="w-3.5 h-3.5" />
                                 <span>Log ID: {log._id}</span>
                             </div>
@@ -300,18 +301,18 @@ const LogRow = ({
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             whileHover={{ backgroundColor: "rgba(255,255,255,0.02)" }}
-            className="border-b border-white/5 group cursor-pointer"
+            className="border-b border-gray-100 dark:border-white/5 group cursor-pointer"
             onClick={onView}
         >
             {/* Timeline dot + Action */}
             <td className="py-4 px-4">
                 <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl ${config.bgColor} border ${config.borderColor} flex-shrink-0`}>
+                    <div className={`p-2 rounded-lg ${config.bgColor} border ${config.borderColor} flex-shrink-0`}>
                         <Icon className={`w-4 h-4 ${config.color}`} />
                     </div>
                     <div className="min-w-0">
-                        <p className="text-sm font-medium text-white">{config.label}</p>
-                        <p className="text-xs text-gray-500 font-mono truncate">{log.action}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{config.label}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-500 font-mono truncate">{log.action}</p>
                     </div>
                 </div>
             </td>
@@ -320,16 +321,16 @@ const LogRow = ({
             <td className="py-4 px-4">
                 {log.userId ? (
                     <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500/80 to-pink-500/80 flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500/80 to-sky-500/80 flex items-center justify-center text-xs font-semibold text-gray-900 dark:text-white flex-shrink-0">
                             {log.userId.name?.charAt(0) || "?"}
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm text-white truncate">{log.userId.name}</p>
-                            <p className="text-xs text-gray-500 truncate">{log.userId.email}</p>
+                            <p className="text-sm text-gray-900 dark:text-white truncate">{log.userId.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-500 truncate">{log.userId.email}</p>
                         </div>
                     </div>
                 ) : (
-                    <span className="text-sm text-gray-500 italic">System</span>
+                    <span className="text-sm text-gray-500 dark:text-slate-500 italic">System</span>
                 )}
             </td>
 
@@ -340,7 +341,7 @@ const LogRow = ({
 
             {/* Timestamp */}
             <td className="py-4 px-4">
-                <div className="flex items-center gap-1.5 text-sm text-gray-400">
+                <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
                     <IconClock className="w-3.5 h-3.5 flex-shrink-0" />
                     <span>{formatRelativeTime(log.createdAt)}</span>
                 </div>
@@ -352,7 +353,7 @@ const LogRow = ({
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
                     whileHover={{ x: 3 }}
                 >
-                    <IconArrowRight className="w-4 h-4 text-gray-400" />
+                    <IconArrowRight className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                 </motion.div>
             </td>
         </motion.tr>
@@ -470,15 +471,16 @@ export default function AuditLogsPage() {
                 className="flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Audit Logs</h1>
-                    <p className="text-gray-400 mt-1">Monitor system activity and security events</p>
+                    <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Audit Logs</h1>
+                    <p className="mt-1" style={{ color: 'var(--text-muted)' }}>Monitor system activity and security events</p>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 hover:bg-white/10 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors"
+                        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
                     >
                         <IconDownload className="w-4 h-4" />
                         Export
@@ -488,7 +490,7 @@ export default function AuditLogsPage() {
                         whileTap={{ scale: 0.98 }}
                         onClick={handleRefresh}
                         disabled={isRefreshing}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-sm font-medium text-white shadow-lg shadow-purple-500/25 disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25 disabled:opacity-50"
                     >
                         <IconRefresh className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
                         Refresh
@@ -504,7 +506,7 @@ export default function AuditLogsPage() {
                 className="grid grid-cols-2 md:grid-cols-4 gap-4"
             >
                 {[
-                    { label: "Total Events", value: stats.total, icon: IconFileAnalytics, color: "purple", gradient: "from-purple-500/20 to-pink-500/10" },
+                    { label: "Total Events", value: stats.total, icon: IconFileAnalytics, color: "blue", gradient: "from-blue-500/20 to-sky-500/10" },
                     { label: "Auth Events", value: stats.authEvents, icon: IconShieldCheck, color: "blue", gradient: "from-blue-500/20 to-cyan-500/10" },
                     { label: "Job Events", value: stats.jobEvents, icon: IconBriefcase, color: "amber", gradient: "from-amber-500/20 to-orange-500/10" },
                     { label: "Doc Events", value: stats.docEvents, icon: IconUpload, color: "emerald", gradient: "from-emerald-500/20 to-teal-500/10" },
@@ -514,14 +516,14 @@ export default function AuditLogsPage() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 + index * 0.05 }}
-                        className={`p-4 rounded-xl bg-gradient-to-br ${stat.gradient} border border-white/10 relative overflow-hidden`}
+                        className={`p-4 rounded-lg bg-gradient-to-br ${stat.gradient} border border-gray-200 dark:border-white/10 relative overflow-hidden`}
                     >
                         <div className="absolute top-3 right-3 opacity-20">
                             <stat.icon className={`w-10 h-10 text-${stat.color}-400`} />
                         </div>
                         <div className="relative z-10">
-                            <p className="text-sm text-gray-400">{stat.label}</p>
-                            <p className={`text-2xl font-bold text-white mt-1`}>{stat.value}</p>
+                            <p className="text-sm text-gray-500 dark:text-slate-400">{stat.label}</p>
+                            <p className={`text-2xl font-bold text-gray-900 dark:text-white mt-1`}>{stat.value}</p>
                         </div>
                     </motion.div>
                 ))}
@@ -536,60 +538,51 @@ export default function AuditLogsPage() {
             >
                 {/* Search */}
                 <div className="relative flex-1">
-                    <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--text-disabled)' }} />
                     <input
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search logs by action, user, resource..."
-                        className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                        className="w-full pl-12 pr-4 py-3 rounded-lg text-sm focus:outline-none transition-colors"
+                        style={{ background: 'var(--bg-input)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)' }}
                     />
                 </div>
 
                 {/* Action Filter */}
-                <div className="relative">
-                    <IconFilter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={actionFilter}
-                        onChange={(e) => setActionFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Actions</option>
-                        <optgroup label="Authentication">
-                            <option value="USER_SIGNUP">User Signup</option>
-                            <option value="USER_LOGIN">User Login</option>
-                            <option value="LOGIN_FAILED">Login Failed</option>
-                            <option value="AUTH_LOGIN_FAILED">Auth Failed</option>
-                        </optgroup>
-                        <optgroup label="Documents">
-                            <option value="DOCUMENT_UPLOAD_QUEUED">Doc Uploaded</option>
-                        </optgroup>
-                        <optgroup label="Jobs">
-                            <option value="JOB_CREATED">Job Created</option>
-                            <option value="JOB_STARTED">Job Started</option>
-                            <option value="JOB_COMPLETED">Job Completed</option>
-                            <option value="JOB_FAILED">Job Failed</option>
-                            <option value="JOB_RETRY_SCHEDULED">Job Retry</option>
-                        </optgroup>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-56"
+                    icon={IconFilter}
+                    value={actionFilter}
+                    onChange={setActionFilter}
+                    options={[
+                        { value: "all", label: "All Actions" },
+                        { value: "USER_SIGNUP", label: "User Signup" },
+                        { value: "USER_LOGIN", label: "User Login" },
+                        { value: "LOGIN_FAILED", label: "Login Failed" },
+                        { value: "AUTH_LOGIN_FAILED", label: "Auth Failed" },
+                        { value: "DOCUMENT_UPLOAD_QUEUED", label: "Doc Uploaded" },
+                        { value: "JOB_CREATED", label: "Job Created" },
+                        { value: "JOB_STARTED", label: "Job Started" },
+                        { value: "JOB_COMPLETED", label: "Job Completed" },
+                        { value: "JOB_FAILED", label: "Job Failed" },
+                        { value: "JOB_RETRY_SCHEDULED", label: "Job Retry" }
+                    ]}
+                />
 
                 {/* Resource Type Filter */}
-                <div className="relative">
-                    <IconActivity className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                        value={resourceFilter}
-                        onChange={(e) => setResourceFilter(e.target.value)}
-                        className="pl-10 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50"
-                    >
-                        <option value="all">All Resources</option>
-                        <option value="auth">Auth</option>
-                        <option value="document">Document</option>
-                        <option value="job">Job</option>
-                    </select>
-                    <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <CustomSelect
+                    className="w-48"
+                    icon={IconActivity}
+                    value={resourceFilter}
+                    onChange={setResourceFilter}
+                    options={[
+                        { value: "all", label: "All Resources" },
+                        { value: "auth", label: "Auth" },
+                        { value: "document", label: "Document" },
+                        { value: "job", label: "Job" }
+                    ]}
+                />
             </motion.div>
 
             {/* Loading State */}
@@ -599,8 +592,8 @@ export default function AuditLogsPage() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-16"
                 >
-                    <IconLoader2 className="w-12 h-12 text-purple-400 animate-spin mb-4" />
-                    <p className="text-gray-400">Loading audit logs...</p>
+                    <IconLoader2 className="w-12 h-12 text-blue-400 animate-spin mb-4" />
+                    <p className="text-gray-500 dark:text-slate-400">Loading audit logs...</p>
                 </motion.div>
             )}
 
@@ -609,20 +602,20 @@ export default function AuditLogsPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20"
+                    className="p-6 rounded-lg bg-red-500/10 border border-red-500/20"
                 >
                     <div className="flex items-center gap-3">
                         <IconAlertTriangle className="w-6 h-6 text-red-400" />
                         <div>
                             <p className="text-red-400 font-medium">Failed to load audit logs</p>
-                            <p className="text-sm text-gray-400 mt-1">{error}</p>
+                            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{error}</p>
                         </div>
                     </div>
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => loadLogs(1)}
-                        className="mt-4 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-xl text-sm text-red-400 hover:bg-red-500/30 transition-colors"
+                        className="mt-4 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-sm text-red-400 hover:bg-red-500/30 transition-colors"
                     >
                         Try Again
                     </motion.button>
@@ -635,17 +628,18 @@ export default function AuditLogsPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden"
+                    className="rounded-lg overflow-hidden"
+                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
                 >
                     {/* Live indicator bar */}
-                    <div className="px-4 py-2.5 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                    <div className="px-4 py-2.5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-secondary)', background: 'var(--bg-elevated)' }}>
                         <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-500 dark:text-slate-400">
                                 Showing {filteredLogs.length} of {totalLogs} events
                             </span>
                         </div>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-slate-500">
                             Page {currentPage} of {totalPages}
                         </span>
                     </div>
@@ -653,12 +647,12 @@ export default function AuditLogsPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-white/10 text-left">
-                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
-                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Resource</th>
-                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                                <tr className="border-b border-gray-200 dark:border-white/10 text-left">
+                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Event</th>
+                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">User</th>
+                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Resource</th>
+                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Time</th>
+                                    <th className="py-3.5 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -678,22 +672,22 @@ export default function AuditLogsPage() {
                     {filteredLogs.length === 0 && (
                         <div className="py-16 text-center">
                             <IconFileAnalytics className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-500">No audit logs found</p>
+                            <p className="text-gray-500 dark:text-slate-500">No audit logs found</p>
                             <p className="text-sm text-gray-600 mt-1">Try adjusting your filters or search query</p>
                         </div>
                     )}
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="px-4 py-3 border-t border-white/10 flex items-center justify-between">
-                            <p className="text-sm text-gray-500">
+                        <div className="px-4 py-3 border-t border-gray-200 dark:border-white/10 flex items-center justify-between">
+                            <p className="text-sm text-gray-500 dark:text-slate-500">
                                 Page {currentPage} of {totalPages} ({totalLogs} total events)
                             </p>
                             <div className="flex items-center gap-1">
                                 <button
                                     onClick={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage === 1}
-                                    className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                                    className="p-2 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10 rounded-lg transition-colors disabled:opacity-30 disabled:pointer-events-none"
                                 >
                                     <IconChevronLeft className="w-4 h-4" />
                                 </button>
@@ -704,21 +698,21 @@ export default function AuditLogsPage() {
                                             key={idx}
                                             onClick={() => handlePageChange(page)}
                                             className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${page === currentPage
-                                                ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                                                : "text-gray-400 hover:text-white hover:bg-white/10"
+                                                ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                                                : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10"
                                                 }`}
                                         >
                                             {page}
                                         </button>
                                     ) : (
-                                        <span key={idx} className="px-2 text-gray-500">…</span>
+                                        <span key={idx} className="px-2 text-gray-500 dark:text-slate-500">…</span>
                                     )
                                 ))}
 
                                 <button
                                     onClick={() => handlePageChange(currentPage + 1)}
                                     disabled={currentPage === totalPages}
-                                    className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors disabled:opacity-30 disabled:pointer-events-none"
+                                    className="p-2 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10 rounded-lg transition-colors disabled:opacity-30 disabled:pointer-events-none"
                                 >
                                     <IconChevronRight className="w-4 h-4" />
                                 </button>

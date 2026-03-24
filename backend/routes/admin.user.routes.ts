@@ -3,7 +3,9 @@ import { authMiddleware } from "../middleware/auth";
 import { requireRole } from "../middleware/requireRole";
 import {
   getAllUsers,
-  getAuditors
+  getAuditors,
+  createUser,
+  updateUserDepartment
 } from "../controllers/adminUser.controller";
 
 const router = Router();
@@ -14,7 +16,7 @@ const router = Router();
 router.get(
   "/users",
   authMiddleware,
-  requireRole("ADMIN"),
+  requireRole("ORG_ADMIN"),
   getAllUsers
 );
 
@@ -24,8 +26,28 @@ router.get(
 router.get(
   "/users/auditors",
   authMiddleware,
-  requireRole("ADMIN"),
+  requireRole("ORG_ADMIN"),
   getAuditors
+);
+
+/**
+ * ORG_ADMIN — Create new user
+ */
+router.post(
+  "/users",
+  authMiddleware,
+  requireRole("ORG_ADMIN"),
+  createUser
+);
+
+/**
+ * ORG_ADMIN — Change user department
+ */
+router.put(
+  "/users/:id/department",
+  authMiddleware,
+  requireRole("ORG_ADMIN"),
+  updateUserDepartment
 );
 
 export default router;

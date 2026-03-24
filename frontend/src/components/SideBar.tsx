@@ -91,10 +91,9 @@ export const DesktopSidebar = ({
     <motion.div
       className={cn(
         "h-screen hidden md:flex md:flex-col flex-shrink-0 sticky top-0",
-        "bg-gradient-to-b from-[#0f0f1a] via-[#141428] to-[#0f0f1a]",
-        "border-r border-white/5",
         className
       )}
+      style={{ background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border-secondary)' }}
       animate={{
         width: animate ? (open ? "280px" : "80px") : "280px",
       }}
@@ -105,7 +104,7 @@ export const DesktopSidebar = ({
       {...props}
     >
       {/* Gradient overlay at top */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-500/10 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col overflow-hidden">
@@ -115,7 +114,8 @@ export const DesktopSidebar = ({
       {/* Toggle button */}
       <motion.button
         onClick={() => setOpen(!open)}
-        className="absolute top-6 -right-3 z-50 w-6 h-6 rounded-full bg-[#1a1a2e] border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:bg-purple-500/20 hover:border-purple-500/30 transition-all duration-200 shadow-lg"
+        className="absolute top-6 -right-3 z-50 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg"
+        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)' }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
@@ -139,22 +139,23 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-14 px-4 flex flex-row md:hidden items-center justify-between fixed top-0 left-0 right-0 z-50",
-          "bg-gradient-to-r from-[#0f0f1a] to-[#141428] border-b border-white/5"
+          "h-14 px-4 flex flex-row md:hidden items-center justify-between fixed top-0 left-0 right-0 z-50"
         )}
+        style={{ background: 'var(--bg-navbar)', borderBottom: '1px solid var(--border-secondary)' }}
         {...props}
       >
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center">
             <span className="text-white font-bold text-sm">E</span>
           </div>
-          <span className="text-white font-semibold">Enterprise AI</span>
+          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Enterprise AI</span>
         </Link>
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setOpen(!open)}
-          className="p-2 rounded-xl bg-white/5 border border-white/10 text-gray-400"
+          className="p-2 rounded-lg border"
+          style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)', color: 'var(--text-muted)' }}
         >
           <IconMenu2 className="w-5 h-5" />
         </motion.button>
@@ -185,17 +186,17 @@ export const MobileSidebar = ({
               }}
               className={cn(
                 "fixed h-full w-[280px] inset-y-0 left-0 z-[100] flex flex-col",
-                "bg-gradient-to-b from-[#0f0f1a] via-[#141428] to-[#0f0f1a]",
-                "border-r border-white/5",
                 className
               )}
+              style={{ background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border-secondary)' }}
             >
               <div className="absolute top-4 right-4">
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setOpen(false)}
-                  className="p-2 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white"
+                  className="p-2 rounded-lg border"
+                  style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)', color: 'var(--text-muted)' }}
                 >
                   <IconX className="w-5 h-5" />
                 </motion.button>
@@ -225,21 +226,23 @@ export const SidebarLink = ({
     <Link
       to={link.href}
       className={cn(
-        "flex items-center gap-3 py-3 mx-3 rounded-xl transition-all duration-200",
+        "flex items-center gap-3 py-3 mx-3 rounded-lg transition-all duration-200",
         "group/sidebar relative overflow-hidden",
         open ? "px-4" : "px-0 justify-center",
-        isActive
-          ? "bg-gradient-to-r from-purple-500/20 to-pink-500/10 text-white"
-          : "text-gray-400 hover:text-white hover:bg-white/5",
         className
       )}
+      style={{
+        ...(isActive
+          ? { background: 'var(--sidebar-active-bg)', color: 'var(--text-primary)' }
+          : { color: 'var(--text-muted)' })
+      }}
       {...props}
     >
       {/* Active indicator */}
       {isActive && (
         <motion.div
           layoutId="activeIndicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-gradient-to-b from-purple-500 to-pink-500"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-gradient-to-b from-blue-500 to-sky-500"
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         />
       )}
@@ -247,7 +250,7 @@ export const SidebarLink = ({
       {/* Icon */}
       <div className={cn(
         "flex-shrink-0 transition-colors duration-200",
-        isActive ? "text-purple-400" : "group-hover/sidebar:text-purple-400"
+        isActive ? "text-blue-400" : "group-hover/sidebar:text-blue-400"
       )}>
         {link.icon}
       </div>
@@ -277,7 +280,7 @@ export const SidebarLink = ({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="ml-auto px-2 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30"
+            className="ml-auto px-2 py-0.5 text-xs font-medium bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30"
           >
             {link.badge}
           </motion.span>
@@ -291,10 +294,10 @@ export const SidebarLogo = ({ open }: { open: boolean }) => {
   return (
     <Link to="/" className="flex items-center gap-3 px-6 py-5">
       <motion.div
-        className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 flex-shrink-0"
+        className="relative w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 via-sky-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0"
       >
         <span className="text-white font-bold text-lg">E</span>
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent" />
+        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/20 to-transparent" />
       </motion.div>
       <AnimatePresence>
         {open && (
@@ -305,10 +308,10 @@ export const SidebarLogo = ({ open }: { open: boolean }) => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <h1 className="text-lg font-bold text-white whitespace-nowrap">
+            <h1 className="text-lg font-bold whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
               Enterprise
             </h1>
-            <p className="text-xs text-gray-400 -mt-0.5 whitespace-nowrap">AI Platform</p>
+            <p className="text-xs -mt-0.5 whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>AI Platform</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -335,7 +338,7 @@ export const SidebarSection = ({
             exit={{ opacity: 0, height: 0 }}
             className="px-6 mb-2 overflow-hidden"
           >
-            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
               {title}
             </span>
           </motion.div>
@@ -348,7 +351,7 @@ export const SidebarSection = ({
 
 export const SidebarFooter = ({ open }: { open: boolean }) => {
   return (
-    <div className="mt-auto border-t border-white/5 p-4">
+    <div className="mt-auto p-4" style={{ borderTop: '1px solid var(--border-secondary)' }}>
       <AnimatePresence>
         {open && (
           <motion.div
@@ -357,15 +360,16 @@ export const SidebarFooter = ({ open }: { open: boolean }) => {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
-              <p className="text-sm font-medium text-white">Need help?</p>
-              <p className="text-xs text-gray-400 mt-1">
+            <div className="p-4 rounded-lg border" style={{ background: 'var(--accent-subtle)', borderColor: 'var(--badge-border)' }}>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Need help?</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
                 Check our documentation or contact support
               </p>
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="mt-3 w-full py-2 text-xs font-medium text-purple-300 bg-purple-500/20 rounded-lg border border-purple-500/30 hover:bg-purple-500/30 transition-colors"
+                className="mt-3 w-full py-2 text-xs font-medium rounded-lg transition-colors"
+                style={{ color: 'var(--accent-primary)', background: 'var(--badge-bg)', border: '1px solid var(--badge-border)' }}
               >
                 View Documentation
               </motion.button>
@@ -384,7 +388,7 @@ export const SidebarFooter = ({ open }: { open: boolean }) => {
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
               exit={{ opacity: 0, width: 0 }}
-              className="text-xs text-gray-500 overflow-hidden whitespace-nowrap"
+              className="text-xs overflow-hidden whitespace-nowrap" style={{ color: 'var(--text-muted)' }}
             >
               All systems operational
             </motion.span>

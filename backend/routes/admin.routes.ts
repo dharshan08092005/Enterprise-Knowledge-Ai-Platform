@@ -4,8 +4,8 @@ import { requireRole } from "../middleware/requireRole";
 import { getAuditLogs } from "../controllers/adminLogs.controller";
 import { getSettings, updateSettings, testConnection } from "../controllers/settings.controller";
 import {
-  getAllUsers,
-  getAuditors
+    getAllUsers,
+    getAuditors
 } from "../controllers/adminUser.controller";
 
 const router = Router();
@@ -14,7 +14,7 @@ const router = Router();
 router.get(
     "/logs",
     authMiddleware,
-    requireRole("ADMIN", "AUDITOR"),
+    requireRole("ADMIN", "AUDITOR", "ORG_ADMIN"),
     getAuditLogs
 );
 

@@ -32,6 +32,11 @@ const auditLogSchema = new Schema(
     metadata: {
       type: Schema.Types.Mixed
       // flexible field for IP, email, error reason, etc.
+    },
+    organizationId: {
+      type: Types.ObjectId,
+      ref: "Organization",
+      required: false
     }
   },
   {

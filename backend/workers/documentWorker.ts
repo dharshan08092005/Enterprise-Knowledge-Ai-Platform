@@ -1,5 +1,5 @@
+import "dotenv/config";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 
 import Job from "../models/Job";
 import Document from "../models/Document";
@@ -12,8 +12,8 @@ import { logAudit } from "../utils/auditLogger";
 
 import { extractPdfText } from "../services/extraction/pdfExtractor";
 import { chunkText } from "../services/chunking/chunker";
-
-dotenv.config();
+import { generateEmbeddingsBatch } from "../services/embeddings/geminiEmbedder";
+import { upsertChunksToPinecone } from "../services/vectorDb/pineconeService";
 
 let isConnected = false;
 
@@ -96,7 +96,27 @@ const processJob = async (job: any) => {
     job.stage = "extraction";
     await job.save();
 
-    const { text, pageCount } = await extractPdfText(document.filePath);
+    let fileData: string | Buffer;
+
+    if (document.s3Key) {
+      console.log(`☁️ Fetching PDF stream natively from AWS S3: ${document.s3Key}`);
+      const { s3 } = await import("../middleware/upload");
+      const { GetObjectCommand } = await import("@aws-sdk/client-s3");
+      
+      const getObjectParams = {
+        Bucket: process.env.AWS_S3_BUCKET_NAME as string,
+        Key: document.s3Key
+      };
+      const response = await s3.send(new GetObjectCommand(getObjectParams));
+      const arrayBuffer = await response.Body?.transformToByteArray();
+      if (!arrayBuffer) throw new Error("Failed to read S3 bucket payload.");
+      fileData = Buffer.from(arrayBuffer);
+    } else {
+      console.log(`📁 Processing local file: ${document.filePath}`);
+      fileData = document.filePath;
+    }
+
+    const { text, pageCount } = await extractPdfText(fileData);
 
     if (!text || text.length < 20) {
       throw new Error("Extracted text too short");
@@ -129,10 +149,45 @@ const processJob = async (job: any) => {
       documentId: document._id,
       chunkIndex: index,
       text: chunk.text,
-      tokenCount: chunk.tokenCount
+      tokenCount: chunk.tokenCount,
+      embeddingStatus: "pending",
+      embeddingModel: "text-embedding-004"
     }));
 
-    await DocumentChunk.insertMany(chunkDocs);
+    const insertedChunks = await DocumentChunk.insertMany(chunkDocs);
+
+    /* ---------------------------
+       EMBEDDING & VECTOR DB
+    --------------------------- */
+
+    job.stage = "embedding";
+    await job.save();
+
+    console.log(`🧠 Generating embeddings for ${chunks.length} chunks`);
+    const textsToEmbed = insertedChunks.map(c => c.text);
+    const embeddings = await generateEmbeddingsBatch(textsToEmbed);
+
+    console.log(`💾 Upserting to Pinecone`);
+    const pineconeChunks = insertedChunks.map((chunk, index) => ({
+      id: chunk._id.toString(),
+      text: chunk.text,
+      values: embeddings[index]
+    }));
+
+    await upsertChunksToPinecone(
+      document.organizationId.toString(),
+      document._id.toString(),
+      document.accessScope || "restricted",
+      document.ownerId.toString(),
+      document.departmentId ? document.departmentId.toString() : undefined,
+      pineconeChunks
+    );
+
+    // Update chunks status
+    await DocumentChunk.updateMany(
+      { documentId: document._id },
+      { $set: { embeddingStatus: "embedded" } }
+    );
 
     /* ---------------------------
        UPDATE DOCUMENT

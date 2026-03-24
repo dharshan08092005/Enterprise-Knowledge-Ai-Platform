@@ -147,6 +147,8 @@ export interface AdminUser {
     role: "USER" | "AUDITOR" | "ADMIN";
     isActive: boolean;
     createdAt: string;
+    departmentId: string | null;
+    departmentName: string | null;
 }
 
 export const fetchAllUsers = async (token: string): Promise<AdminUser[]> => {
@@ -158,6 +160,24 @@ export const fetchAllUsers = async (token: string): Promise<AdminUser[]> => {
 
 export const fetchAuditors = async (token: string): Promise<AdminUser[]> => {
     const res = await api.get("/admin/users/users/auditors", {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+};
+
+export const createUser = async (token: string, userData: { email: string; name: string; role: string; departmentId: string }): Promise<AdminUser> => {
+    const res = await api.post("/admin/users/users", userData, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+};
+
+export const updateUserDepartment = async (
+    token: string,
+    userId: string,
+    departmentId: string
+): Promise<{ message: string; user: { _id: string; departmentId: string; departmentName: string } }> => {
+    const res = await api.put(`/admin/users/users/${userId}/department`, { departmentId }, {
         headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;
