@@ -53,16 +53,16 @@ const SECTIONS: SectionConfig[] = [
         label: "LLM Provider",
         description: "Large Language Model configuration",
         icon: IconBrain,
-        color: "blue",
-        gradient: "from-blue-500/20 to-sky-500/10",
+        color: "accent",
+        gradient: "bg-accent/10",
     },
     {
         key: "embedding",
         label: "Embeddings",
         description: "Text embedding model configuration",
         icon: IconVectorTriangle,
-        color: "blue",
-        gradient: "from-blue-500/20 to-cyan-500/10",
+        color: "accent",
+        gradient: "bg-accent/10",
     },
     {
         key: "vectorDb",
@@ -239,7 +239,7 @@ const PasswordField = ({
                 value={value || ""}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full px-4 py-2.5 pr-10 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors font-mono"
+                className="w-full px-4 py-2.5 pr-10 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-colors font-mono"
             />
             <button
                 type="button"
@@ -337,7 +337,7 @@ const SettingsSection = ({
                                             value={data[field.key] || ""}
                                             onChange={(e) => onChange(field.key, e.target.value)}
                                             placeholder={field.placeholder}
-                                            className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors"
+                                            className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-colors"
                                         />
                                     )}
 
@@ -350,7 +350,7 @@ const SettingsSection = ({
                                             min={field.min}
                                             max={field.max}
                                             step={field.step}
-                                            className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors"
+                                            className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-colors"
                                         />
                                     )}
 
@@ -359,7 +359,7 @@ const SettingsSection = ({
                                             <select
                                                 value={data[field.key] || ""}
                                                 onChange={(e) => onChange(field.key, e.target.value)}
-                                                className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white appearance-none focus:outline-none focus:border-blue-500/50 transition-colors"
+                                                className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white appearance-none focus:outline-none focus:border-accent/50 transition-colors"
                                             >
                                                 {field.options?.map((opt) => (
                                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -372,7 +372,7 @@ const SettingsSection = ({
                                     {field.type === "toggle" && (
                                         <button
                                             onClick={() => onChange(field.key, !data[field.key])}
-                                            className={`relative w-12 h-6 rounded-full transition-colors ${data[field.key] ? "bg-blue-500" : "bg-gray-100 dark:bg-white/10"
+                                            className={`relative w-12 h-6 rounded-full transition-colors ${data[field.key] ? "bg-accent" : "bg-gray-100 dark:bg-white/10"
                                                 }`}
                                         >
                                             <motion.div
@@ -539,8 +539,8 @@ export default function AdminSettingsPage() {
                 className="flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
                 <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500/20 to-sky-500/10 border border-gray-200 dark:border-white/10">
-                        <IconSettings className="w-7 h-7 text-blue-400" />
+                    <div className="p-3 rounded-lg bg-accent/10 border border-gray-200 dark:border-white/10">
+                        <IconSettings className="w-7 h-7 text-accent" />
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Settings</h1>
@@ -565,7 +565,7 @@ export default function AdminSettingsPage() {
                         onClick={handleSave}
                         disabled={isSaving || !hasChanges}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${hasChanges
-                            ? "bg-gradient-to-r from-blue-600 to-sky-600 text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                            ? "bg-accent-gradient text-white shadow-accent"
                             : "bg-white dark:bg-white/5 text-gray-500 dark:text-slate-500 border border-gray-200 dark:border-white/10 cursor-not-allowed"
                             }`}
                     >
@@ -630,7 +630,7 @@ export default function AdminSettingsPage() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-20"
                 >
-                    <IconLoader2 className="w-12 h-12 text-blue-400 animate-spin mb-4" />
+                    <IconLoader2 className="w-12 h-12 text-accent animate-spin mb-4" />
                     <p className="text-gray-500 dark:text-slate-400">Loading settings...</p>
                 </motion.div>
             )}

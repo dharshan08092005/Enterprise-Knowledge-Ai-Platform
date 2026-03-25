@@ -5,6 +5,7 @@ import Job from "../models/Job";
 import Document from "../models/Document";
 import DocumentText from "../models/DocumentText";
 import DocumentChunk from "../models/DocumentChunk";
+import Organization from "../models/Organization";
 
 import { JOB_TYPES } from "../constants/jobTypes";
 import { AUDIT_ACTIONS } from "../constants/auditActions";
@@ -67,6 +68,9 @@ const processJob = async (job: any) => {
     job.stage = "initializing";
     await job.save();
 
+    // Update document status to processing
+    await Document.findByIdAndUpdate(job.documentId, { $set: { status: "processing" } });
+
     await logAudit({
       action: AUDIT_ACTIONS.JOB_STARTED,
       resourceType: "job",
@@ -84,6 +88,10 @@ const processJob = async (job: any) => {
     const document = await Document.findById(job.documentId);
 
     if (!document) throw new Error("Document not found");
+
+    const org = await Organization.findById(document.organizationId).select("+embeddingSettings.apiKey").lean();
+    const embSettings = org?.embeddingSettings;
+    const modelName = embSettings?.model || "nomic-embed-text";
 
     if (document.mimeType !== "application/pdf") {
       throw new Error("Unsupported file type");
@@ -151,7 +159,7 @@ const processJob = async (job: any) => {
       text: chunk.text,
       tokenCount: chunk.tokenCount,
       embeddingStatus: "pending",
-      embeddingModel: "nomic-embed-text"
+      embeddingModel: modelName
     }));
 
     const insertedChunks = await DocumentChunk.insertMany(chunkDocs);
@@ -163,9 +171,9 @@ const processJob = async (job: any) => {
     job.stage = "embedding";
     await job.save();
 
-    console.log(`🧠 Generating embeddings for ${chunks.length} chunks`);
+    console.log(`🧠 Generating embeddings for ${chunks.length} chunks using ${modelName}`);
     const textsToEmbed = insertedChunks.map(c => c.text);
-    const embeddings = await generateEmbeddingsBatch(textsToEmbed);
+    const embeddings = await generateEmbeddingsBatch(textsToEmbed, embSettings as any);
 
     console.log(`💾 Upserting to Pinecone`);
     const pineconeChunks = insertedChunks.map((chunk, index) => ({
@@ -227,6 +235,9 @@ const processJob = async (job: any) => {
     if (job.attempts >= job.maxAttempts) {
       job.status = "DEAD";
       job.error = err.message;
+
+      // Update document status to failed
+      await Document.findByIdAndUpdate(job.documentId, { $set: { status: "failed" } });
 
       await logAudit({
         action: AUDIT_ACTIONS.JOB_FAILED,

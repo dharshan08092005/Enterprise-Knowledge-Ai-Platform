@@ -70,7 +70,7 @@ export default function OrganizationsPage() {
                 <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                    className="flex items-center gap-2 px-4 py-2 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                 >
                     <IconPlus className="w-4 h-4" />
                     New Organization
@@ -86,7 +86,7 @@ export default function OrganizationsPage() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search by name or slug..."
-                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-all shadow-sm"
                     />
                 </div>
                 <button
@@ -99,7 +99,7 @@ export default function OrganizationsPage() {
 
             {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20">
-                    <IconLoader2 className="w-10 h-10 text-blue-400 animate-spin mb-3" />
+                    <IconLoader2 className="w-10 h-10 text-accent animate-spin mb-3" />
                     <p className="text-gray-500 dark:text-slate-400">Loading organizations...</p>
                 </div>
             ) : error ? (
@@ -115,13 +115,13 @@ export default function OrganizationsPage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             whileHover={{ y: -5 }}
-                            className="p-6 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-blue-500/30 transition-all group relative overflow-hidden"
+                            className="p-6 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-accent/30 transition-all group relative overflow-hidden"
                         >
                             {/* Decorative Background Blob */}
-                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 blur-2xl rounded-full group-hover:bg-blue-500/20 transition-colors" />
+                            <div className="absolute -right-4 -top-4 w-24 h-24 bg-accent/5 blur-2xl rounded-full group-hover:bg-accent/10 transition-colors" />
 
                             <div className="flex items-start justify-between mb-4">
-                                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-gray-900 dark:text-white shadow-lg shadow-blue-500/20">
+                                <div className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center text-white shadow-accent">
                                     <IconBuilding className="w-6 h-6" />
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -134,7 +134,7 @@ export default function OrganizationsPage() {
                                 </div>
                             </div>
 
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-400 transition-colors">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-accent transition-colors">
                                 {org.name}
                             </h3>
                             <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-500 mb-4">
@@ -145,7 +145,7 @@ export default function OrganizationsPage() {
                             <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-white/5">
                                 <div className="flex items-center justify-between text-xs">
                                     <span className="text-gray-500 dark:text-slate-500">Subscription</span>
-                                    <span className="text-blue-400 font-semibold uppercase">{org.subscriptionPlan}</span>
+                                    <span className="text-accent font-semibold uppercase">{org.subscriptionPlan}</span>
                                 </div>
                                 <div className="flex items-center justify-between text-xs">
                                     <span className="text-gray-500 dark:text-slate-500">Joined</span>

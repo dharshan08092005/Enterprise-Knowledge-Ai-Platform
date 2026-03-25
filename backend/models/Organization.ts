@@ -7,6 +7,17 @@ interface IOrganization extends Document {
     isActive: boolean;
     maxUsers: number;
     subscriptionPlan: "free" | "pro" | "enterprise";
+    aiSettings?: {
+        provider: string;
+        apiKey?: string;
+        model?: string;
+    };
+    embeddingSettings?: {
+        provider: string;
+        apiKey?: string;
+        model?: string;
+    };
+    themeColor?: string;
 }
 
 const organizationSchema = new Schema<IOrganization>(
@@ -40,6 +51,20 @@ const organizationSchema = new Schema<IOrganization>(
             type: String,
             enum: ["free", "pro", "enterprise"],
             default: "free"
+        },
+        aiSettings: {
+            provider: { type: String, default: 'google' },
+            apiKey: { type: String, select: false }, // Only returned when explicitly requested for security
+            model: { type: String, default: 'gemini-1.5-flash' }
+        },
+        embeddingSettings: {
+            provider: { type: String, default: 'ollama' },
+            apiKey: { type: String, select: false },
+            model: { type: String, default: 'nomic-embed-text' }
+        },
+        themeColor: {
+            type: String,
+            default: "#2563eb"
         }
     },
     { timestamps: true }

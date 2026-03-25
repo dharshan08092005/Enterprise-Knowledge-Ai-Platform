@@ -9,6 +9,7 @@ import {
     IconLogout,
     IconUser,
     IconSparkles,
+    IconMessages,
 } from "@tabler/icons-react";
 import { getUserFromToken, logout } from "@/lib/auth";
 import { Link } from "react-router-dom";
@@ -84,14 +85,16 @@ export default function NavBar({ title = "Dashboard", subtitle }: NavBarProps) {
             {/* Right Section - Actions */}
             <div className="flex items-center gap-2">
                 {/* AI Assistant Button */}
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow duration-300"
-                >
-                    <IconSparkles className="w-4 h-4" />
-                    <span>Ask AI</span>
-                </motion.button>
+                <Link to="/ask">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="hidden sm:flex items-center gap-2 px-4 py-2 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent transition-shadow duration-300"
+                    >
+                        <IconSparkles className="w-4 h-4" />
+                        <span>Ask AI</span>
+                    </motion.button>
+                </Link>
 
                 {/* Theme Toggle */}
                 <motion.button
@@ -123,7 +126,7 @@ export default function NavBar({ title = "Dashboard", subtitle }: NavBarProps) {
                     >
                         <IconBell className="w-5 h-5" />
                         {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold text-white bg-gradient-to-r from-sky-500 to-red-500 rounded-full">
+                            <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold text-white bg-accent rounded-full border border-white/20 shadow-accent shadow-sm">
                                 {unreadCount}
                             </span>
                         )}
@@ -162,7 +165,7 @@ export default function NavBar({ title = "Dashboard", subtitle }: NavBarProps) {
                                                         ? "status-online"
                                                         : notification.type === "warning"
                                                             ? "status-warning"
-                                                            : "bg-blue-500"
+                                                            : "bg-accent"
                                                         }`}
                                                 />
                                                 <div className="flex-1 min-w-0">
@@ -181,7 +184,7 @@ export default function NavBar({ title = "Dashboard", subtitle }: NavBarProps) {
                                     ))}
                                 </div>
                                 <div className="p-3" style={{ borderTop: '1px solid var(--border-primary)' }}>
-                                    <button className="w-full py-2 text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors">
+                                    <button className="w-full py-2 text-sm font-medium text-accent hover:opacity-80 transition-colors">
                                         View all notifications
                                     </button>
                                 </div>
@@ -190,15 +193,18 @@ export default function NavBar({ title = "Dashboard", subtitle }: NavBarProps) {
                     </AnimatePresence>
                 </div>
 
-                {/* Settings */}
-                <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="p-2.5 rounded-lg transition-all duration-300"
-                    style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
-                >
-                    <IconSettings className="w-5 h-5" />
-                </motion.button>
+                {/* Channels */}
+                <Link to="/channels">
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="relative p-2.5 rounded-lg transition-all duration-300"
+                        style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
+                        title="Team Channels"
+                    >
+                        <IconMessages className="w-5 h-5" />
+                    </motion.button>
+                </Link>
 
                 {/* Profile Dropdown */}
                 <div className="relative ml-2">
@@ -213,7 +219,7 @@ export default function NavBar({ title = "Dashboard", subtitle }: NavBarProps) {
                         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
                     >
                         <div className="relative">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-sm font-semibold text-white">
+                            <div className="w-8 h-8 rounded-lg bg-accent-gradient flex items-center justify-center text-sm font-semibold text-white">
                                 {userInitial}
                             </div>
                             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full status-online" style={{ border: '2px solid var(--bg-navbar)' }} />

@@ -1,15 +1,40 @@
-export const generateEmbedding = async (text: string): Promise<number[]> => {
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+export interface EmbeddingSettings {
+    provider?: string;
+    apiKey?: string;
+    model?: string;
+}
+
+/**
+ * Universal embedding generator that supports Ollama and Google Gemini Embeddings.
+ */
+export const generateEmbedding = async (text: string, settings?: EmbeddingSettings): Promise<number[]> => {
   if (!text || text.trim().length === 0) {
     throw new Error("❌ Text is empty");
   }
 
+  const provider = settings?.provider || "ollama";
+  const modelName = settings?.model || (provider === "ollama" ? "nomic-embed-text" : "text-embedding-004");
+
+  if (provider === "google") {
+    const key = settings?.apiKey || process.env.GEMINI_API_KEY;
+    if (!key) throw new Error("Google API Key for embeddings is missing");
+    
+    const genAI = new GoogleGenerativeAI(key);
+    const model = genAI.getGenerativeModel({ model: modelName });
+    const result = await model.embedContent(text);
+    return result.embedding.values;
+  }
+
+  // Fallback to Ollama (default)
   const response = await fetch("http://localhost:11434/api/embeddings", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "nomic-embed-text",
+      model: modelName,
       prompt: text,
     }),
   });
@@ -27,8 +52,12 @@ export const generateEmbedding = async (text: string): Promise<number[]> => {
   return data.embedding;
 };
 
+/**
+ * Batch generate embeddings with optional settings.
+ */
 export const generateEmbeddingsBatch = async (
   texts: string[],
+  settings?: EmbeddingSettings,
   batchSize = 20,
   delayMs = 0
 ): Promise<number[][]> => {
@@ -37,21 +66,20 @@ export const generateEmbeddingsBatch = async (
   }
 
   const results: number[][] = [];
-  console.log(`🚀 Generating embeddings for ${texts.length} chunks with Ollama (nomic-embed-text)`);
+  const provider = settings?.provider || "ollama";
+  console.log(`🚀 Generating embeddings for ${texts.length} chunks via ${provider}`);
 
   for (let i = 0; i < texts.length; i += batchSize) {
     const batch = texts.slice(i, i + batchSize);
-    console.log(`📦 Processing batch ${Math.floor(i / batchSize) + 1} (${batch.length} items)`);
-
-    // Ollama currently processes embeddings sequentially or parallelly depending on load
-    // We can fire them in parallel using Promise.all for this batch size
-    const batchPromises = batch.map(text => generateEmbedding(text));
+    
+    // Process batch
+    const batchPromises = batch.map(text => generateEmbedding(text, settings));
     
     try {
       const batchResults = await Promise.all(batchPromises);
       results.push(...batchResults);
     } catch (err: any) {
-      console.error("❌ Batch embed failed with Ollama:", err.message);
+      console.error(`❌ Batch embed failed with ${provider}:`, err.message);
       throw err;
     }
 
@@ -60,6 +88,5 @@ export const generateEmbeddingsBatch = async (
     }
   }
 
-  console.log("✅ All embeddings completed!");
   return results;
 };

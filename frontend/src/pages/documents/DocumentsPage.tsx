@@ -19,7 +19,6 @@ import {
     IconCheck,
     IconLoader2,
     IconX,
-    IconChevronDown,
     IconCalendar,
     IconLock,
     IconWorld,
@@ -37,7 +36,7 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // Types
 type FileType = "pdf" | "doc" | "docx" | "txt" | "xls" | "xlsx" | "csv" | "other";
-type StatusType = "uploaded" | "processing" | "active";
+type StatusType = "uploaded" | "processing" | "active" | "failed";
 type AccessScopeType = "public" | "department" | "restricted";
 
 // Helper functions
@@ -58,7 +57,7 @@ const formatDate = (date: Date | string): string => {
     return dateObj.toLocaleDateString();
 };
 
-const getFileType = (fileName: string, mimeType: string): FileType => {
+const getFileType = (fileName: string): FileType => {
     const ext = fileName?.split(".").pop()?.toLowerCase() || "";
     const typeMap: Record<string, FileType> = {
         pdf: "pdf",
@@ -77,8 +76,8 @@ const FileIcon = ({ type, size = 24 }: { type: FileType; size?: number }) => {
     const iconClass = `w-${size === 24 ? 6 : 5} h-${size === 24 ? 6 : 5}`;
     const icons: Record<FileType, JSX.Element> = {
         pdf: <IconFileTypePdf className={`${iconClass} text-red-400`} />,
-        doc: <IconFileTypeDoc className={`${iconClass} text-blue-400`} />,
-        docx: <IconFileTypeDoc className={`${iconClass} text-blue-400`} />,
+        doc: <IconFileTypeDoc className={`${iconClass} text-accent`} />,
+        docx: <IconFileTypeDoc className={`${iconClass} text-accent`} />,
         txt: <IconFileTypeTxt className={`${iconClass} text-gray-500 dark:text-slate-400`} />,
         xls: <IconFileTypeXls className={`${iconClass} text-green-400`} />,
         xlsx: <IconFileTypeXls className={`${iconClass} text-green-400`} />,
@@ -92,7 +91,7 @@ const FileIcon = ({ type, size = 24 }: { type: FileType; size?: number }) => {
 const StatusBadge = ({ status }: { status: StatusType }) => {
     if (status === "processing" || status === "uploaded") {
         return (
-            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-accent/20 text-accent border border-accent/25 rounded-full">
                 <IconLoader2 className="w-3 h-3 animate-spin" />
                 {status === "uploaded" ? "Queued" : "Processing"}
             </span>
@@ -104,6 +103,15 @@ const StatusBadge = ({ status }: { status: StatusType }) => {
             <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">
                 <IconCheck className="w-3 h-3" />
                 Active
+            </span>
+        );
+    }
+
+    if (status === "failed") {
+        return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 rounded-full">
+                <IconX className="w-3 h-3" />
+                Failed
             </span>
         );
     }
@@ -146,7 +154,7 @@ const DocumentRow = ({
     onDelete: () => void;
 }) => {
     const [showMenu, setShowMenu] = useState(false);
-    const fileType = getFileType(doc.fileName, doc.mimeType);
+    const fileType = getFileType(doc.fileName);
 
     return (
         <motion.tr
@@ -329,8 +337,8 @@ const UploadModal = ({
                             <div className="p-6" style={{ borderBottom: '1px solid var(--border-primary)' }}>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-sky-500/20">
-                                            <IconCloudUpload className="w-5 h-5 text-blue-400" />
+                                        <div className="p-2 rounded-lg bg-accent/20">
+                                            <IconCloudUpload className="w-5 h-5 text-accent" />
                                         </div>
                                         <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Upload Document</h3>
                                     </div>
@@ -364,7 +372,7 @@ const UploadModal = ({
                                     onDragLeave={() => setDragOver(false)}
                                     onDrop={handleDrop}
                                     className={`relative p-8 border-2 border-dashed rounded-lg text-center transition-all ${dragOver
-                                        ? "border-blue-500 bg-blue-500/10"
+                                        ? "border-accent bg-accent/10"
                                         : "border-gray-300 dark:border-white/20 hover:border-white/30"
                                         }`}
                                 >
@@ -429,7 +437,7 @@ const UploadModal = ({
                                     onClick={handleUpload}
                                     disabled={files.length === 0 || !title.trim() || isUploading}
                                     className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${files.length > 0 && title.trim() && !isUploading
-                                        ? "bg-gradient-to-r from-blue-600 to-sky-600 text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                                        ? "bg-accent-gradient text-white shadow-accent"
                                         : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-slate-500 cursor-not-allowed"
                                         }`}
                                 >
@@ -467,7 +475,6 @@ export default function DocumentsPage() {
     const userRole = getUserRole();
     const isAdmin = userRole === "ADMIN";
 
-    // Fetch documents from API
     const loadDocuments = async () => {
         try {
             setIsLoading(true);
@@ -487,9 +494,41 @@ export default function DocumentsPage() {
         }
     };
 
+    // Re-load documents silently (without full loading state)
+    const refreshDocuments = async () => {
+        try {
+            const token = getToken();
+            if (!token) return;
+            const data = await fetchDocuments(token);
+            setDocuments(data);
+        } catch (err) {
+            console.error("Failed to refresh documents:", err);
+        }
+    };
+
     useEffect(() => {
         loadDocuments();
     }, []);
+
+    // Implement Polling
+    useEffect(() => {
+        const hasProcessing = documents.some(doc => doc.status === "uploaded" || doc.status === "processing");
+        let interval: any = null;
+
+        if (hasProcessing) {
+            console.log("🔄 Starting polling for processing documents...");
+            interval = setInterval(() => {
+                refreshDocuments();
+            }, 5000); // Poll every 5 seconds
+        }
+
+        return () => {
+            if (interval) {
+                console.log("🛑 Stopping document polling.");
+                clearInterval(interval);
+            }
+        };
+    }, [documents]);
 
     // Filter documents
     const filteredDocuments = documents.filter((doc) => {
@@ -549,7 +588,7 @@ export default function DocumentsPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setShowUploadModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                        className="flex items-center gap-2 px-4 py-2 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                     >
                         <IconUpload className="w-4 h-4" />
                         Upload Document
@@ -575,8 +614,8 @@ export default function DocumentsPage() {
                         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
                     >
                         <div className="flex items-center gap-3 mb-2">
-                            <div className={`p-2 rounded-lg bg-${stat.color}-500/20`}>
-                                <stat.icon className={`w-4 h-4 text-${stat.color}-400`} />
+                            <div className={`p-2 rounded-lg bg-accent/20`}>
+                                <stat.icon className={`w-4 h-4 text-accent`} />
                             </div>
                         </div>
                         <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
@@ -615,7 +654,8 @@ export default function DocumentsPage() {
                         { value: "all", label: "All Status" },
                         { value: "active", label: "Active" },
                         { value: "processing", label: "Processing" },
-                        { value: "uploaded", label: "Queued" }
+                        { value: "uploaded", label: "Queued" },
+                        { value: "failed", label: "Failed" }
                     ]}
                 />
 
@@ -637,14 +677,14 @@ export default function DocumentsPage() {
                 <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}>
                     <button
                         onClick={() => setViewMode("list")}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-blue-500/20 text-blue-300" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
+                        className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-accent/20 text-accent" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
                             }`}
                     >
                         <IconList className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => setViewMode("grid")}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-blue-500/20 text-blue-300" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
+                        className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-accent/20 text-accent" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
                             }`}
                     >
                         <IconGridDots className="w-5 h-5" />
@@ -659,7 +699,7 @@ export default function DocumentsPage() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-16"
                 >
-                    <IconLoader2 className="w-12 h-12 text-blue-400 animate-spin mb-4" />
+                    <IconLoader2 className="w-12 h-12 text-accent animate-spin mb-4" />
                     <p className="text-gray-500 dark:text-slate-400">Loading documents...</p>
                 </motion.div>
             )}

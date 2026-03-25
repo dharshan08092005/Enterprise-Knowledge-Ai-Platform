@@ -109,7 +109,7 @@ const SourceCard = ({ source }: { source: Source }) => {
             </div>
             <div className="flex items-center gap-1">
               <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${source.relevance >= 90 ? "bg-emerald-500/20 text-emerald-400" :
-                  source.relevance >= 70 ? "bg-blue-500/20 text-blue-400" :
+                  source.relevance >= 70 ? "bg-accent/20 text-accent" :
                     "bg-amber-500/20 text-amber-400"
                 }`}>
                 {source.relevance}%
@@ -147,8 +147,8 @@ const ChatMessage = ({ message }: { message: Message }) => {
       className={`flex gap-4 ${message.role === "user" ? "flex-row-reverse" : ""}`}
     >
       <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${message.role === "user"
-          ? "bg-gradient-to-br from-blue-500 to-sky-500"
-          : "bg-gradient-to-br from-blue-500 to-cyan-500"
+          ? "bg-accent-gradient"
+          : "bg-accent-gradient"
         }`}>
         {message.role === "user" ? (
           <IconUser className="w-5 h-5 text-gray-900 dark:text-white" />
@@ -159,7 +159,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
 
       <div className={`flex-1 max-w-[80%] ${message.role === "user" ? "text-right" : ""}`}>
         <div className={`inline-block p-4 rounded-lg ${message.role === "user"
-            ? "bg-gradient-to-br from-blue-600/30 to-sky-600/30 border border-blue-500/20"
+            ? "bg-accent/25 border border-accent/20"
             : "bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10"
           }`}>
           {message.role === "assistant" ? (
@@ -177,7 +177,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
           {message.role === "assistant" && message.sources && message.sources.length > 0 && (
             <button
               onClick={() => setShowSources(!showSources)}
-              className="flex items-center gap-1 px-2 py-1 text-xs text-blue-400 hover:text-blue-300 bg-blue-500/10 rounded-lg transition-colors"
+              className="flex items-center gap-1 px-2 py-1 text-xs text-accent hover:opacity-80 bg-accent/10 rounded-lg transition-colors"
             >
               <IconFileText className="w-3 h-3" />
               {message.sources.length} sources
@@ -225,7 +225,7 @@ const ChatHistoryItem = ({
       whileHover={{ x: 4 }}
       onClick={onClick}
       className={`relative group p-3 rounded-lg cursor-pointer transition-all ${isActive
-          ? "bg-blue-500/20 border border-blue-500/30"
+          ? "bg-accent/20 border border-accent/25"
           : "bg-white dark:bg-white/5 border border-transparent hover:border-gray-200 dark:border-white/10"
         }`}
     >
@@ -464,14 +464,14 @@ export default function AskAI() {
             <div className="p-4 border-b border-gray-200 dark:border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <IconHistory className="w-5 h-5 text-blue-400" />
+                  <IconHistory className="w-5 h-5 text-accent" />
                   Chat History
                 </h3>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleNewChat}
-                  className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
+                  className="p-2 rounded-lg bg-accent/20 text-accent hover:opacity-80 transition-colors"
                 >
                   <IconPlus className="w-4 h-4" />
                 </motion.button>
@@ -483,7 +483,7 @@ export default function AskAI() {
                   value={searchHistory}
                   onChange={(e) => setSearchHistory(e.target.value)}
                   placeholder="Search chats..."
-                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50"
                 />
               </div>
             </div>
@@ -492,7 +492,7 @@ export default function AskAI() {
             <div className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-thin">
               {isLoadingHistory ? (
                 <div className="flex flex-col items-center justify-center py-12">
-                  <IconLoader2 className="w-6 h-6 text-blue-400 animate-spin mb-2" />
+                  <IconLoader2 className="w-6 h-6 text-accent animate-spin mb-2" />
                   <p className="text-xs text-gray-500 dark:text-slate-500">Loading chats...</p>
                 </div>
               ) : filteredHistory.length > 0 ? (
@@ -533,8 +533,8 @@ export default function AskAI() {
         {/* Chat Header */}
         <div className="p-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-sky-500/20">
-              <IconSparkles className="w-5 h-5 text-blue-400" />
+            <div className="p-2 rounded-lg bg-accent/20">
+              <IconSparkles className="w-5 h-5 text-accent" />
             </div>
             <div>
               <h2 className="font-semibold text-gray-900 dark:text-white">Enterprise AI Assistant</h2>
@@ -547,7 +547,7 @@ export default function AskAI() {
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowSources(!showSources)}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${showSources
-                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                  ? "bg-accent/20 text-accent border border-accent/25"
                   : "bg-white dark:bg-white/5 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-white/10"
                 }`}
             >
@@ -573,9 +573,9 @@ export default function AskAI() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", duration: 0.5 }}
-                className="p-6 rounded-3xl bg-gradient-to-br from-blue-500/20 to-sky-500/20 border border-blue-500/20 mb-6"
+                className="p-6 rounded-3xl bg-accent/20 border border-accent/25 mb-6"
               >
-                <IconSparkles className="w-12 h-12 text-blue-400" />
+                <IconSparkles className="w-12 h-12 text-accent" />
               </motion.div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">How can I help you today?</h3>
               <p className="text-gray-500 dark:text-slate-400 mb-8 max-w-md">
@@ -590,7 +590,7 @@ export default function AskAI() {
                     transition={{ delay: index * 0.1 }}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => setInput(question)}
-                    className="p-3 text-left text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:border-blue-500/30 hover:bg-gray-100 dark:bg-white/10 transition-all"
+                    className="p-3 text-left text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:border-accent hover:bg-accent/10 transition-all font-medium"
                   >
                     {question}
                   </motion.button>
@@ -608,12 +608,12 @@ export default function AskAI() {
                   animate={{ opacity: 1 }}
                   className="flex gap-4"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                    <IconRobot className="w-5 h-5 text-gray-900 dark:text-white" />
+                  <div className="w-10 h-10 rounded-lg bg-accent-gradient flex items-center justify-center">
+                    <IconRobot className="w-5 h-5 text-white" />
                   </div>
                   <div className="p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
                     <div className="flex items-center gap-2">
-                      <IconLoader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                      <IconLoader2 className="w-4 h-4 text-accent animate-spin" />
                       <span className="text-sm text-gray-500 dark:text-slate-400">Thinking...</span>
                     </div>
                   </div>
@@ -635,7 +635,7 @@ export default function AskAI() {
                 onKeyDown={handleKeyPress}
                 placeholder="Ask anything about your knowledge base..."
                 rows={1}
-                className="w-full px-4 py-3 pr-12 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 resize-none"
+                className="w-full px-4 py-3 pr-12 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 resize-none"
                 style={{ minHeight: "48px", maxHeight: "120px" }}
               />
               <motion.button
@@ -644,7 +644,7 @@ export default function AskAI() {
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
                 className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${input.trim() && !isLoading
-                    ? "bg-gradient-to-r from-blue-600 to-sky-600 text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                    ? "bg-accent-gradient text-white shadow-accent"
                     : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-slate-500"
                   }`}
               >
@@ -698,7 +698,7 @@ export default function AskAI() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-2.5 text-sm font-medium text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition-colors"
+                className="w-full py-2.5 text-sm font-medium text-accent bg-accent/10 border border-accent/25 rounded-lg hover:bg-accent/20 transition-colors"
               >
                 View All Sources
               </motion.button>

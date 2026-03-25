@@ -38,7 +38,7 @@ const QuickActionCard = ({
             <div className={`absolute inset-0 ${gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
             <div className="relative z-10">
                 <div className={`inline-flex p-3 rounded-lg ${gradient} mb-4`}>
-                    <Icon className="w-6 h-6 text-gray-900 dark:text-white" />
+                    <Icon className="w-6 h-6 text-white" />
                 </div>
                 <h4 className="font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                     {title}
@@ -64,18 +64,18 @@ const RecentQueryItem = ({
         whileHover={{ x: 4, backgroundColor: "rgba(255,255,255,0.05)" }}
         className="flex items-start gap-4 p-4 rounded-lg cursor-pointer transition-colors"
     >
-        <div className="p-2.5 rounded-lg bg-blue-500/20">
-            <IconMessageCircle className="w-5 h-5 text-blue-400" />
+        <div className="p-2.5 rounded-lg bg-accent/20">
+            <IconMessageCircle className="w-5 h-5 text-accent" />
         </div>
         <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{query}</p>
             <div className="flex items-center gap-2 mt-1">
                 <span className="text-xs" style={{ color: 'var(--text-disabled)' }}>{time}</span>
                 <span className="w-1 h-1 rounded-full bg-gray-600" />
-                <span className="text-xs text-blue-400">{category}</span>
+                <span className="text-xs text-accent opacity-80">{category}</span>
             </div>
         </div>
-        <IconBookmark className="w-4 h-4 text-gray-500 dark:text-slate-500 hover:text-blue-400 transition-colors" />
+        <IconBookmark className="w-4 h-4 text-gray-500 dark:text-slate-500 hover:text-accent transition-colors" />
     </motion.div>
 );
 
@@ -94,8 +94,8 @@ const SuggestedTopic = ({
         className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all"
         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
     >
-        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-sky-500/20">
-            <Icon className="w-4 h-4 text-blue-400" />
+        <div className="p-2 rounded-lg bg-accent/20">
+            <Icon className="w-4 h-4 text-accent" />
         </div>
         <div className="flex-1">
             <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{title}</p>
@@ -128,15 +128,15 @@ export default function UserDashboard() {
                 style={{ background: 'var(--gradient-card)', borderColor: 'var(--border-primary)' }}
             >
                 {/* Background decorations */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-sky-500/15 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+                <div className="absolute top-0 right-0 w-96 h-96 bg-accent/15 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
 
                 <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                     <div>
-                        <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--accent-primary)' }}>
-                            <IconClock className="w-4 h-4" />
-                            <span className="text-sm">Good morning</span>
-                        </div>
+                    <div className="flex items-center gap-2 text-accent mb-1 opacity-80">
+                        <IconClock className="w-4 h-4" />
+                        <span className="text-sm">Last updated: 2 minutes ago</span>
+                    </div>
                         <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                             What would you like to know today?
                         </h1>
@@ -170,21 +170,21 @@ export default function UserDashboard() {
                     icon={IconSparkles}
                     title="Ask AI"
                     description="Start a conversation with your enterprise AI assistant"
-                    gradient="bg-gradient-to-br from-blue-500 to-sky-500"
+                    gradient="bg-accent-gradient"
                     to="/ask"
                 />
                 <QuickActionCard
                     icon={IconDatabase}
                     title="Knowledge Base"
                     description="Browse documents and data sources"
-                    gradient="bg-gradient-to-br from-blue-500 to-cyan-500"
+                    gradient="bg-accent-gradient"
                     to="/knowledge"
                 />
                 <QuickActionCard
                     icon={IconHistory}
                     title="Query History"
                     description="View and revisit your past conversations"
-                    gradient="bg-gradient-to-br from-emerald-500 to-teal-500"
+                    gradient="bg-accent-gradient"
                     to="/history"
                 />
             </div>
@@ -201,15 +201,15 @@ export default function UserDashboard() {
                 >
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-sky-500/20">
-                                <IconHistory className="w-5 h-5 text-blue-400" />
+                            <div className="p-2 rounded-lg bg-accent/20">
+                                <IconHistory className="w-5 h-5 text-accent" />
                             </div>
                             <div>
                                 <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Recent Queries</h3>
                                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Your conversation history</p>
                             </div>
                         </div>
-                        <Link to="/history" className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                        <Link to="/history" className="text-sm text-accent hover:opacity-80 transition-colors">
                             View all
                         </Link>
                     </div>
@@ -245,7 +245,7 @@ export default function UserDashboard() {
                         ))}
                     </div>
 
-                    <div className="mt-6 p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-sky-500/10 border border-blue-500/20">
+                    <div className="mt-6 p-4 rounded-lg bg-accent/10 border border-accent/30">
                         <div className="flex items-center gap-2 mb-2">
                             <IconStar className="w-4 h-4 text-amber-400" />
                             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Pro Tip</span>
@@ -265,13 +265,13 @@ export default function UserDashboard() {
                 className="relative overflow-hidden rounded-lg p-6"
                 style={{ border: '1px solid var(--border-primary)', background: 'var(--gradient-card)' }}
             >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-sky-600/10 to-blue-600/10" />
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-2xl" />
+                <div className="absolute inset-0 bg-accent/10" />
+                <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-2xl" />
 
                 <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 animate-float">
-                            <IconSparkles className="w-6 h-6 text-gray-900 dark:text-white" />
+                        <div className="p-3 rounded-lg bg-accent-gradient animate-float">
+                            <IconSparkles className="w-6 h-6 text-white" />
                         </div>
                         <div>
                             <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Need help getting started?</h4>
@@ -284,7 +284,7 @@ export default function UserDashboard() {
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25 whitespace-nowrap"
+                            className="px-6 py-2.5 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent whitespace-nowrap"
                         >
                             Start Chatting
                         </motion.button>

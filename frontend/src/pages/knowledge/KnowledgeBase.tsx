@@ -20,9 +20,7 @@ import {
     IconCheck,
     IconLoader2,
     IconX,
-    IconChevronDown,
     IconCalendar,
-    IconUser,
     IconLock,
     IconWorld,
     IconUsers,
@@ -96,14 +94,14 @@ const StatusBadge = ({ status, progress }: { status: Document["status"]; progres
     if (status === "processing") {
         return (
             <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full">
+                <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-accent/20 text-accent border border-accent/25 rounded-full">
                     <IconLoader2 className="w-3 h-3 animate-spin" />
                     Processing
                 </span>
                 {progress !== undefined && (
                     <div className="w-20 h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-300"
+                            className="h-full bg-accent transition-all duration-300"
                             style={{ width: `${progress}%` }}
                         />
                     </div>
@@ -143,7 +141,7 @@ const AccessScopeBadge = ({ scope }: { scope: Document["accessScope"] }) => {
     const { icon: Icon, label, color } = config[scope] || config.restricted;
 
     return (
-        <span className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-${color}-500/20 text-${color}-400 border border-${color}-500/30 rounded-full`}>
+        <span className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-${color === 'blue' ? 'accent' : color}-500/20 text-${color === 'blue' ? 'accent' : color}-400 border border-${color === 'blue' ? 'accent' : color}-500/30 rounded-full`}>
             <Icon className="w-3 h-3" />
             {label}
         </span>
@@ -226,7 +224,7 @@ const DocumentRow = ({
                 {isAdmin && doc.owner && (
                     <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-xs font-medium text-gray-900 dark:text-white">
+                            <div className="w-7 h-7 rounded-lg bg-accent-gradient flex items-center justify-center text-xs font-medium text-white">
                                 {doc.owner.name?.charAt(0) || "?"}
                             </div>
                             <div>
@@ -285,7 +283,7 @@ const DocumentRow = ({
                                         {doc.status === "failed" && (
                                             <button
                                                 onClick={() => { onRetry(); setShowMenu(false); }}
-                                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-blue-400 hover:bg-blue-500/10 transition-colors"
+                                                className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-accent hover:bg-accent/10 transition-colors"
                                             >
                                                 <IconRefresh className="w-4 h-4" />
                                                 Retry Processing
@@ -326,7 +324,7 @@ const DocumentRow = ({
                                                 whileHover={{ scale: 1.02 }}
                                                 whileTap={{ scale: 0.98 }}
                                                 onClick={onRetry}
-                                                className="px-3 py-1.5 text-xs font-medium text-blue-400 bg-blue-500/20 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 transition-colors"
+                                                className="px-3 py-1.5 text-xs font-medium text-accent bg-accent/20 border border-accent/30 rounded-lg hover:bg-accent/30 transition-colors"
                                             >
                                                 <IconRefresh className="w-3 h-3 inline mr-1" />
                                                 Retry
@@ -409,8 +407,8 @@ const UploadModal = ({
                             <div className="p-6 border-b border-gray-200 dark:border-white/10">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-sky-500/20">
-                                            <IconCloudUpload className="w-5 h-5 text-blue-400" />
+                                        <div className="p-2 rounded-lg bg-accent/20">
+                                            <IconCloudUpload className="w-5 h-5 text-accent" />
                                         </div>
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Upload Documents</h3>
                                     </div>
@@ -431,7 +429,7 @@ const UploadModal = ({
                                     onDragLeave={() => setDragOver(false)}
                                     onDrop={handleDrop}
                                     className={`relative p-8 border-2 border-dashed rounded-lg text-center transition-all ${dragOver
-                                        ? "border-blue-500 bg-blue-500/10"
+                                        ? "border-accent bg-accent/10"
                                         : "border-gray-300 dark:border-white/20 hover:border-white/30"
                                         }`}
                                 >
@@ -509,7 +507,7 @@ const UploadModal = ({
                                     onClick={handleUpload}
                                     disabled={files.length === 0}
                                     className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all ${files.length > 0
-                                        ? "bg-gradient-to-r from-blue-600 to-sky-600 text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                                        ? "bg-accent-gradient text-white shadow-accent"
                                         : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-slate-500 cursor-not-allowed"
                                         }`}
                                 >
@@ -657,7 +655,7 @@ export default function KnowledgeBase() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setShowUploadModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                        className="flex items-center gap-2 px-4 py-2 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                     >
                         <IconUpload className="w-4 h-4" />
                         Upload Documents
@@ -682,8 +680,8 @@ export default function KnowledgeBase() {
                         className="p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10"
                     >
                         <div className="flex items-center gap-3 mb-2">
-                            <div className={`p-2 rounded-lg bg-${stat.color}-500/20`}>
-                                <stat.icon className={`w-4 h-4 text-${stat.color}-400`} />
+                            <div className={`p-2 rounded-lg bg-accent/15`}>
+                                <stat.icon className={`w-4 h-4 text-accent`} />
                             </div>
                         </div>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
@@ -707,7 +705,7 @@ export default function KnowledgeBase() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search documents..."
-                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50"
                     />
                 </div>
 
@@ -739,18 +737,17 @@ export default function KnowledgeBase() {
                     ]}
                 />
 
-                {/* View Toggle */}
-                <div className="flex items-center gap-1 p-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg">
+                {/* View Toggle */}                 <div className="flex items-center gap-1 p-1 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg">
                     <button
                         onClick={() => setViewMode("list")}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-blue-500/20 text-blue-300" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
+                        className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-accent/20 text-accent font-bold" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
                             }`}
                     >
                         <IconList className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => setViewMode("grid")}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-blue-500/20 text-blue-300" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
+                        className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-accent/20 text-accent font-bold" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
                             }`}
                     >
                         <IconGridDots className="w-5 h-5" />
@@ -765,7 +762,7 @@ export default function KnowledgeBase() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-16"
                 >
-                    <IconLoader2 className="w-12 h-12 text-blue-400 animate-spin mb-4" />
+                    <IconLoader2 className="w-12 h-12 text-accent animate-spin mb-4" />
                     <p className="text-gray-500 dark:text-slate-400">Loading documents...</p>
                 </motion.div>
             )}

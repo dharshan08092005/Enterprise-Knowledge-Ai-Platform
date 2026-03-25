@@ -21,10 +21,14 @@ import {
   IconFileAnalytics,
   IconUserCog,
   IconUserShield,
-  IconMessages,
 } from "@tabler/icons-react";
 import { Outlet, useLocation } from "react-router-dom";
 import { getUserFromToken } from "@/lib/auth";
+import { getMyOrganization } from "@/services/organizationService";
+import { useEffect } from "react";
+import { useTheme } from "@/lib/ThemeContext";
+
+
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(true);
@@ -32,6 +36,18 @@ export default function DashboardLayout() {
   const userData = getUserFromToken();
   const userRole = userData?.role || null;
   const isGlobalAdmin = userRole === "ADMIN" && !userData?.organizationId;
+
+  const { updateBranding } = useTheme();
+
+  useEffect(() => {
+    if (userData?.organizationId) {
+      getMyOrganization().then(org => {
+        if (org.themeColor) {
+          updateBranding(org.themeColor);
+        }
+      }).catch(err => console.error("Failed to apply theme", err));
+    }
+  }, [userData?.organizationId, updateBranding]);
 
   // Get page title based on current route
   const getPageInfo = () => {
@@ -78,7 +94,6 @@ export default function DashboardLayout() {
     ...(!isGlobalAdmin && userRole !== "AUDITOR"
       ? [
           { label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" /> },
-          { label: "Channels", href: "/channels", icon: <IconMessages className="w-5 h-5" />, badge: "New" }
         ]
       : []),
     ...(!isGlobalAdmin

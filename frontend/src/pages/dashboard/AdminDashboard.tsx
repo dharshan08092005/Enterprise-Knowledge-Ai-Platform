@@ -39,7 +39,7 @@ const StatCard = ({
     whileHover={{ y: -4, scale: 1.02 }}
     className="relative group"
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-sky-500/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="absolute inset-0 bg-accent/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     <div className="relative p-6 rounded-lg border backdrop-blur-xl overflow-hidden" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
       {/* Background gradient orb */}
       <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full ${gradient} opacity-20 blur-2xl`} />
@@ -110,7 +110,7 @@ const MiniChart = () => (
         initial={{ height: 0 }}
         animate={{ height: `${height}%` }}
         transition={{ duration: 0.5, delay: i * 0.05 }}
-        className="flex-1 rounded-t bg-gradient-to-t from-blue-500 to-sky-500 opacity-80 hover:opacity-100 transition-opacity"
+        className="flex-1 rounded-t bg-accent-gradient opacity-80 hover:opacity-100 transition-opacity"
       />
     ))}
   </div>
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
       change: "+12.5%",
       changeType: "up" as const,
       icon: IconMessageCircle,
-      gradient: "bg-gradient-to-br from-blue-500 to-blue-600",
+      gradient: "bg-accent-gradient",
     },
     {
       title: "Knowledge Items",
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
       change: "+8.2%",
       changeType: "up" as const,
       icon: IconDatabase,
-      gradient: "bg-gradient-to-br from-blue-500 to-cyan-500",
+      gradient: "bg-accent-gradient",
     },
     {
       title: "AI Models Active",
@@ -187,14 +187,14 @@ export default function AdminDashboard() {
       title: "New document uploaded",
       description: "Q4 Financial Report.pdf added to knowledge base",
       time: "2 min ago",
-      iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500",
+      iconBg: "bg-accent-gradient",
     },
     {
       icon: IconBrain,
       title: "Model training completed",
       description: "GPT-4 fine-tuned on company data",
       time: "1 hour ago",
-      iconBg: "bg-gradient-to-br from-blue-500 to-sky-500",
+      iconBg: "bg-accent-gradient",
     },
     {
       icon: IconUsers,
@@ -217,13 +217,13 @@ export default function AdminDashboard() {
       icon: IconSparkles,
       title: "Ask AI",
       description: "Start a conversation with AI",
-      gradient: "bg-gradient-to-br from-blue-500 to-sky-500",
+      gradient: "bg-accent-gradient",
     },
     {
       icon: IconDatabase,
       title: "Add Knowledge",
       description: "Upload documents or data",
-      gradient: "bg-gradient-to-br from-blue-500 to-cyan-500",
+      gradient: "bg-accent-gradient",
     },
     {
       icon: IconBrain,
@@ -249,11 +249,11 @@ export default function AdminDashboard() {
         style={{ background: 'var(--gradient-card)', borderColor: 'var(--border-primary)' }}
       >
         {/* Background decorations */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/30 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-sky-500/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/15 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-2 text-blue-300 mb-2">
+          <div className="flex items-center gap-2 text-accent mb-2 opacity-80">
             <IconClock className="w-4 h-4" />
             <span className="text-sm">Good morning</span>
           </div>
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
           </h1>
           <p className="max-w-xl" style={{ color: 'var(--text-secondary)' }}>
             Your enterprise AI platform is running smoothly. You have{" "}
-            <span className="text-blue-400 font-medium">3 pending tasks</span> and{" "}
+            <span className="text-accent font-medium">3 pending tasks</span> and{" "}
             <span className="text-emerald-400 font-medium">5 new insights</span> waiting for you.
           </p>
 
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow"
+              className="px-6 py-2.5 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent transition-shadow"
             >
               Start Exploring
             </motion.button>
@@ -308,7 +308,7 @@ export default function AdminDashboard() {
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Last 30 days performance</p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-3 py-1.5 text-xs font-medium text-blue-400 bg-blue-500/20 rounded-lg border border-blue-500/30">
+              <button className="px-3 py-1.5 text-xs font-medium text-accent bg-accent/20 rounded-lg border border-accent/30">
                 Daily
               </button>
               <button className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10 rounded-lg transition-colors">
@@ -350,7 +350,7 @@ export default function AdminDashboard() {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Recent Activity</h3>
-            <button className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+            <button className="text-sm text-accent hover:opacity-80 transition-colors">
               View all
             </button>
           </div>
@@ -385,13 +385,13 @@ export default function AdminDashboard() {
         className="relative overflow-hidden rounded-lg p-6"
         style={{ border: '1px solid var(--border-primary)', background: 'var(--gradient-card)' }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-sky-600/10 to-blue-600/10" />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-2xl" />
+        <div className="absolute inset-0 bg-accent/5 backdrop-blur-sm" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-2xl" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 animate-float">
-              <IconSparkles className="w-6 h-6 text-gray-900 dark:text-white" />
+            <div className="p-3 rounded-lg bg-accent-gradient animate-float">
+              <IconSparkles className="w-6 h-6 text-white" />
             </div>
             <div>
               <h4 className="font-semibold" style={{ color: 'var(--text-primary)' }}>AI-Powered Insights Available</h4>
@@ -403,7 +403,7 @@ export default function AdminDashboard() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25 whitespace-nowrap"
+            className="px-6 py-2.5 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent whitespace-nowrap"
           >
             View Insights
           </motion.button>

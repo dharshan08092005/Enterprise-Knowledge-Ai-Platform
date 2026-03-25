@@ -5,6 +5,7 @@ import { searchSimilarChunks } from "../services/vectorDb/pineconeService";
 import { generateRAGResponse } from "../services/llm/geminiChat";
 import { logAudit } from "../utils/auditLogger";
 import ChatSession from "../models/ChatSession";
+import Organization from "../models/Organization";
 
 /**
  * POST /api/chat
@@ -29,8 +30,13 @@ export const handleChatQuery = async (
 
     console.log(`💬 User ${userId} querying: "${message}"`);
 
-    // 1. Embed query
-    const queryEmbedding = await generateEmbedding(message);
+    // 3.5. Fetch Organization specific settings (BYOK)
+    const org = await Organization.findById(organizationId).select("+aiSettings.apiKey +embeddingSettings.apiKey").lean();
+    const aiSettings = org?.aiSettings;
+    const embeddingSettings = org?.embeddingSettings;
+
+    // 1. Embed query with org-specific settings
+    const queryEmbedding = await generateEmbedding(message, embeddingSettings as any);
 
     // 2. Vector search in Pinecone with strict RBAC filtering
     const similarChunks = await searchSimilarChunks(
@@ -61,8 +67,9 @@ export const handleChatQuery = async (
       }
     }
 
-    // 4. Send to LLM with conversation history
-    const answer = await generateRAGResponse(message, contextTexts, conversationHistory);
+    
+    // 4. Send to LLM with conversation history and org-specific settings
+    const answer = await generateRAGResponse(message, contextTexts, conversationHistory, aiSettings);
 
     // 4. Build unique sources
     const uniqueSourcesArray = similarChunks

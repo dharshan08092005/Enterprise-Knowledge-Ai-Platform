@@ -17,3 +17,25 @@ export const getOrganizationUsers = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: "Failed to fetch users" });
     }
 }
+
+export const getMe = async (req: AuthRequest, res: Response) => {
+    try {
+        const { userId } = req.user!;
+        const user = await User.findById(userId).select("-password").populate("organizationId departmentId");
+        res.status(200).json(user);
+    } catch(err: any) {
+        res.status(500).json({ message: "Failed to fetch profile" });
+    }
+}
+
+export const updateMe = async (req: AuthRequest, res: Response) => {
+    try {
+        const { userId } = req.user!;
+        const { firstName, lastName, email } = req.body;
+        
+        const user = await User.findByIdAndUpdate(userId, { firstName, lastName, email }, { new: true }).select("-password");
+        res.status(200).json(user);
+    } catch(err: any) {
+        res.status(500).json({ message: "Failed to update profile" });
+    }
+}

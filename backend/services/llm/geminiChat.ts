@@ -5,17 +5,27 @@ export interface ConversationMessage {
   content: string;
 }
 
+export interface AiSettings {
+    provider?: string;
+    apiKey?: string;
+    model?: string;
+}
+
 export const generateRAGResponse = async (
   query: string,
   contextChunks: string[],
-  conversationHistory: ConversationMessage[] = []
+  conversationHistory: ConversationMessage[] = [],
+  aiSettings?: AiSettings
 ): Promise<string> => {
-    if (!process.env.GEMINI_API_KEY) {
-        throw new Error("GEMINI_API_KEY is missing");
+    const key = aiSettings?.apiKey || process.env.GEMINI_API_KEY;
+    const modelName = aiSettings?.model || "gemini-1.5-flash"; // Default to a stable model
+
+    if (!key) {
+        throw new Error("AI API Key is missing");
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const genAI = new GoogleGenerativeAI(key);
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     const contextText = contextChunks.map((c, i) => `[Document Chunk ${i + 1}]:\n${c}`).join("\n\n");
 

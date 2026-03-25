@@ -11,7 +11,7 @@ interface IDocument extends Document {
   filePath: string;
   mimeType: string;
   size: number;
-  status: "uploaded" | "processing" | "active";
+  status: "uploaded" | "processing" | "active" | "failed";
   pageCount?: number;
   chunkCount?: number;
   s3Key?: string | null;
@@ -80,7 +80,7 @@ const documentSchema = new Schema<IDocument>(
     // Processing lifecycle
     status: {
       type: String,
-      enum: ["uploaded", "processing", "active"],
+      enum: ["uploaded", "processing", "active", "failed"],
       default: "uploaded"
     },
 
