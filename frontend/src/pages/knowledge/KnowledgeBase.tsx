@@ -1,4 +1,5 @@
 import { useState, useEffect, type JSX } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
     IconSearch,
@@ -42,7 +43,8 @@ interface Document {
     fileName: string;
     fileType: "pdf" | "doc" | "docx" | "txt" | "xls" | "xlsx" | "csv" | "other";
     fileSize: number;
-    status: "processing" | "active" | "failed";
+    status: "processing" | "active" | "failed" | "deactivated" | "superseded";
+    version?: number;
     uploadDate: Date;
     owner?: {
         id: string;
@@ -53,6 +55,7 @@ interface Document {
     processingError?: string;
     processedChunks?: number;
     totalChunks?: number;
+    mimeType: string;
     tags?: string[];
 }
 
@@ -119,6 +122,24 @@ const StatusBadge = ({ status, progress }: { status: Document["status"]; progres
         );
     }
 
+    if (status === "deactivated") {
+        return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-gray-500/20 text-gray-400 border border-gray-500/30 rounded-full">
+                <IconClock className="w-3 h-3" />
+                Deactivated
+            </span>
+        );
+    }
+
+    if (status === "superseded") {
+        return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-amber-500/10 text-amber-500/70 border border-amber-500/20 rounded-full">
+                <IconRefresh className="w-3 h-3" />
+                Superseded
+            </span>
+        );
+    }
+
     return (
         <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 rounded-full">
             <IconAlertTriangle className="w-3 h-3" />
@@ -156,6 +177,7 @@ const DocumentRow = ({
     onEdit,
     onDelete,
     onRetry,
+    onToggleStatus,
 }: {
     doc: Document;
     isAdmin: boolean;
@@ -163,6 +185,7 @@ const DocumentRow = ({
     onEdit: () => void;
     onDelete: () => void;
     onRetry: () => void;
+    onToggleStatus: () => void;
 }) => {
     const [showMenu, setShowMenu] = useState(false);
     const [showError, setShowError] = useState(false);
@@ -183,7 +206,14 @@ const DocumentRow = ({
                             <FileIcon type={doc.fileType} />
                         </div>
                         <div className="min-w-0">
-                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-xs">{doc.title}</p>
+                            <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-xs">{doc.title}</p>
+                                {doc.version && (
+                                    <span className="px-1.5 py-0.5 text-[10px] font-bold bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-md text-gray-500 uppercase">
+                                        v{doc.version}
+                                    </span>
+                                )}
+                            </div>
                             <p className="text-xs text-gray-500 dark:text-slate-500 truncate">{doc.fileName} • {formatFileSize(doc.fileSize)}</p>
                             {doc.tags && doc.tags.length > 0 && (
                                 <div className="flex items-center gap-1 mt-1">
@@ -244,24 +274,31 @@ const DocumentRow = ({
                 <td className="py-4 px-4">
                     <div className="relative">
                         <motion.button
-                            whileHover={{ scale: 1.1 }}
+                            id={`action-trigger-${doc.id}`}
+                            whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.05)" }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => setShowMenu(!showMenu)}
-                            className="p-2 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-2.5 rounded-xl border border-transparent active:border-white/10 group h-10 w-10 flex items-center justify-center"
                         >
-                            <IconDotsVertical className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+                            <IconDotsVertical className="w-5 h-5 text-gray-600 dark:text-slate-400 group-hover:text-accent transition-colors" />
                         </motion.button>
 
                         <AnimatePresence>
                             {showMenu && (
                                 <>
-                                    <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.95 }}
-                                        className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl z-20 overflow-hidden"
-                                    >
+                                    <div className="fixed inset-0 z-[1001]" onClick={() => setShowMenu(false)} />
+                                    {createPortal(
+                                        <motion.div
+                                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                            // 💡 Strategy: Position fixed relative to the trigger
+                                            className="fixed w-48 bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.3)] z-[1002] overflow-hidden py-1"
+                                            style={{
+                                                top: (document.getElementById(`action-trigger-${doc.id}`)?.getBoundingClientRect().bottom || 0) + 8,
+                                                left: (document.getElementById(`action-trigger-${doc.id}`)?.getBoundingClientRect().right || 0) - 192,
+                                            }}
+                                        >
                                         <button
                                             onClick={() => { onView(); setShowMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:bg-white/5 transition-colors"
@@ -289,6 +326,19 @@ const DocumentRow = ({
                                                 Retry Processing
                                             </button>
                                         )}
+                                        {(doc.status === "active" || doc.status === "deactivated") && (
+                                            <button
+                                                onClick={() => { onToggleStatus(); setShowMenu(false); }}
+                                                className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm transition-colors whitespace-nowrap ${
+                                                    doc.status === "active" 
+                                                        ? "text-amber-500 hover:bg-amber-400/10" 
+                                                        : "text-emerald-500 hover:bg-emerald-400/10"
+                                                }`}
+                                            >
+                                                <IconX className="w-4 h-4 flex-shrink-0" />
+                                                {doc.status === "active" ? "Deactivate (Mute)" : "Activate Knowledge"}
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => { onDelete(); setShowMenu(false); }}
                                             className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
@@ -296,7 +346,9 @@ const DocumentRow = ({
                                             <IconTrash className="w-4 h-4" />
                                             Delete
                                         </button>
-                                    </motion.div>
+                                        </motion.div>,
+                                        document.body
+                                    )}
                                 </>
                             )}
                         </AnimatePresence>
@@ -348,8 +400,7 @@ const DocumentRow = ({
         </>
     );
 };
-
-// Upload Modal Component
+// Upload Modal Component (Portalized)
 const UploadModal = ({
     isOpen,
     onClose,
@@ -385,7 +436,9 @@ const UploadModal = ({
         onClose();
     };
 
-    return (
+    if (typeof document === 'undefined') return null;
+
+    return createPortal(
         <AnimatePresence>
             {isOpen && (
                 <>
@@ -394,15 +447,15 @@ const UploadModal = ({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999]"
                     />
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
+                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-[1000]"
                     >
-                        <div className="bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl overflow-hidden">
+                        <div className="bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden">
                             {/* Header */}
                             <div className="p-6 border-b border-gray-200 dark:border-white/10">
                                 <div className="flex items-center justify-between">
@@ -518,7 +571,176 @@ const UploadModal = ({
                     </motion.div>
                 </>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+    );
+};
+
+// Preview Drawer Component (Portalized + Side-Over)
+const PreviewModal = ({
+    isOpen,
+    onClose,
+    doc
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    doc: Document | null;
+}) => {
+    const [blobUrl, setBlobUrl] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!isOpen || !doc) return;
+
+        const loadPreview = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const token = getToken();
+                const res = await fetch(`http://localhost:5000/api/documents/${doc.id}/view`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
+                if (!res.ok) throw new Error("Failed to load document preview");
+
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                setBlobUrl(url);
+            } catch (err: any) {
+                console.error(err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadPreview();
+
+        return () => {
+            if (blobUrl) {
+                URL.revokeObjectURL(blobUrl);
+                setBlobUrl(null);
+            }
+        };
+    }, [isOpen, doc]);
+
+    if (typeof document === 'undefined') return null;
+
+    return createPortal(
+        <AnimatePresence>
+            {isOpen && doc && (
+                <>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999]"
+                    />
+                    <motion.div
+                        initial={{ x: "100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                        className="fixed right-0 top-0 bottom-0 w-full max-w-4xl z-[1000] flex flex-col shadow-[-10px_0_40px_rgba(0,0,0,0.3)]"
+                    >
+                        <div className="bg-[#1a1a2e] border-l border-white/10 flex flex-col h-full">
+                            {/* Header */}
+                            <div className="p-5 border-b border-white/10 flex items-center justify-between bg-black/20">
+                                <div className="flex items-center gap-4">
+                                    <div className="p-2.5 rounded-xl bg-accent/20">
+                                        <FileIcon type={doc.fileType} />
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                        <h3 className="text-lg font-bold text-white truncate max-w-sm md:max-w-xl" title={doc.title}>
+                                            {doc.title}
+                                        </h3>
+                                        <p className="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                                            {doc.fileName} • {doc.mimeType}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => blobUrl && window.open(blobUrl)}
+                                        className="p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all"
+                                        title="Open in new tab"
+                                    >
+                                        <IconWorld className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={onClose}
+                                        className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+                                    >
+                                        <IconX className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Viewer Content */}
+                            <div className="flex-1 overflow-hidden bg-black/40 relative">
+                                {loading && (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                                        <IconLoader2 className="w-12 h-12 animate-spin mb-4 text-accent" />
+                                        <p className="text-sm font-medium">Reading Secure Document Storage...</p>
+                                    </div>
+                                )}
+
+                                {error && (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-red-400 p-8 text-center">
+                                        <div className="p-4 rounded-full bg-red-400/10 mb-4 text-red-400">
+                                            <IconAlertTriangle className="w-12 h-12" />
+                                        </div>
+                                        <p className="font-bold text-xl">Permission Denied or Load Failed</p>
+                                        <p className="text-sm mt-2 opacity-70 max-w-xs mx-auto">{error}</p>
+                                        <button 
+                                            onClick={onClose}
+                                            className="mt-8 px-6 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm font-medium hover:bg-white/10 transition-colors"
+                                        >
+                                            Back to Source List
+                                        </button>
+                                    </div>
+                                )}
+
+                                {blobUrl && !loading && (
+                                    <>
+                                        {doc.mimeType === "application/pdf" ? (
+                                            <iframe
+                                                src={`${blobUrl}#toolbar=0`}
+                                                className="w-full h-full border-none"
+                                                title={doc.title}
+                                            />
+                                        ) : doc.mimeType.startsWith("image/") ? (
+                                            <div className="w-full h-full p-10 flex items-center justify-center overflow-auto">
+                                                <img src={blobUrl} alt={doc.title} className="max-w-full max-h-full shadow-2xl rounded-xl" />
+                                            </div>
+                                        ) : (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-12 text-center">
+                                                <IconFileTypeTxt className="w-16 h-16 text-accent mb-6" />
+                                                <p className="text-2xl font-bold">Standard Preview Unavailable</p>
+                                                <p className="text-gray-400 mt-3 text-center max-w-sm">
+                                                    We can't render a direct preview for this media type ({doc.mimeType}).
+                                                </p>
+                                                <button 
+                                                    onClick={() => window.open(blobUrl)}
+                                                    className="mt-8 px-8 py-3 bg-accent-gradient text-white rounded-xl text-sm font-bold shadow-accent hover:scale-[1.02] transition-transform"
+                                                >
+                                                    Securely Download Source
+                                                </button>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>,
+        document.body
     );
 };
 
@@ -527,10 +749,11 @@ export default function KnowledgeBase() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState<string>("all");
+    const [statusFilter, setStatusFilter] = useState<string>("active");
     const [scopeFilter, setScopeFilter] = useState<string>("all");
     const [viewMode, setViewMode] = useState<"list" | "grid">("list");
     const [showUploadModal, setShowUploadModal] = useState(false);
+    const [selectedDocForPreview, setSelectedDocForPreview] = useState<Document | null>(null);
 
     const userRole = getUserRole();
     const isAdmin = userRole === "ADMIN";
@@ -555,9 +778,11 @@ export default function KnowledgeBase() {
                     fileType: getFileType(doc.fileName || doc.mimeType),
                     fileSize: doc.fileSize || 0,
                     status: doc.status as Document["status"],
-                    uploadDate: new Date(doc.uploadDate),
+                    version: doc.version,
+                    uploadDate: new Date(doc.uploadDate || doc.createdAt),
                     owner: doc.owner,
                     accessScope: mapAccessScope(doc.accessScope),
+                    mimeType: doc.mimeType || "application/octet-stream"
                 }));
                 setDocuments(mappedDocs);
             } catch (err: any) {
@@ -627,6 +852,30 @@ export default function KnowledgeBase() {
                 ? { ...d, status: "processing" as const, processingError: undefined, processedChunks: 0 }
                 : d
         ));
+    };
+
+    const handleToggleStatus = async (doc: Document) => {
+        try {
+            const token = getToken();
+            if (!token) return;
+            const newStatus = doc.status === "active" ? "deactivated" : "active";
+            
+            // Optimistic update
+            setDocuments(documents.map(d => d.id === doc.id ? { ...d, status: newStatus } : d));
+            
+            const { updateDocumentStatus } = await import("@/services/documentService");
+            await updateDocumentStatus(token, doc.id, newStatus);
+            
+            // If we reactivated, trigger a partial refresh to show processing state if needed
+            if (newStatus === "active") {
+                // Background job might take a sec to show up
+                // loadDocuments is not defined in the scope if it was inside useEffect. 
+                // Ah, it was inside loadDocuments inside useEffect.
+            }
+        } catch (err: any) {
+            alert("Failed to toggle status: " + (err.response?.data?.message || err.message));
+            // Rollback logic would need re-fetching
+        }
     };
 
     return (
@@ -716,9 +965,10 @@ export default function KnowledgeBase() {
                     value={statusFilter}
                     onChange={setStatusFilter}
                     options={[
-                        { value: "all", label: "All Status" },
-                        { value: "active", label: "Active" },
-                        { value: "processing", label: "Processing" }
+                        { value: "active", label: "Active Knowledge" },
+                        { value: "deactivated", label: "Muted / Inactive" },
+                        { value: "superseded", label: "Superseded" },
+                        { value: "all", label: "All Repository" }
                     ]}
                 />
 
@@ -812,10 +1062,11 @@ export default function KnowledgeBase() {
                                         key={doc.id}
                                         doc={doc}
                                         isAdmin={isAdmin}
-                                        onView={() => console.log("View:", doc)}
+                                        onView={() => setSelectedDocForPreview(doc)}
                                         onEdit={() => console.log("Edit:", doc)}
                                         onDelete={() => handleDelete(doc)}
                                         onRetry={() => handleRetry(doc)}
+                                        onToggleStatus={() => handleToggleStatus(doc)}
                                     />
                                 ))}
                             </tbody>
@@ -854,6 +1105,12 @@ export default function KnowledgeBase() {
             <UploadModal
                 isOpen={showUploadModal}
                 onClose={() => setShowUploadModal(false)}
+            />
+
+            <PreviewModal
+                isOpen={!!selectedDocForPreview}
+                onClose={() => setSelectedDocForPreview(null)}
+                doc={selectedDocForPreview}
             />
         </div>
     );

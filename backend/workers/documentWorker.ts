@@ -14,7 +14,7 @@ import { logAudit } from "../utils/auditLogger";
 import { extractPdfText } from "../services/extraction/pdfExtractor";
 import { chunkText } from "../services/chunking/chunker";
 import { generateEmbeddingsBatch } from "../services/embeddings/ollamaEmbedder";
-import { upsertChunksToPinecone } from "../services/vectorDb/pineconeService";
+import { upsertChunksToPinecone, deleteChunksFromPinecone } from "../services/vectorDb/pineconeService";
 
 let isConnected = false;
 
@@ -207,6 +207,31 @@ const processJob = async (job: any) => {
     await document.save();
 
     /* ---------------------------
+       VERSION CONTROL: SUPERSEDE OLD
+    --------------------------- */
+    console.log(`🧹 Checking for old versions of ${document.fileName} to supersede...`);
+    const oldDocs = await Document.find({
+        organizationId: document.organizationId,
+        fileName: document.fileName,
+        _id: { $ne: document._id },
+        status: { $in: ["active", "failed", "deactivated"] } // Anything that isn't already superseded or current
+    });
+
+    for (const oldDoc of oldDocs) {
+        console.log(`♻️ Superseding v${oldDoc.version} with v${document.version}`);
+        oldDoc.status = "superseded";
+        oldDoc.supersededBy = document._id as any;
+        await oldDoc.save();
+
+        // Ensure old chunks are removed from Pinecone AI search
+        try {
+            await deleteChunksFromPinecone(oldDoc._id.toString());
+        } catch (pErr: any) {
+            console.error(`⚠️ Failed to purge old version chunks for ${oldDoc._id}:`, pErr.message);
+        }
+    }
+
+    /* ---------------------------
        COMPLETE JOB
     --------------------------- */
 
@@ -238,6 +263,13 @@ const processJob = async (job: any) => {
 
       // Update document status to failed
       await Document.findByIdAndUpdate(job.documentId, { $set: { status: "failed" } });
+
+      // 🧹 Cleanup Pinecone if we already sent chunks
+      try {
+        await deleteChunksFromPinecone(job.documentId.toString());
+      } catch (pErr: any) {
+        console.error(`⚠️ Failed to cleanup Pinecone for failed job ${job._id}:`, pErr.message);
+      }
 
       await logAudit({
         action: AUDIT_ACTIONS.JOB_FAILED,

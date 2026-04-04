@@ -41,6 +41,7 @@ export const upsertChunksToPinecone = async (
             organizationId,
             documentId,
             accessScope,
+            status: "active", // Only active documents should be searchable
             ownerId,
             ...(departmentId ? { departmentId } : {})
         }
@@ -61,7 +62,8 @@ export const searchSimilarChunks = async (
 
     // 1️⃣ Base multi-tenancy filter
     const filter: any = {
-        organizationId: { $eq: organizationId }
+        organizationId: { $eq: organizationId },
+        status: { $eq: "active" } // 🛡️ Concept: Only AI-search active documents
     };
 
     // 2️⃣ RBAC (Role-Based Access Control)
@@ -91,4 +93,14 @@ export const searchSimilarChunks = async (
     });
 
     return queryResponse.matches;
+};
+
+export const deleteChunksFromPinecone = async (documentId: string) => {
+    const index = getPineconeIndex();
+    
+    // Pinecone allows deleting by metadata filter (rigorous shape)
+    console.log(`🧹 Deleting vectors for documentId: ${documentId} from Pinecone`);
+    await index.deleteMany({
+        filter: { documentId: { $eq: documentId } }
+    });
 };

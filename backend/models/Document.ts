@@ -11,7 +11,9 @@ interface IDocument extends Document {
   filePath: string;
   mimeType: string;
   size: number;
-  status: "uploaded" | "processing" | "active" | "failed";
+  status: "uploaded" | "processing" | "active" | "failed" | "deactivated" | "superseded";
+  version: number;
+  supersededBy?: Types.ObjectId;
   pageCount?: number;
   chunkCount?: number;
   s3Key?: string | null;
@@ -80,8 +82,18 @@ const documentSchema = new Schema<IDocument>(
     // Processing lifecycle
     status: {
       type: String,
-      enum: ["uploaded", "processing", "active", "failed"],
+      enum: ["uploaded", "processing", "active", "failed", "deactivated", "superseded"],
       default: "uploaded"
+    },
+    
+    version: {
+      type: Number,
+      default: 1
+    },
+
+    supersededBy: {
+      type: Schema.Types.ObjectId,
+      ref: "Document"
     },
 
     pageCount: {

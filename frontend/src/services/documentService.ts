@@ -12,8 +12,10 @@ export interface DocumentResponse {
     filePath: string;
     mimeType: string;
     size: number;
-    status: "uploaded" | "processing" | "active";
-    accessScope: "public" | "department" | "restricted";
+    status: "uploaded" | "processing" | "active" | "failed" | "deactivated" | "superseded";
+    version?: number;
+    supersededBy?: string;
+    accessScope: "public" | "department" | "restricted" | "private" | "team" | "organization";
     ownerId: string;
     createdAt: string;
     updatedAt: string;
@@ -53,4 +55,12 @@ export const uploadDocument = async (token: string, formData: FormData): Promise
         }
     });
     return res.data;
+};
+
+export const updateDocumentStatus = async (token: string, id: string, status: string): Promise<void> => {
+    await api.patch(`/documents/${id}/status`, { status }, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
 };

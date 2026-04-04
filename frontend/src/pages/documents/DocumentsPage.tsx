@@ -260,6 +260,7 @@ const UploadModal = ({
     const [dragOver, setDragOver] = useState(false);
     const [files, setFiles] = useState<File[]>([]);
     const [title, setTitle] = useState("");
+    const [accessScope, setAccessScope] = useState<AccessScopeType>("public");
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -302,12 +303,14 @@ const UploadModal = ({
             const formData = new FormData();
             formData.append("file", files[0]);
             formData.append("title", title.trim());
+            formData.append("accessScope", accessScope);
 
             await uploadDocument(token, formData);
             onUploadComplete();
             onClose();
             setFiles([]);
             setTitle("");
+            setAccessScope("public");
         } catch (err: any) {
             setUploadError(err.response?.data?.message || err.message || "Failed to upload document");
         } finally {
@@ -352,7 +355,7 @@ const UploadModal = ({
                             </div>
 
                             {/* Content */}
-                            <div className="p-6 space-y-6">
+                            <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                                 {/* Title Input */}
                                 <div>
                                     <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-muted)' }}>Document Title</label>
@@ -364,6 +367,36 @@ const UploadModal = ({
                                         className="w-full px-4 py-3 rounded-lg focus:outline-none"
                                         style={{ background: 'var(--bg-input)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)' }}
                                     />
+                                </div>
+
+                                {/* Access Visibility */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-muted)' }}>Who can access this document?</label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {[
+                                            { id: "public", label: "Organization-wide", sub: "Everyone in the company can see this", icon: IconWorld },
+                                            { id: "department", label: "Department Only", sub: "Only your department members", icon: IconUsers },
+                                            { id: "restricted", label: "Private / Restricted", sub: "Only you and enterprise admins", icon: IconLock },
+                                        ].map((option) => (
+                                            <button
+                                                key={option.id}
+                                                onClick={() => setAccessScope(option.id as AccessScopeType)}
+                                                className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all ${
+                                                    accessScope === option.id 
+                                                    ? "bg-accent/10 border-accent shadow-sm" 
+                                                    : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 hover:border-white/20"
+                                                }`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${accessScope === option.id ? "bg-accent text-white" : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-slate-400"}`}>
+                                                    <option.icon className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold" style={{ color: accessScope === option.id ? 'var(--accent-primary)' : 'var(--text-primary)' }}>{option.label}</p>
+                                                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-disabled)' }}>{option.sub}</p>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* Drop Zone */}

@@ -3,7 +3,9 @@ import {
   createDocument,
   getDocuments,
   getDocumentById,
-  deleteDocument
+  deleteDocument,
+  updateDocumentStatus,
+  viewDocument
 } from "../controllers/document.controller";
 
 import { authMiddleware } from "../middleware/auth";
@@ -39,6 +41,19 @@ router.delete(
   authMiddleware,
   requireRole("ADMIN", "ORG_ADMIN"),
   deleteDocument
+);
+
+router.patch(
+  "/:id/status",
+  authMiddleware,
+  requireRole("ADMIN", "ORG_ADMIN", "USER"),
+  updateDocumentStatus
+);
+
+router.get(
+  "/:id/view",
+  authMiddleware,
+  viewDocument
 );
 
 export default router;
