@@ -13,7 +13,6 @@ const app = express();
 // Global middleware
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://enterprise-knowledge-ai-platform-frontend.vercel.app", // Placeholder
   process.env.CORS_ORIGIN
 ].filter(Boolean) as string[];
 
@@ -33,6 +32,11 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
+
+// Health check
+app.get("/health", (req, res) => {
+  res.send("healthy");
+});
 
 // API routes
 app.use("/api", routes);
