@@ -13,7 +13,6 @@ import {
     IconCalendar,
     IconShieldCheck,
     IconX,
-    IconChevronDown,
     IconDownload,
     IconRefresh,
     IconUserPlus,

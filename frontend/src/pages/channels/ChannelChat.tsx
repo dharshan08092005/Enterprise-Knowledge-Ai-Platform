@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { getChannelMessages } from "../../services/channelService";
 import { format } from "date-fns";
@@ -16,7 +16,6 @@ interface Message {
 
 const ChannelChat: React.FC = () => {
     const { channelId } = useParams<{ channelId: string }>();
-    const navigate = useNavigate();
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const [isBotTyping, setIsBotTyping] = useState(false);

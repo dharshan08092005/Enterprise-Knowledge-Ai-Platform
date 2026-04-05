@@ -36,8 +36,8 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // Types
 type FileType = "pdf" | "doc" | "docx" | "txt" | "xls" | "xlsx" | "csv" | "other";
-type StatusType = "uploaded" | "processing" | "active" | "failed";
-type AccessScopeType = "public" | "department" | "restricted";
+type StatusType = "uploaded" | "processing" | "active" | "failed" | "deactivated" | "superseded";
+type AccessScopeType = "public" | "department" | "restricted" | "private" | "team" | "organization";
 
 // Helper functions
 const formatFileSize = (bytes: number): string => {
@@ -116,6 +116,24 @@ const StatusBadge = ({ status }: { status: StatusType }) => {
         );
     }
 
+    if (status === "deactivated") {
+        return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full">
+                <IconLock className="w-3 h-3" />
+                Muted
+            </span>
+        );
+    }
+
+    if (status === "superseded") {
+        return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full">
+                <IconRefresh className="w-3 h-3" />
+                Superseded
+            </span>
+        );
+    }
+
     return (
         <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-gray-500/20 text-gray-500 dark:text-slate-400 border border-gray-500/30 rounded-full">
             Unknown
@@ -127,7 +145,10 @@ const StatusBadge = ({ status }: { status: StatusType }) => {
 const AccessScopeBadge = ({ scope }: { scope: AccessScopeType }) => {
     const config: Record<AccessScopeType, { icon: typeof IconLock; label: string; color: string }> = {
         restricted: { icon: IconLock, label: "Restricted", color: "red" },
+        private: { icon: IconLock, label: "Private", color: "gray" },
+        team: { icon: IconUsers, label: "Team", color: "blue" },
         department: { icon: IconUsers, label: "Department", color: "amber" },
+        organization: { icon: IconWorld, label: "Organization", color: "indigo" },
         public: { icon: IconWorld, label: "Public", color: "emerald" },
     };
 
