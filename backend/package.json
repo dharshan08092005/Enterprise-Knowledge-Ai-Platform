@@ -6,8 +6,10 @@
   "type": "commonjs",
   "scripts": {
     "dev": "nodemon --exec ts-node server.ts",
+    "dev:worker": "nodemon --exec ts-node workers/documentWorker.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "start:worker": "node dist/workers/documentWorker.js"
   },
   "keywords": [],
   "author": "",
