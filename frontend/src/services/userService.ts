@@ -1,17 +1,16 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-const api = axios.create({
-    baseURL: "http://localhost:5000/api",
-    withCredentials: true
-});
+export const getMe = async () => {
+    const res = await apiClient.get("/users/me");
+    return res.data;
+};
 
-const getAuthHeaders = () => {
-    return {
-        headers: { Authorization: `Bearer ${localStorage.getItem("accessToken") || localStorage.getItem("token")}` }
-    };
+export const updateMe = async (data: any) => {
+    const res = await apiClient.patch("/users/me", data);
+    return res.data;
 };
 
 export const getOrganizationDirectory = async () => {
-    const response = await api.get("/users/directory", getAuthHeaders());
-    return response.data;
+    const res = await apiClient.get("/users/directory");
+    return res.data;
 };

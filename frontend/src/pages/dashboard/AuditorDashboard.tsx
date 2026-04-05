@@ -43,14 +43,14 @@ const StatCard = ({
         whileHover={{ y: -4 }}
         className="relative group"
     >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-sky-500/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-accent/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <div className="relative p-6 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 backdrop-blur-xl overflow-hidden">
             <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full ${gradient} opacity-20 blur-2xl`} />
 
             <div className="relative z-10">
                 <div className="flex items-start justify-between mb-4">
                     <div className={`p-3 rounded-lg ${gradient}`}>
-                        <Icon className="w-6 h-6 text-gray-900 dark:text-white" />
+                        <Icon className="w-6 h-6 text-white" />
                     </div>
                     <button className="p-1.5 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors">
                         <IconDots className="w-4 h-4 text-gray-500 dark:text-slate-400" />
@@ -106,7 +106,7 @@ const AuditLogRow = ({
         </td>
         <td className="py-4 px-4">
             <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-xs font-medium text-gray-900 dark:text-white">
+                <div className="w-7 h-7 rounded-full bg-accent-gradient flex items-center justify-center text-xs font-medium text-white">
                     {user.charAt(0)}
                 </div>
                 <span className="text-sm text-gray-700 dark:text-gray-300">{user}</span>
@@ -144,22 +144,22 @@ const SecurityAlert = ({
             ? "bg-red-500/10 border-red-500/30 hover:border-red-500/50"
             : severity === "medium"
                 ? "bg-amber-500/10 border-amber-500/30 hover:border-amber-500/50"
-                : "bg-blue-500/10 border-blue-500/30 hover:border-blue-500/50"
+                : "bg-accent/10 border-accent/30 hover:border-accent/50"
             }`}
     >
         <div className="flex items-start gap-3">
             <div className={`p-2 rounded-lg ${severity === "high" ? "bg-red-500/20" :
-                severity === "medium" ? "bg-amber-500/20" : "bg-blue-500/20"
+                severity === "medium" ? "bg-amber-500/20" : "bg-accent/20"
                 }`}>
                 <IconAlertTriangle className={`w-4 h-4 ${severity === "high" ? "text-red-400" :
-                    severity === "medium" ? "text-amber-400" : "text-blue-400"
+                    severity === "medium" ? "text-amber-400" : "text-accent"
                     }`} />
             </div>
             <div className="flex-1">
                 <div className="flex items-center justify-between">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white">{title}</h4>
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${severity === "high" ? "bg-red-500/20 text-red-300" :
-                        severity === "medium" ? "bg-amber-500/20 text-amber-300" : "bg-blue-500/20 text-blue-300"
+                        severity === "medium" ? "bg-amber-500/20 text-amber-300" : "bg-accent/20 text-accent opacity-80"
                         }`}>
                         {severity.toUpperCase()}
                     </span>
@@ -181,7 +181,7 @@ export default function AuditorDashboard() {
             change: "+18.2%",
             changeType: "up" as const,
             icon: IconFileAnalytics,
-            gradient: "bg-gradient-to-br from-blue-500 to-blue-600",
+            gradient: "bg-accent-gradient",
         },
         {
             title: "Active Users",
@@ -189,7 +189,7 @@ export default function AuditorDashboard() {
             change: "+5.4%",
             changeType: "up" as const,
             icon: IconUsers,
-            gradient: "bg-gradient-to-br from-blue-500 to-cyan-500",
+            gradient: "bg-accent-gradient",
         },
         {
             title: "Security Alerts",
@@ -233,7 +233,7 @@ export default function AuditorDashboard() {
                 className="flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
                 <div>
-                    <div className="flex items-center gap-2 text-blue-300 mb-1">
+                    <div className="flex items-center gap-2 text-accent mb-1 opacity-80">
                         <IconClock className="w-4 h-4" />
                         <span className="text-sm">Last updated: 2 minutes ago</span>
                     </div>
@@ -249,7 +249,7 @@ export default function AuditorDashboard() {
                                 key={period}
                                 onClick={() => setSelectedPeriod(period)}
                                 className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${selectedPeriod === period
-                                    ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                                    ? "bg-accent/20 text-accent font-bold"
                                     : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
                                     }`}
                             >
@@ -270,7 +270,7 @@ export default function AuditorDashboard() {
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                        className="flex items-center gap-2 px-4 py-2 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                     >
                         <IconDownload className="w-4 h-4" />
                         Export
@@ -297,8 +297,8 @@ export default function AuditorDashboard() {
                     <div className="p-6 border-b border-gray-200 dark:border-white/10">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-sky-500/20">
-                                    <IconActivity className="w-5 h-5 text-blue-400" />
+                                <div className="p-2 rounded-lg bg-accent/20">
+                                    <IconActivity className="w-5 h-5 text-accent" />
                                 </div>
                                 <div>
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Audit Logs</h3>
@@ -312,10 +312,10 @@ export default function AuditorDashboard() {
                                     <input
                                         type="text"
                                         placeholder="Search logs..."
-                                        className="pl-9 pr-4 py-2 w-48 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                                        className="pl-9 pr-4 py-2 w-48 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50"
                                     />
                                 </div>
-                                <button className="text-sm text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1">
+                                <button className="text-sm text-accent hover:opacity-80 transition-colors flex items-center gap-1">
                                     View all
                                     <IconChevronRight className="w-4 h-4" />
                                 </button>
@@ -390,19 +390,19 @@ export default function AuditorDashboard() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Reports</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {[
-                        { title: "User Activity Report", icon: IconUsers, color: "blue" },
+                        { title: "User Activity Report", icon: IconUsers, color: "accent" },
                         { title: "Security Audit", icon: IconShieldCheck, color: "emerald" },
-                        { title: "Compliance Report", icon: IconFileText, color: "blue" },
+                        { title: "Compliance Report", icon: IconFileText, color: "accent" },
                         { title: "Access Logs", icon: IconActivity, color: "amber" },
                     ].map((report, index) => (
                         <motion.button
                             key={index}
                             whileHover={{ scale: 1.02, y: -2 }}
                             whileTap={{ scale: 0.98 }}
-                            className="flex items-center gap-4 p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-blue-500/30 transition-all text-left"
+                            className="flex items-center gap-4 p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-accent/30 transition-all text-left"
                         >
-                            <div className={`p-2.5 rounded-lg bg-${report.color}-500/20`}>
-                                <report.icon className={`w-5 h-5 text-${report.color}-400`} />
+                            <div className={`p-2.5 rounded-lg bg-${report.color === 'accent' ? 'accent/20' : report.color + '-500/20'}`}>
+                                <report.icon className={`w-5 h-5 ${report.color === 'accent' ? 'text-accent' : 'text-' + report.color + '-400'}`} />
                             </div>
                             <div className="flex-1">
                                 <p className="text-sm font-medium text-gray-900 dark:text-white">{report.title}</p>

@@ -5,6 +5,7 @@ import Job from "../models/Job";
 import Document from "../models/Document";
 import DocumentText from "../models/DocumentText";
 import DocumentChunk from "../models/DocumentChunk";
+import Organization from "../models/Organization";
 
 import { JOB_TYPES } from "../constants/jobTypes";
 import { AUDIT_ACTIONS } from "../constants/auditActions";
@@ -12,8 +13,8 @@ import { logAudit } from "../utils/auditLogger";
 
 import { extractPdfText } from "../services/extraction/pdfExtractor";
 import { chunkText } from "../services/chunking/chunker";
-import { generateEmbeddingsBatch } from "../services/embeddings/geminiEmbedder";
-import { upsertChunksToPinecone } from "../services/vectorDb/pineconeService";
+import { generateEmbeddingsBatch } from "../services/embeddings/ollamaEmbedder";
+import { upsertChunksToPinecone, deleteChunksFromPinecone } from "../services/vectorDb/pineconeService";
 
 let isConnected = false;
 
@@ -67,6 +68,9 @@ const processJob = async (job: any) => {
     job.stage = "initializing";
     await job.save();
 
+    // Update document status to processing
+    await Document.findByIdAndUpdate(job.documentId, { $set: { status: "processing" } });
+
     await logAudit({
       action: AUDIT_ACTIONS.JOB_STARTED,
       resourceType: "job",
@@ -84,6 +88,10 @@ const processJob = async (job: any) => {
     const document = await Document.findById(job.documentId);
 
     if (!document) throw new Error("Document not found");
+
+    const org = await Organization.findById(document.organizationId).select("+embeddingSettings.apiKey").lean();
+    const embSettings = org?.embeddingSettings;
+    const modelName = embSettings?.model || "nomic-embed-text";
 
     if (document.mimeType !== "application/pdf") {
       throw new Error("Unsupported file type");
@@ -151,7 +159,7 @@ const processJob = async (job: any) => {
       text: chunk.text,
       tokenCount: chunk.tokenCount,
       embeddingStatus: "pending",
-      embeddingModel: "text-embedding-004"
+      embeddingModel: modelName
     }));
 
     const insertedChunks = await DocumentChunk.insertMany(chunkDocs);
@@ -163,9 +171,9 @@ const processJob = async (job: any) => {
     job.stage = "embedding";
     await job.save();
 
-    console.log(`🧠 Generating embeddings for ${chunks.length} chunks`);
+    console.log(`🧠 Generating embeddings for ${chunks.length} chunks using ${modelName}`);
     const textsToEmbed = insertedChunks.map(c => c.text);
-    const embeddings = await generateEmbeddingsBatch(textsToEmbed);
+    const embeddings = await generateEmbeddingsBatch(textsToEmbed, embSettings as any);
 
     console.log(`💾 Upserting to Pinecone`);
     const pineconeChunks = insertedChunks.map((chunk, index) => ({
@@ -199,6 +207,31 @@ const processJob = async (job: any) => {
     await document.save();
 
     /* ---------------------------
+       VERSION CONTROL: SUPERSEDE OLD
+    --------------------------- */
+    console.log(`🧹 Checking for old versions of ${document.fileName} to supersede...`);
+    const oldDocs = await Document.find({
+        organizationId: document.organizationId,
+        fileName: document.fileName,
+        _id: { $ne: document._id },
+        status: { $in: ["active", "failed", "deactivated"] } // Anything that isn't already superseded or current
+    });
+
+    for (const oldDoc of oldDocs) {
+        console.log(`♻️ Superseding v${oldDoc.version} with v${document.version}`);
+        oldDoc.status = "superseded";
+        oldDoc.supersededBy = document._id as any;
+        await oldDoc.save();
+
+        // Ensure old chunks are removed from Pinecone AI search
+        try {
+            await deleteChunksFromPinecone(oldDoc._id.toString());
+        } catch (pErr: any) {
+            console.error(`⚠️ Failed to purge old version chunks for ${oldDoc._id}:`, pErr.message);
+        }
+    }
+
+    /* ---------------------------
        COMPLETE JOB
     --------------------------- */
 
@@ -227,6 +260,16 @@ const processJob = async (job: any) => {
     if (job.attempts >= job.maxAttempts) {
       job.status = "DEAD";
       job.error = err.message;
+
+      // Update document status to failed
+      await Document.findByIdAndUpdate(job.documentId, { $set: { status: "failed" } });
+
+      // 🧹 Cleanup Pinecone if we already sent chunks
+      try {
+        await deleteChunksFromPinecone(job.documentId.toString());
+      } catch (pErr: any) {
+        console.error(`⚠️ Failed to cleanup Pinecone for failed job ${job._id}:`, pErr.message);
+      }
 
       await logAudit({
         action: AUDIT_ACTIONS.JOB_FAILED,

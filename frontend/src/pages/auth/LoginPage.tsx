@@ -45,7 +45,7 @@ const LoginPage = () => {
       {/* Left Side - Branding */}
       <div className="hidden lg:flex flex-1 items-center justify-center p-8 backdrop-blur-2xl" style={{ borderRight: '1px solid var(--border-primary)' }}>
         <div className="max-w-md">
-          <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mb-8">
+          <div className="w-16 h-16 bg-accent-gradient rounded-lg flex items-center justify-center mb-8 shadow-accent">
             <div className="w-8 h-8 border-3 border-white rounded-lg"></div>
           </div>
 
@@ -58,8 +58,8 @@ const LoginPage = () => {
 
           <div className="space-y-6">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
-                <Shield className="w-5 h-5 text-blue-400" />
+              <div className="w-10 h-10 rounded-lg bg-accent/20 border border-accent/30 flex items-center justify-center flex-shrink-0">
+                <Shield className="w-5 h-5 text-accent" />
               </div>
               <div>
                 <h3 className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Bank-level security</h3>
@@ -69,8 +69,8 @@ const LoginPage = () => {
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-lg bg-accent/20 border border-accent/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
@@ -106,7 +106,7 @@ const LoginPage = () => {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8">
-            <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-accent-gradient rounded-lg flex items-center justify-center shadow-accent">
               <div className="w-6 h-6 border-2 border-white rounded-lg"></div>
             </div>
           </div>
@@ -142,7 +142,7 @@ const LoginPage = () => {
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField("")}
                   className={`w-full border ${focusedField === "email"
-                    ? "border-blue-500 ring-2 ring-blue-500/20"
+                    ? "border-accent ring-2 ring-accent/20"
                     : ""
                     } rounded-lg px-12 py-3.5 placeholder-gray-400
                              focus:outline-none transition-all duration-200`}
@@ -159,7 +159,7 @@ const LoginPage = () => {
                 </label>
                 <a
                   href="#"
-                  className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                  className="text-sm text-accent hover:opacity-80 transition-colors"
                 >
                   Forgot password?
                 </a>
@@ -176,7 +176,7 @@ const LoginPage = () => {
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField("")}
                   className={`w-full border ${focusedField === "password"
-                    ? "border-blue-500 ring-2 ring-blue-500/20"
+                    ? "border-accent ring-2 ring-accent/20"
                     : ""
                     } rounded-lg px-12 py-3.5 placeholder-gray-400
                              focus:outline-none transition-all duration-200`}
@@ -192,8 +192,8 @@ const LoginPage = () => {
                 id="remember"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-700 bg-slate-800/50 text-blue-600 
-                         focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                 className="w-4 h-4 rounded border-slate-700 bg-slate-800/50 text-accent 
+                         focus:ring-2 focus:ring-accent focus:ring-offset-0 cursor-pointer"
               />
               <label
                 htmlFor="remember"
@@ -210,7 +210,7 @@ const LoginPage = () => {
                 transition-all duration-200 flex items-center justify-center gap-2
                 ${loading
                   ? "bg-slate-700 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-blue-600 hover:from-blue-500 hover:to-blue-500 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50"
+                  : "bg-accent-gradient shadow-accent shadow-lg"
                 }`}
             >
               {loading ? "Signing in..." : "Sign In"}
@@ -269,7 +269,7 @@ const LoginPage = () => {
             Don't have an account?{" "}
             <a
               href="/signup"
-              className="text-blue-400 font-medium hover:text-blue-300 transition-colors"
+              className="text-accent font-medium hover:opacity-80 transition-colors"
             >
               Create one
             </a>

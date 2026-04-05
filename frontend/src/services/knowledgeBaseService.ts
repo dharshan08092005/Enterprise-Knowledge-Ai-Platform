@@ -1,15 +1,6 @@
-import axios from "axios";
+import apiClient from "./apiClient";
 
-const api = axios.create({
-  baseURL: "http://localhost:5000/api",
-  withCredentials: true
-});
-
-export const fetchKnowledgeBase = async (token: string) => {
-  const res = await api.get("/knowledge-base", {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+export const fetchKnowledgeBase = async () => {
+  const res = await apiClient.get("/knowledge-base");
   return res.data;
 };

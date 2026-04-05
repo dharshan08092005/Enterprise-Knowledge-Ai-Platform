@@ -12,4 +12,9 @@ router.get("/", requireRole("ADMIN"), orgController.getOrganizations);
 router.post("/", requireRole("ADMIN"), orgController.createOrganization);
 router.patch("/:id", requireRole("ADMIN"), orgController.updateOrganization);
 
+// All users can see their org for branding purposes, etc.
+router.get("/my-org", orgController.getMyOrganization);
+router.patch("/my-org/settings", requireRole("ORG_ADMIN"), orgController.updateMyOrgSettings);
+router.post("/test-ai-config", requireRole("ORG_ADMIN"), orgController.testAiConfig);
+
 export default router;

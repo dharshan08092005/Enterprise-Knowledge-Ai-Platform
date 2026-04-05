@@ -6,7 +6,6 @@ import {
     IconRefresh,
     IconLoader2,
     IconAlertTriangle,
-    IconChevronDown,
     IconDownload,
     IconFileAnalytics,
     IconUser,

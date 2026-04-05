@@ -13,7 +13,6 @@ import {
     IconCalendar,
     IconShieldCheck,
     IconX,
-    IconChevronDown,
     IconDownload,
     IconRefresh,
     IconUserPlus,
@@ -111,10 +110,10 @@ const AuditorRow = ({
             <td className="py-4 px-4">
                 <div className="flex items-center gap-3">
                     <div className="relative">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-500 flex items-center justify-center text-sm font-semibold text-gray-900 dark:text-white">
+                        <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center text-sm font-semibold text-white shadow-accent">
                             {auditor.name.charAt(0)}
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-blue-500 border-2 border-[#1a1a2e]" />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-accent border-2 border-white dark:border-[#1a1a2e]" />
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">{auditor.name}</p>
@@ -265,8 +264,8 @@ const PromoteUserModal = ({
                             <div className="p-6 border-b border-gray-200 dark:border-white/10">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-blue-500/20">
-                                            <IconUserPlus className="w-5 h-5 text-blue-400" />
+                                        <div className="p-2 rounded-lg bg-accent/20">
+                                            <IconUserPlus className="w-5 h-5 text-accent" />
                                         </div>
                                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Promote to Auditor</h3>
                                     </div>
@@ -290,7 +289,7 @@ const PromoteUserModal = ({
                                         type="email"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-all shadow-sm"
                                         placeholder="user@example.com"
                                         required
                                     />
@@ -325,7 +324,7 @@ const PromoteUserModal = ({
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         type="submit"
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                                        className="flex-1 px-4 py-3 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                                     >
                                         Promote User
                                     </motion.button>
@@ -439,7 +438,7 @@ export default function ManageAuditorsPage() {
             {/* Loading State */}
             {isLoading && (
                 <div className="flex flex-col items-center justify-center py-20">
-                    <IconLoader2 className="w-10 h-10 text-blue-400 animate-spin mb-3" />
+                    <IconLoader2 className="w-10 h-10 text-accent animate-spin mb-3" />
                     <p className="text-gray-500 dark:text-slate-400">Loading auditors...</p>
                 </div>
             )}
@@ -480,7 +479,7 @@ export default function ManageAuditorsPage() {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setShowPromoteModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                            className="flex items-center gap-2 px-4 py-2 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                         >
                             <IconPlus className="w-4 h-4" />
                             Add Auditor
@@ -496,9 +495,9 @@ export default function ManageAuditorsPage() {
                     className="grid grid-cols-2 md:grid-cols-4 gap-4"
                 >
                     {[
-                        { label: "Total Auditors", value: stats.total, icon: IconShieldCheck, color: "blue" },
+                        { label: "Total Auditors", value: stats.total, icon: IconShieldCheck, color: "accent" },
                         { label: "Active", value: stats.active, icon: IconUserCheck, color: "emerald" },
-                        { label: "Total Audits Completed", value: stats.totalAudits, icon: IconFileAnalytics, color: "blue" },
+                        { label: "Total Audits Completed", value: stats.totalAudits, icon: IconFileAnalytics, color: "accent" },
                         { label: "Avg Audits/Auditor", value: stats.avgAudits, icon: IconCalendar, color: "amber" },
                     ].map((stat, index) => (
                         <div
@@ -506,8 +505,8 @@ export default function ManageAuditorsPage() {
                             className="p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10"
                         >
                             <div className="flex items-center gap-3 mb-2">
-                                <div className={`p-2 rounded-lg bg-${stat.color}-500/20`}>
-                                    <stat.icon className={`w-4 h-4 text-${stat.color}-400`} />
+                                <div className={`p-2 rounded-lg ${stat.color === 'accent' ? 'bg-accent/20' : `bg-${stat.color}-500/20`}`}>
+                                    <stat.icon className={`w-4 h-4 ${stat.color === 'accent' ? 'text-accent' : `text-${stat.color}-400`}`} />
                                 </div>
                             </div>
                             <p className={`text-2xl font-bold text-gray-900 dark:text-white`}>{stat.value}</p>
@@ -531,7 +530,7 @@ export default function ManageAuditorsPage() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search auditors by name or email..."
-                            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-all shadow-sm"
                         />
                     </div>
 
@@ -566,7 +565,7 @@ export default function ManageAuditorsPage() {
                         onClick={loadAuditors}
                         className="p-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors"
                     >
-                        <IconRefresh className={`w-5 h-5 text-gray-500 dark:text-slate-400 ${isLoading ? "animate-spin" : ""}`} />
+                        <IconRefresh className={`w-5 h-5 ${isLoading ? "animate-spin text-accent" : "text-gray-500 dark:text-slate-400"}`} />
                     </motion.button>
                 </motion.div>
 
@@ -618,7 +617,7 @@ export default function ManageAuditorsPage() {
                             <button className="px-3 py-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10 rounded-lg transition-colors">
                                 Previous
                             </button>
-                            <button className="px-3 py-1.5 text-sm bg-blue-500/20 text-blue-300 rounded-lg">
+                            <button className="px-3 py-1.5 text-sm bg-accent/20 text-accent rounded-lg">
                                 1
                             </button>
                             <button className="px-3 py-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10 rounded-lg transition-colors">

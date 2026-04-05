@@ -11,14 +11,14 @@ import {
     IconUserOff,
     IconMail,
     IconCalendar,
-    IconShieldCheck,
-    IconX,
-    IconChevronDown,
-    IconDownload,
-    IconRefresh,
+
     IconLoader2,
     IconAlertTriangle,
     IconBuilding,
+    IconShieldCheck,
+    IconX,
+    IconDownload,
+    IconRefresh,
 } from "@tabler/icons-react";
 import { getToken } from "@/lib/auth";
 import { fetchAllUsers, createUser as createUserApi, updateUserDepartment as updateDeptApi, type AdminUser } from "@/services/adminService";
@@ -75,9 +75,9 @@ const StatusBadge = ({ status }: { status: User["status"] }) => {
 // Role Badge Component
 const RoleBadge = ({ role }: { role: User["role"] }) => {
     const styles: Record<string, string> = {
-        USER: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+        USER: "bg-accent/20 text-accent border-accent/30",
         AUDITOR: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-        ADMIN: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+        ADMIN: "bg-accent/20 text-accent border-accent/30",
     };
 
     return (
@@ -92,7 +92,7 @@ const RoleBadge = ({ role }: { role: User["role"] }) => {
 const DepartmentBadge = ({ name }: { name: string | null }) => {
     if (!name) return <span className="text-xs text-gray-500 dark:text-slate-500 italic">Unassigned</span>;
     return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full border bg-accent/20 text-accent border-accent/30">
             <IconBuilding className="w-3 h-3" />
             {name}
         </span>
@@ -124,7 +124,7 @@ const UserRow = ({
         >
             <td className="py-4 px-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-sm font-semibold text-gray-900 dark:text-white">
+                    <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center text-sm font-semibold text-white">
                         {user.name.charAt(0)}
                     </div>
                     <div>
@@ -289,7 +289,7 @@ const AddUserModal = ({
                                         type="text"
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-all shadow-sm"
                                         placeholder="Enter full name"
                                         required
                                     />
@@ -301,7 +301,7 @@ const AddUserModal = ({
                                         type="email"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-all shadow-sm"
                                         placeholder="Enter email address"
                                         required
                                     />
@@ -338,8 +338,8 @@ const AddUserModal = ({
                                     )}
                                 </div>
 
-                                <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                                    <p className="text-xs text-blue-300">
+                                <div className="p-4 bg-accent/10 border border-accent/20 rounded-lg">
+                                    <p className="text-xs text-accent">
                                         <strong>Note:</strong> The initial password will be the username (the portion of the email before the @). Users can change this after logging in.
                                     </p>
                                 </div>
@@ -357,7 +357,7 @@ const AddUserModal = ({
                                         whileTap={{ scale: 0.98 }}
                                         type="submit"
                                         disabled={departments.length === 0}
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 px-4 py-3 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Add User
                                     </motion.button>
@@ -437,7 +437,7 @@ const ChangeDepartmentModal = ({
                             <form onSubmit={handleSubmit} className="p-6 space-y-4">
                                 {/* User info */}
                                 <div className="p-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 flex items-center justify-center text-sm font-semibold text-gray-900 dark:text-white">
+                                    <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center text-sm font-semibold text-white">
                                         {user.name.charAt(0)}
                                     </div>
                                     <div>
@@ -450,7 +450,7 @@ const ChangeDepartmentModal = ({
                                 {user.departmentName && (
                                     <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
                                         <IconBuilding className="w-4 h-4" />
-                                        Current: <span className="text-cyan-400 font-medium">{user.departmentName}</span>
+                                        Current: <span className="text-accent font-medium">{user.departmentName}</span>
                                     </div>
                                 )}
 
@@ -480,7 +480,7 @@ const ChangeDepartmentModal = ({
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         type="submit"
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-cyan-500/25"
+                                        className="flex-1 px-4 py-3 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                                     >
                                         Update Department
                                     </motion.button>
@@ -623,7 +623,7 @@ export default function ManageUsersPage() {
             {isLoading && (
                 <div className="flex items-center justify-center py-20">
                     <div className="text-center">
-                        <IconLoader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto mb-4" />
+                        <IconLoader2 className="w-8 h-8 text-accent animate-spin mx-auto mb-4" />
                         <p className="text-gray-500 dark:text-slate-400">Loading users...</p>
                     </div>
                 </div>
@@ -676,7 +676,7 @@ export default function ManageUsersPage() {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => setShowAddModal(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                            className="flex items-center gap-2 px-4 py-2 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                         >
                             <IconPlus className="w-4 h-4" />
                             Add User
@@ -692,14 +692,14 @@ export default function ManageUsersPage() {
                     className="grid grid-cols-2 md:grid-cols-4 gap-4"
                 >
                     {[
-                        { label: 'Total Users', value: stats.total, color: 'blue' },
+                        { label: 'Total Users', value: stats.total, color: 'accent' },
                         { label: 'Active', value: stats.active, color: 'emerald' },
                         { label: 'Inactive', value: stats.inactive, color: 'red' },
-                        { label: 'Admins', value: stats.admins, color: 'amber' },
+                        { label: 'Admins', value: stats.admins, color: 'accent' },
                     ].map((stat, i) => (
-                        <div key={i} className="p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
-                            <div className={`w-8 h-8 rounded-lg bg-${stat.color}-500/20 flex items-center justify-center mb-3`}>
-                                <div className={`w-3 h-3 rounded-full bg-${stat.color}-500`} />
+                        <div key={i} className="p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 transition-all hover:bg-white/[0.08]">
+                            <div className={`w-8 h-8 rounded-lg ${stat.color === 'accent' ? 'bg-accent/20' : `bg-${stat.color}-500/20`} flex items-center justify-center mb-3`}>
+                                <div className={`w-3 h-3 rounded-full ${stat.color === 'accent' ? 'bg-accent' : `bg-${stat.color}-500`}`} />
                             </div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
                             <p className="text-sm text-gray-500 dark:text-slate-400">{stat.label}</p>
@@ -722,7 +722,7 @@ export default function ManageUsersPage() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search users by name or email..."
-                            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-all shadow-sm"
                         />
                     </div>
 

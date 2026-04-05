@@ -54,8 +54,8 @@ const systemSettingsSchema = new Schema(
         embedding: {
             provider: {
                 type: String,
-                enum: ["openai", "cohere", "huggingface", "custom"],
-                default: "openai"
+                enum: ["openai", "cohere", "huggingface", "custom", "ollama"],
+                default: "ollama"
             },
             apiKey: {
                 type: String,
@@ -63,7 +63,7 @@ const systemSettingsSchema = new Schema(
             },
             model: {
                 type: String,
-                default: "text-embedding-3-small"
+                default: "nomic-embed-text"
             },
             baseUrl: {
                 type: String,

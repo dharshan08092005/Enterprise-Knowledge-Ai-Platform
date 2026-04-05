@@ -76,7 +76,7 @@ export default function DepartmentsPage() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setShowModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-sm font-medium text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                    className="flex items-center gap-2 px-4 py-2 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                 >
                     <IconPlus className="w-4 h-4" />
                     Add Department
@@ -92,7 +92,7 @@ export default function DepartmentsPage() {
                         value={search}
                         placeholder="Search departments..."
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                        className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-all shadow-sm"
                     />
                 </div>
                 <button
@@ -105,7 +105,7 @@ export default function DepartmentsPage() {
 
             {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20">
-                    <IconLoader2 className="w-10 h-10 text-blue-400 animate-spin mb-3" />
+                    <IconLoader2 className="w-10 h-10 text-accent animate-spin mb-3" />
                     <p className="text-gray-500 dark:text-slate-400">Loading departments...</p>
                 </div>
             ) : error ? (
@@ -131,7 +131,7 @@ export default function DepartmentsPage() {
                             className="p-5 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-between group hover:bg-white/[0.07] transition-all cursor-pointer"
                         >
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-gray-900 dark:text-white transition-all">
+                                <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-white transition-all shadow-sm group-hover:shadow-accent">
                                     <IconUsers className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -181,7 +181,7 @@ export default function DepartmentsPage() {
                                         required
                                         value={newDept.name}
                                         onChange={e => setNewDept({ ...newDept, name: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50"
+                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-accent/50 transition-all shadow-sm"
                                         placeholder="e.g. Sales, Engineering..."
                                     />
                                 </div>
@@ -190,13 +190,13 @@ export default function DepartmentsPage() {
                                     <textarea
                                         value={newDept.description}
                                         onChange={e => setNewDept({ ...newDept, description: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-blue-500/50 min-h-[100px]"
+                                        className="w-full px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-accent/50 min-h-[100px] transition-all shadow-sm"
                                         placeholder="Brief purpose of this department..."
                                     />
                                 </div>
                                 <button
                                     disabled={isCreating}
-                                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-sky-600 rounded-lg text-gray-900 dark:text-white font-bold shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                                    className="w-full py-4 bg-accent-gradient rounded-lg text-white font-bold shadow-accent disabled:opacity-50 transition-all"
                                 >
                                     {isCreating ? "Creating..." : "Create Department"}
                                 </button>

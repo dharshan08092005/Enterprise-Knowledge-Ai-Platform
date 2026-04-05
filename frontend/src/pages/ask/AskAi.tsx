@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import ReactMarkdown from "react-markdown";
 import {
   IconSend,
   IconHistory,
@@ -27,7 +28,13 @@ import {
   IconLink,
   IconRefresh,
 } from "@tabler/icons-react";
-import { sendChatQuery } from "../../services/chatService"; 
+import {
+  sendChatQuery,
+  getChatSessions,
+  getChatSessionById,
+  deleteChatSessionById,
+  type ChatSessionSummary,
+} from "../../services/chatService";
 
 // Types
 interface Message {
@@ -47,25 +54,6 @@ interface Source {
   url?: string;
   relevance: number;
 }
-
-interface ChatSession {
-  id: string;
-  title: string;
-  lastMessage: string;
-  timestamp: Date;
-  messageCount: number;
-}
-
-// Mock data for chat history
-const mockChatHistory: ChatSession[] = [
-  { id: "1", title: "Q4 Financial Analysis", lastMessage: "The Q4 revenue increased by 15%...", timestamp: new Date(Date.now() - 1000 * 60 * 30), messageCount: 8 },
-  { id: "2", title: "Employee Benefits Policy", lastMessage: "According to the policy document...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), messageCount: 5 },
-  { id: "3", title: "Product Roadmap 2024", lastMessage: "The key milestones for Q1 include...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), messageCount: 12 },
-  { id: "4", title: "Security Compliance", lastMessage: "Based on the SOC 2 guidelines...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), messageCount: 6 },
-  { id: "5", title: "Marketing Strategy", lastMessage: "The target audience analysis shows...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72), messageCount: 10 },
-];
-
-// no mockSources
 
 // Helper function
 const formatTime = (date: Date) => {
@@ -121,7 +109,7 @@ const SourceCard = ({ source }: { source: Source }) => {
             </div>
             <div className="flex items-center gap-1">
               <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${source.relevance >= 90 ? "bg-emerald-500/20 text-emerald-400" :
-                  source.relevance >= 70 ? "bg-blue-500/20 text-blue-400" :
+                  source.relevance >= 70 ? "bg-accent/20 text-accent" :
                     "bg-amber-500/20 text-amber-400"
                 }`}>
                 {source.relevance}%
@@ -159,8 +147,8 @@ const ChatMessage = ({ message }: { message: Message }) => {
       className={`flex gap-4 ${message.role === "user" ? "flex-row-reverse" : ""}`}
     >
       <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${message.role === "user"
-          ? "bg-gradient-to-br from-blue-500 to-sky-500"
-          : "bg-gradient-to-br from-blue-500 to-cyan-500"
+          ? "bg-accent-gradient"
+          : "bg-accent-gradient"
         }`}>
         {message.role === "user" ? (
           <IconUser className="w-5 h-5 text-gray-900 dark:text-white" />
@@ -171,10 +159,16 @@ const ChatMessage = ({ message }: { message: Message }) => {
 
       <div className={`flex-1 max-w-[80%] ${message.role === "user" ? "text-right" : ""}`}>
         <div className={`inline-block p-4 rounded-lg ${message.role === "user"
-            ? "bg-gradient-to-br from-blue-600/30 to-sky-600/30 border border-blue-500/20"
+            ? "bg-accent/25 border border-accent/20"
             : "bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10"
           }`}>
-          <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{message.content}</p>
+          {message.role === "assistant" ? (
+            <div className="text-sm text-gray-900 dark:text-white markdown-body">
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{message.content}</p>
+          )}
         </div>
 
         <div className={`flex items-center gap-2 mt-2 ${message.role === "user" ? "justify-end" : ""}`}>
@@ -183,7 +177,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
           {message.role === "assistant" && message.sources && message.sources.length > 0 && (
             <button
               onClick={() => setShowSources(!showSources)}
-              className="flex items-center gap-1 px-2 py-1 text-xs text-blue-400 hover:text-blue-300 bg-blue-500/10 rounded-lg transition-colors"
+              className="flex items-center gap-1 px-2 py-1 text-xs text-accent hover:opacity-80 bg-accent/10 rounded-lg transition-colors"
             >
               <IconFileText className="w-3 h-3" />
               {message.sources.length} sources
@@ -219,7 +213,7 @@ const ChatHistoryItem = ({
   onClick,
   onDelete,
 }: {
-  session: ChatSession;
+  session: ChatSessionSummary;
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;
@@ -231,7 +225,7 @@ const ChatHistoryItem = ({
       whileHover={{ x: 4 }}
       onClick={onClick}
       className={`relative group p-3 rounded-lg cursor-pointer transition-all ${isActive
-          ? "bg-blue-500/20 border border-blue-500/30"
+          ? "bg-accent/20 border border-accent/25"
           : "bg-white dark:bg-white/5 border border-transparent hover:border-gray-200 dark:border-white/10"
         }`}
     >
@@ -250,7 +244,7 @@ const ChatHistoryItem = ({
       <div className="flex items-center gap-2 mt-2">
         <span className="text-xs text-gray-500 dark:text-slate-500 flex items-center gap-1">
           <IconClock className="w-3 h-3" />
-          {formatTime(session.timestamp)}
+          {formatTime(new Date(session.timestamp))}
         </span>
         <span className="text-xs text-gray-600">•</span>
         <span className="text-xs text-gray-500 dark:text-slate-500">{session.messageCount} messages</span>
@@ -303,8 +297,9 @@ export default function AskAI() {
   const [isLoading, setIsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(true);
   const [showSources, setShowSources] = useState(true);
-  const [chatHistory, setChatHistory] = useState<ChatSession[]>(mockChatHistory);
-  const [activeSession, setActiveSession] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatSessionSummary[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -313,6 +308,49 @@ export default function AskAI() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Load chat history on mount
+  useEffect(() => {
+    loadChatHistory();
+  }, []);
+
+  const loadChatHistory = async () => {
+    try {
+      setIsLoadingHistory(true);
+      const sessions = await getChatSessions();
+      setChatHistory(sessions);
+    } catch (err) {
+      console.error("Failed to load chat history:", err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  // Load a specific session
+  const loadSession = async (sessionId: string) => {
+    try {
+      setActiveSessionId(sessionId);
+      const session = await getChatSessionById(sessionId);
+
+      const loadedMessages: Message[] = session.messages.map((msg, idx) => ({
+        id: `${sessionId}-${idx}`,
+        role: msg.role,
+        content: msg.content,
+        timestamp: new Date(msg.createdAt),
+        sources: msg.sources?.map((s, sIdx) => ({
+          id: s.documentId || sIdx.toString(),
+          title: s.title || "Retrieved Document",
+          type: "pdf" as const,
+          excerpt: s.excerpt || `Retrieval Score: ${((s.score || 0) * 100).toFixed(2)}%`,
+          relevance: Math.round((s.score || 0) * 100),
+        })),
+      }));
+
+      setMessages(loadedMessages);
+    } catch (err) {
+      console.error("Failed to load session:", err);
+    }
+  };
 
   // Handle send message
   const handleSend = async () => {
@@ -330,12 +368,12 @@ export default function AskAI() {
     setIsLoading(true);
 
     try {
-      const response = await sendChatQuery(userMessage.content);
-      
-      const mappedSources: Source[] = response.sources.map((s: any, idx) => ({
+      const response = await sendChatQuery(userMessage.content, activeSessionId || undefined);
+
+      const mappedSources: Source[] = response.sources.map((s: any, idx: number) => ({
         id: s.documentId || idx.toString(),
         title: s.title || "Retrieved Document",
-        type: "pdf", // default type for now
+        type: "pdf",
         excerpt: s.excerpt || `Retrieval Score: ${(s.score * 100).toFixed(2)}%`,
         relevance: Math.round(s.score * 100)
       }));
@@ -349,6 +387,14 @@ export default function AskAI() {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
+
+      // Update active session ID (for new sessions)
+      if (!activeSessionId && response.sessionId) {
+        setActiveSessionId(response.sessionId);
+      }
+
+      // Refresh the sidebar history
+      await loadChatHistory();
     } catch (err) {
       console.error(err);
       const errorMessage: Message = {
@@ -374,15 +420,20 @@ export default function AskAI() {
   // Start new chat
   const handleNewChat = () => {
     setMessages([]);
-    setActiveSession(null);
+    setActiveSessionId(null);
   };
 
   // Delete chat
-  const handleDeleteChat = (id: string) => {
-    setChatHistory(chatHistory.filter((c) => c.id !== id));
-    if (activeSession === id) {
-      setMessages([]);
-      setActiveSession(null);
+  const handleDeleteChat = async (id: string) => {
+    try {
+      await deleteChatSessionById(id);
+      setChatHistory((prev) => prev.filter((c) => c.id !== id));
+      if (activeSessionId === id) {
+        setMessages([]);
+        setActiveSessionId(null);
+      }
+    } catch (err) {
+      console.error("Failed to delete session:", err);
     }
   };
 
@@ -413,14 +464,14 @@ export default function AskAI() {
             <div className="p-4 border-b border-gray-200 dark:border-white/10">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <IconHistory className="w-5 h-5 text-blue-400" />
+                  <IconHistory className="w-5 h-5 text-accent" />
                   Chat History
                 </h3>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleNewChat}
-                  className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors"
+                  className="p-2 rounded-lg bg-accent/20 text-accent hover:opacity-80 transition-colors"
                 >
                   <IconPlus className="w-4 h-4" />
                 </motion.button>
@@ -432,25 +483,36 @@ export default function AskAI() {
                   value={searchHistory}
                   onChange={(e) => setSearchHistory(e.target.value)}
                   placeholder="Search chats..."
-                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50"
+                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50"
                 />
               </div>
             </div>
 
             {/* History List */}
             <div className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-thin">
-              {filteredHistory.map((session) => (
-                <ChatHistoryItem
-                  key={session.id}
-                  session={session}
-                  isActive={activeSession === session.id}
-                  onClick={() => setActiveSession(session.id)}
-                  onDelete={() => handleDeleteChat(session.id)}
-                />
-              ))}
-              {filteredHistory.length === 0 && (
+              {isLoadingHistory ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <IconLoader2 className="w-6 h-6 text-accent animate-spin mb-2" />
+                  <p className="text-xs text-gray-500 dark:text-slate-500">Loading chats...</p>
+                </div>
+              ) : filteredHistory.length > 0 ? (
+                filteredHistory.map((session) => (
+                  <ChatHistoryItem
+                    key={session.id}
+                    session={session}
+                    isActive={activeSessionId === session.id}
+                    onClick={() => loadSession(session.id)}
+                    onDelete={() => handleDeleteChat(session.id)}
+                  />
+                ))
+              ) : (
                 <div className="text-center py-8">
-                  <p className="text-sm text-gray-500 dark:text-slate-500">No chats found</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-500">
+                    {searchHistory ? "No chats found" : "No chat history yet"}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
+                    {!searchHistory && "Start a conversation to see it here"}
+                  </p>
                 </div>
               )}
             </div>
@@ -471,8 +533,8 @@ export default function AskAI() {
         {/* Chat Header */}
         <div className="p-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-sky-500/20">
-              <IconSparkles className="w-5 h-5 text-blue-400" />
+            <div className="p-2 rounded-lg bg-accent/20">
+              <IconSparkles className="w-5 h-5 text-accent" />
             </div>
             <div>
               <h2 className="font-semibold text-gray-900 dark:text-white">Enterprise AI Assistant</h2>
@@ -485,7 +547,7 @@ export default function AskAI() {
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowSources(!showSources)}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${showSources
-                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                  ? "bg-accent/20 text-accent border border-accent/25"
                   : "bg-white dark:bg-white/5 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-white/10"
                 }`}
             >
@@ -511,9 +573,9 @@ export default function AskAI() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", duration: 0.5 }}
-                className="p-6 rounded-3xl bg-gradient-to-br from-blue-500/20 to-sky-500/20 border border-blue-500/20 mb-6"
+                className="p-6 rounded-3xl bg-accent/20 border border-accent/25 mb-6"
               >
-                <IconSparkles className="w-12 h-12 text-blue-400" />
+                <IconSparkles className="w-12 h-12 text-accent" />
               </motion.div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">How can I help you today?</h3>
               <p className="text-gray-500 dark:text-slate-400 mb-8 max-w-md">
@@ -528,7 +590,7 @@ export default function AskAI() {
                     transition={{ delay: index * 0.1 }}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => setInput(question)}
-                    className="p-3 text-left text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:border-blue-500/30 hover:bg-gray-100 dark:bg-white/10 transition-all"
+                    className="p-3 text-left text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:border-accent hover:bg-accent/10 transition-all font-medium"
                   >
                     {question}
                   </motion.button>
@@ -546,12 +608,12 @@ export default function AskAI() {
                   animate={{ opacity: 1 }}
                   className="flex gap-4"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                    <IconRobot className="w-5 h-5 text-gray-900 dark:text-white" />
+                  <div className="w-10 h-10 rounded-lg bg-accent-gradient flex items-center justify-center">
+                    <IconRobot className="w-5 h-5 text-white" />
                   </div>
                   <div className="p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
                     <div className="flex items-center gap-2">
-                      <IconLoader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                      <IconLoader2 className="w-4 h-4 text-accent animate-spin" />
                       <span className="text-sm text-gray-500 dark:text-slate-400">Thinking...</span>
                     </div>
                   </div>
@@ -573,7 +635,7 @@ export default function AskAI() {
                 onKeyDown={handleKeyPress}
                 placeholder="Ask anything about your knowledge base..."
                 rows={1}
-                className="w-full px-4 py-3 pr-12 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 resize-none"
+                className="w-full px-4 py-3 pr-12 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 resize-none"
                 style={{ minHeight: "48px", maxHeight: "120px" }}
               />
               <motion.button
@@ -582,7 +644,7 @@ export default function AskAI() {
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
                 className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${input.trim() && !isLoading
-                    ? "bg-gradient-to-r from-blue-600 to-sky-600 text-gray-900 dark:text-white shadow-lg shadow-blue-500/25"
+                    ? "bg-accent-gradient text-white shadow-accent"
                     : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-slate-500"
                   }`}
               >
@@ -636,7 +698,7 @@ export default function AskAI() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-2.5 text-sm font-medium text-blue-400 bg-blue-500/10 border border-blue-500/20 rounded-lg hover:bg-blue-500/20 transition-colors"
+                className="w-full py-2.5 text-sm font-medium text-accent bg-accent/10 border border-accent/25 rounded-lg hover:bg-accent/20 transition-colors"
               >
                 View All Sources
               </motion.button>

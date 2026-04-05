@@ -1,9 +1,4 @@
-import axios from "axios";
-
-const api = axios.create({
-    baseURL: "http://localhost:5000/api",
-    withCredentials: true
-});
+import apiClient from "./apiClient";
 
 const getAuthHeaders = () => {
     return {
@@ -12,16 +7,16 @@ const getAuthHeaders = () => {
 };
 
 export const createChannel = async (data: any) => {
-    const response = await api.post("/channels", data, getAuthHeaders());
+    const response = await apiClient.post("/channels", data, getAuthHeaders());
     return response.data;
 };
 
 export const getMyChannels = async () => {
-    const response = await api.get("/channels", getAuthHeaders());
+    const response = await apiClient.get("/channels", getAuthHeaders());
     return response.data;
 };
 
 export const getChannelMessages = async (channelId: string) => {
-    const response = await api.get(`/channels/${channelId}/messages`, getAuthHeaders());
+    const response = await apiClient.get(`/channels/${channelId}/messages`, getAuthHeaders());
     return response.data;
 };

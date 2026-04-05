@@ -87,7 +87,7 @@ const SignUp = () => {
         <div className="w-full max-w-md">
           {/* Logo/Brand */}
           <div className="mb-6 flex items-center justify-between">
-            <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-accent-gradient rounded-lg flex items-center justify-center shadow-accent">
               <div className="w-6 h-6 border-2 border-white rounded-lg"></div>
             </div>
             <div>
@@ -123,7 +123,7 @@ const SignUp = () => {
                   onFocus={() => setFocusedField("name")}
                   onBlur={() => setFocusedField("")}
                   className={`w-full bg-slate-800/50 border ${focusedField === "name"
-                      ? "border-blue-500 ring-2 ring-blue-500/20"
+                      ? "border-accent ring-2 ring-accent/20"
                       : "border-slate-700"
                     } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
                              focus:outline-none transition-all duration-200`}
@@ -147,7 +147,7 @@ const SignUp = () => {
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField("")}
                   className={`w-full bg-slate-800/50 border ${focusedField === "email"
-                      ? "border-blue-500 ring-2 ring-blue-500/20"
+                      ? "border-accent ring-2 ring-accent/20"
                       : "border-slate-700"
                     } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
                              focus:outline-none transition-all duration-200`}
@@ -171,7 +171,7 @@ const SignUp = () => {
                   onFocus={() => setFocusedField("password")}
                   onBlur={() => setFocusedField("")}
                   className={`w-full bg-slate-800/50 border ${focusedField === "password"
-                      ? "border-blue-500 ring-2 ring-blue-500/20"
+                      ? "border-accent ring-2 ring-accent/20"
                       : "border-slate-700"
                     } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
                              focus:outline-none transition-all duration-200`}
@@ -184,7 +184,7 @@ const SignUp = () => {
             </div>
 
             <div className="pt-4 border-t border-slate-800">
-              <h3 className="text-sm font-semibold text-blue-400 mb-4 uppercase tracking-wider">
+              <h3 className="text-sm font-semibold text-accent mb-4 uppercase tracking-wider">
                 Organization Details (Optional)
               </h3>
 
@@ -203,7 +203,7 @@ const SignUp = () => {
                       onFocus={() => setFocusedField("orgName")}
                       onBlur={() => setFocusedField("")}
                       className={`w-full bg-slate-800/50 border ${focusedField === "orgName"
-                          ? "border-blue-500 ring-2 ring-blue-500/20"
+                          ? "border-accent ring-2 ring-accent/20"
                           : "border-slate-700"
                         } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
                                  focus:outline-none transition-all duration-200`}
@@ -226,7 +226,7 @@ const SignUp = () => {
                       onFocus={() => setFocusedField("orgSlug")}
                       onBlur={() => setFocusedField("")}
                       className={`w-full bg-slate-800/50 border ${focusedField === "orgSlug"
-                          ? "border-blue-500 ring-2 ring-blue-500/20"
+                          ? "border-accent ring-2 ring-accent/20"
                           : "border-slate-700"
                         } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
                                  focus:outline-none transition-all duration-200 text-sm font-mono`}
@@ -247,7 +247,7 @@ const SignUp = () => {
                 transition-all duration-200 flex items-center justify-center gap-2
                 ${loading
                   ? "bg-slate-600 cursor-not-allowed"
-                  : "bg-linear-to-r from-blue-600 to-blue-600 hover:from-blue-500 hover:to-blue-500 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50"
+                  : "bg-accent-gradient shadow-accent shadow-lg"
                 }
               `}
             >
@@ -306,7 +306,7 @@ const SignUp = () => {
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-blue-400 font-medium hover:text-blue-300 transition-colors"
+              className="text-accent font-medium hover:opacity-80 transition-colors"
             >
               Sign in
             </Link>
@@ -326,7 +326,7 @@ const SignUp = () => {
       </div>
 
       {/* Right Side - Features */}
-      <div className="hidden lg:flex flex-1 items-center justify-center p-8 bg-linear-to-br from-blue-600/10 to-blue-600/10 backdrop-blur-2xl border-l border-slate-800/50">
+      <div className="hidden lg:flex flex-1 items-center justify-center p-8 bg-accent/5 backdrop-blur-2xl border-l border-slate-800/50">
         <div className="max-w-md">
           <div className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -340,8 +340,8 @@ const SignUp = () => {
           <div className="space-y-6">
             {features.map((feature, index) => (
               <div key={index} className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30 flex items-center justify-center shrink-0">
-                  <Check className="w-5 h-5 text-blue-400" />
+                <div className="w-10 h-10 rounded-lg bg-accent/20 border border-accent/30 flex items-center justify-center shrink-0">
+                  <Check className="w-5 h-5 text-accent" />
                 </div>
                 <div>
                   <h3 className="text-gray-900 dark:text-white font-semibold mb-1">{feature}</h3>
@@ -353,12 +353,12 @@ const SignUp = () => {
             ))}
           </div>
 
-          <div className="mt-12 p-6 rounded-lg bg-linear-to-br from-blue-500/10 to-blue-500/10 border border-blue-500/20">
+          <div className="mt-12 p-6 rounded-lg bg-accent/5 border border-accent/20">
             <div className="flex items-center gap-4 mb-4">
               <img
                 src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
                 alt="User"
-                className="w-12 h-12 rounded-full border-2 border-blue-500/50"
+                className="w-12 h-12 rounded-full border-2 border-accent/50"
               />
               <div>
                 <div className="text-gray-900 dark:text-white font-semibold">Sarah Johnson</div>
