@@ -1,9 +1,4 @@
-import axios from "axios";
-
-const api = axios.create({
-    baseURL: "http://localhost:5000/api",
-    withCredentials: true
-});
+import apiClient from "./apiClient";
 
 export interface DocumentResponse {
     _id: string;
@@ -21,46 +16,46 @@ export interface DocumentResponse {
     updatedAt: string;
 }
 
-export const fetchDocuments = async (token: string): Promise<DocumentResponse[]> => {
-    const res = await api.get("/documents", {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+export const fetchDocuments = async (token?: string): Promise<DocumentResponse[]> => {
+    const res = await apiClient.get("/documents", {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
     });
     return res.data;
 };
 
-export const fetchDocumentById = async (token: string, id: string): Promise<DocumentResponse> => {
-    const res = await api.get(`/documents/${id}`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+export const fetchDocumentById = async (token?: string, id?: string): Promise<DocumentResponse> => {
+    const res = await apiClient.get(`/documents/${id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
     });
     return res.data;
 };
 
-export const deleteDocument = async (token: string, id: string): Promise<void> => {
-    await api.delete(`/documents/${id}`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+export const deleteDocument = async (token?: string, id?: string): Promise<void> => {
+    await apiClient.delete(`/documents/${id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
     });
 };
 
-export const uploadDocument = async (token: string, formData: FormData): Promise<{ documentId: string; jobId: string; status: string }> => {
-    const res = await api.post("/documents", formData, {
+export const uploadDocument = async (token?: string, formData?: FormData): Promise<{ documentId: string; jobId: string; status: string }> => {
+    const res = await apiClient.post("/documents", formData, {
         headers: {
-            Authorization: `Bearer ${token}`,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
             "Content-Type": "multipart/form-data"
         }
     });
     return res.data;
 };
 
-export const updateDocumentStatus = async (token: string, id: string, status: string): Promise<void> => {
-    await api.patch(`/documents/${id}/status`, { status }, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+export const updateDocumentStatus = async (token?: string, id?: string, status?: string): Promise<void> => {
+    await apiClient.patch(`/documents/${id}/status`, { status }, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
     });
+};
+
+export const viewDocument = async (token?: string, id?: string): Promise<Blob> => {
+    const res = await apiClient.get(`/documents/${id}/view`, {
+        responseType: "blob",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
+    });
+    return res.data;
 };

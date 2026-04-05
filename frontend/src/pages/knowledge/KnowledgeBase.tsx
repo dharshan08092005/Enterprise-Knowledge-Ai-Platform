@@ -34,6 +34,7 @@ import {
 } from "@tabler/icons-react";
 import { getUserRole, getToken } from "@/lib/auth";
 import { fetchKnowledgeBase } from "@/services/knowledgeBaseService";
+import { viewDocument } from "@/services/documentService";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // Types
@@ -597,16 +598,8 @@ const PreviewModal = ({
             try {
                 setLoading(true);
                 setError(null);
-                const token = getToken();
-                const res = await fetch(`http://localhost:5000/api/documents/${doc.id}/view`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-
-                if (!res.ok) throw new Error("Failed to load document preview");
-
-                const blob = await res.blob();
+                const token = getToken() || undefined;
+                const blob = await viewDocument(token, doc.id);
                 const url = URL.createObjectURL(blob);
                 setBlobUrl(url);
             } catch (err: any) {
@@ -769,7 +762,7 @@ export default function KnowledgeBase() {
                     setError("Authentication required");
                     return;
                 }
-                const data = await fetchKnowledgeBase(token);
+                const data = await fetchKnowledgeBase();
                 // Map API response to Document interface
                 const mappedDocs: Document[] = data.map((doc: any) => ({
                     id: doc.id,

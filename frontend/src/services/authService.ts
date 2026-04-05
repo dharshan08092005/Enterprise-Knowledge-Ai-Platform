@@ -1,12 +1,4 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:5000/api/auth";
-
-// Axios instance
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true // 🔴 REQUIRED for refresh token cookie
-});
+import apiClient from "./apiClient";
 
 // Signup
 export const signup = async (data: {
@@ -16,7 +8,7 @@ export const signup = async (data: {
   organizationName?: string;
   organizationSlug?: string;
 }) => {
-  const res = await api.post("/signup", data);
+  const res = await apiClient.post("/auth/signup", data);
   return res.data;
 };
 
@@ -25,13 +17,13 @@ export const login = async (data: {
   email: string;
   password: string;
 }) => {
-  const res = await api.post("/login", data);
+  const res = await apiClient.post("/auth/login", data);
   return res.data;
 };
 
 // Get current user
 export const getMe = async (token: string) => {
-  const res = await api.get("/me", {
+  const res = await apiClient.get("/auth/me", {
     headers: {
       Authorization: `Bearer ${token}`
     }

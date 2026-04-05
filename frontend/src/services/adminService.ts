@@ -1,9 +1,4 @@
-import axios from "axios";
-
-const api = axios.create({
-    baseURL: "http://localhost:5000/api",
-    withCredentials: true
-});
+import apiClient from "./apiClient";
 
 export interface AuditLogUser {
     _id: string;
@@ -38,7 +33,7 @@ export const fetchAuditLogs = async (
         resourceType?: string;
     }
 ): Promise<AuditLogsResponse> => {
-    const res = await api.get("/admin/logs", {
+    const res = await apiClient.get("/admin/logs", {
         headers: {
             Authorization: `Bearer ${token}`
         },
@@ -111,7 +106,7 @@ export interface SystemSettings {
 }
 
 export const fetchSettings = async (token: string): Promise<SystemSettings> => {
-    const res = await api.get("/admin/settings", {
+    const res = await apiClient.get("/admin/settings", {
         headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;
@@ -121,7 +116,7 @@ export const updateSettings = async (
     token: string,
     settings: Partial<SystemSettings>
 ): Promise<{ message: string; settings: SystemSettings }> => {
-    const res = await api.put("/admin/settings", settings, {
+    const res = await apiClient.put("/admin/settings", settings, {
         headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;
@@ -131,7 +126,7 @@ export const testServiceConnection = async (
     token: string,
     service: string
 ): Promise<{ success: boolean; message: string }> => {
-    const res = await api.post(
+    const res = await apiClient.post(
         "/admin/settings/test-connection",
         { service },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -152,21 +147,21 @@ export interface AdminUser {
 }
 
 export const fetchAllUsers = async (token: string): Promise<AdminUser[]> => {
-    const res = await api.get("/admin/users/users", {
+    const res = await apiClient.get("/admin/users/users", {
         headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;
 };
 
 export const fetchAuditors = async (token: string): Promise<AdminUser[]> => {
-    const res = await api.get("/admin/users/users/auditors", {
+    const res = await apiClient.get("/admin/users/users/auditors", {
         headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;
 };
 
 export const createUser = async (token: string, userData: { email: string; name: string; role: string; departmentId: string }): Promise<AdminUser> => {
-    const res = await api.post("/admin/users/users", userData, {
+    const res = await apiClient.post("/admin/users/users", userData, {
         headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;
@@ -177,7 +172,7 @@ export const updateUserDepartment = async (
     userId: string,
     departmentId: string
 ): Promise<{ message: string; user: { _id: string; departmentId: string; departmentName: string } }> => {
-    const res = await api.put(`/admin/users/users/${userId}/department`, { departmentId }, {
+    const res = await apiClient.put(`/admin/users/users/${userId}/department`, { departmentId }, {
         headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;

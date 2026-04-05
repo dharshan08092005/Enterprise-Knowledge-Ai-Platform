@@ -1,9 +1,4 @@
-import axios from "axios";
-
-const api = axios.create({
-    baseURL: "http://localhost:5000/api",
-    withCredentials: true
-});
+import apiClient from "./apiClient";
 
 const getAuthHeader = () => ({
   Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -50,7 +45,7 @@ export const sendChatQuery = async (
   message: string,
   sessionId?: string
 ): Promise<ChatResponse> => {
-  const response = await api.post(
+  const response = await apiClient.post(
     "/chat",
     { message, sessionId },
     { headers: getAuthHeader() }
@@ -60,7 +55,7 @@ export const sendChatQuery = async (
 
 /** Get all chat sessions for the current user */
 export const getChatSessions = async (): Promise<ChatSessionSummary[]> => {
-  const response = await api.get("/chat/sessions", {
+  const response = await apiClient.get("/chat/sessions", {
     headers: getAuthHeader(),
   });
   return response.data;
@@ -70,7 +65,7 @@ export const getChatSessions = async (): Promise<ChatSessionSummary[]> => {
 export const getChatSessionById = async (
   id: string
 ): Promise<ChatSessionFull> => {
-  const response = await api.get(`/chat/sessions/${id}`, {
+  const response = await apiClient.get(`/chat/sessions/${id}`, {
     headers: getAuthHeader(),
   });
   return response.data;
@@ -78,7 +73,7 @@ export const getChatSessionById = async (
 
 /** Delete a chat session */
 export const deleteChatSessionById = async (id: string): Promise<void> => {
-  await api.delete(`/chat/sessions/${id}`, {
+  await apiClient.delete(`/chat/sessions/${id}`, {
     headers: getAuthHeader(),
   });
 };

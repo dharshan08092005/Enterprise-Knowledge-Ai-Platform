@@ -1,31 +1,16 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:5000/api/users";
-
-const api = axios.create({
-    baseURL: API_URL,
-    withCredentials: true
-});
-
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+import apiClient from "./apiClient";
 
 export const getMe = async () => {
-    const res = await api.get("/me");
+    const res = await apiClient.get("/users/me");
     return res.data;
 };
 
 export const updateMe = async (data: any) => {
-    const res = await api.patch("/me", data);
+    const res = await apiClient.patch("/users/me", data);
     return res.data;
 };
 
 export const getOrganizationDirectory = async () => {
-    const res = await api.get("/directory");
+    const res = await apiClient.get("/users/directory");
     return res.data;
 };
