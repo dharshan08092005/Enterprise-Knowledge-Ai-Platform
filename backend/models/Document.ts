@@ -11,9 +11,12 @@ interface IDocument extends Document {
   filePath: string;
   mimeType: string;
   size: number;
-  status: "uploaded" | "processing" | "active";
+  status: "uploaded" | "processing" | "active" | "failed" | "deactivated" | "superseded";
+  version: number;
+  supersededBy?: Types.ObjectId;
   pageCount?: number;
   chunkCount?: number;
+  s3Key?: string | null;
 }
 
 const documentSchema = new Schema<IDocument>(
@@ -79,8 +82,18 @@ const documentSchema = new Schema<IDocument>(
     // Processing lifecycle
     status: {
       type: String,
-      enum: ["uploaded", "processing", "active"],
+      enum: ["uploaded", "processing", "active", "failed", "deactivated", "superseded"],
       default: "uploaded"
+    },
+    
+    version: {
+      type: Number,
+      default: 1
+    },
+
+    supersededBy: {
+      type: Schema.Types.ObjectId,
+      ref: "Document"
     },
 
     pageCount: {
@@ -91,6 +104,11 @@ const documentSchema = new Schema<IDocument>(
     chunkCount: {
       type: Number,
       default: 0
+    },
+
+    s3Key: {
+      type: String,
+      default: null // The direct AWS Bucket object key for streaming retrievals
     }
   },
   {

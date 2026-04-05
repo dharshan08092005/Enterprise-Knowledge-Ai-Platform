@@ -19,7 +19,6 @@ import {
     IconCheck,
     IconLoader2,
     IconX,
-    IconChevronDown,
     IconCalendar,
     IconLock,
     IconWorld,
@@ -37,8 +36,8 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 
 // Types
 type FileType = "pdf" | "doc" | "docx" | "txt" | "xls" | "xlsx" | "csv" | "other";
-type StatusType = "uploaded" | "processing" | "active";
-type AccessScopeType = "public" | "department" | "restricted";
+type StatusType = "uploaded" | "processing" | "active" | "failed" | "deactivated" | "superseded";
+type AccessScopeType = "public" | "department" | "restricted" | "private" | "team" | "organization";
 
 // Helper functions
 const formatFileSize = (bytes: number): string => {
@@ -58,7 +57,7 @@ const formatDate = (date: Date | string): string => {
     return dateObj.toLocaleDateString();
 };
 
-const getFileType = (fileName: string, mimeType: string): FileType => {
+const getFileType = (fileName: string): FileType => {
     const ext = fileName?.split(".").pop()?.toLowerCase() || "";
     const typeMap: Record<string, FileType> = {
         pdf: "pdf",
@@ -77,13 +76,13 @@ const FileIcon = ({ type, size = 24 }: { type: FileType; size?: number }) => {
     const iconClass = `w-${size === 24 ? 6 : 5} h-${size === 24 ? 6 : 5}`;
     const icons: Record<FileType, JSX.Element> = {
         pdf: <IconFileTypePdf className={`${iconClass} text-red-400`} />,
-        doc: <IconFileTypeDoc className={`${iconClass} text-blue-400`} />,
-        docx: <IconFileTypeDoc className={`${iconClass} text-blue-400`} />,
-        txt: <IconFileTypeTxt className={`${iconClass} text-gray-400`} />,
+        doc: <IconFileTypeDoc className={`${iconClass} text-accent`} />,
+        docx: <IconFileTypeDoc className={`${iconClass} text-accent`} />,
+        txt: <IconFileTypeTxt className={`${iconClass} text-gray-500 dark:text-slate-400`} />,
         xls: <IconFileTypeXls className={`${iconClass} text-green-400`} />,
         xlsx: <IconFileTypeXls className={`${iconClass} text-green-400`} />,
         csv: <IconFileTypeCsv className={`${iconClass} text-emerald-400`} />,
-        other: <IconFile className={`${iconClass} text-gray-400`} />,
+        other: <IconFile className={`${iconClass} text-gray-500 dark:text-slate-400`} />,
     };
     return icons[type] || icons.other;
 };
@@ -92,7 +91,7 @@ const FileIcon = ({ type, size = 24 }: { type: FileType; size?: number }) => {
 const StatusBadge = ({ status }: { status: StatusType }) => {
     if (status === "processing" || status === "uploaded") {
         return (
-            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-accent/20 text-accent border border-accent/25 rounded-full">
                 <IconLoader2 className="w-3 h-3 animate-spin" />
                 {status === "uploaded" ? "Queued" : "Processing"}
             </span>
@@ -108,8 +107,35 @@ const StatusBadge = ({ status }: { status: StatusType }) => {
         );
     }
 
+    if (status === "failed") {
+        return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30 rounded-full">
+                <IconX className="w-3 h-3" />
+                Failed
+            </span>
+        );
+    }
+
+    if (status === "deactivated") {
+        return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full">
+                <IconLock className="w-3 h-3" />
+                Muted
+            </span>
+        );
+    }
+
+    if (status === "superseded") {
+        return (
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full">
+                <IconRefresh className="w-3 h-3" />
+                Superseded
+            </span>
+        );
+    }
+
     return (
-        <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-gray-500/20 text-gray-400 border border-gray-500/30 rounded-full">
+        <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-gray-500/20 text-gray-500 dark:text-slate-400 border border-gray-500/30 rounded-full">
             Unknown
         </span>
     );
@@ -119,7 +145,10 @@ const StatusBadge = ({ status }: { status: StatusType }) => {
 const AccessScopeBadge = ({ scope }: { scope: AccessScopeType }) => {
     const config: Record<AccessScopeType, { icon: typeof IconLock; label: string; color: string }> = {
         restricted: { icon: IconLock, label: "Restricted", color: "red" },
+        private: { icon: IconLock, label: "Private", color: "gray" },
+        team: { icon: IconUsers, label: "Team", color: "blue" },
         department: { icon: IconUsers, label: "Department", color: "amber" },
+        organization: { icon: IconWorld, label: "Organization", color: "indigo" },
         public: { icon: IconWorld, label: "Public", color: "emerald" },
     };
 
@@ -146,7 +175,7 @@ const DocumentRow = ({
     onDelete: () => void;
 }) => {
     const [showMenu, setShowMenu] = useState(false);
-    const fileType = getFileType(doc.fileName, doc.mimeType);
+    const fileType = getFileType(doc.fileName);
 
     return (
         <motion.tr
@@ -158,7 +187,7 @@ const DocumentRow = ({
             {/* Document Info */}
             <td className="py-4 px-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}>
+                    <div className="p-2.5 rounded-lg" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}>
                         <FileIcon type={fileType} />
                     </div>
                     <div className="min-w-0">
@@ -175,7 +204,7 @@ const DocumentRow = ({
 
             {/* Upload Date */}
             <td className="py-4 px-4">
-                <div className="flex items-center gap-1.5 text-sm text-gray-400">
+                <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
                     <IconCalendar className="w-4 h-4" />
                     {formatDate(doc.createdAt)}
                 </div>
@@ -193,9 +222,9 @@ const DocumentRow = ({
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setShowMenu(!showMenu)}
-                        className="p-2 rounded-lg hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-2 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
                     >
-                        <IconDotsVertical className="w-4 h-4 text-gray-400" />
+                        <IconDotsVertical className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                     </motion.button>
 
                     <AnimatePresence>
@@ -206,17 +235,17 @@ const DocumentRow = ({
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    className="absolute right-0 top-full mt-1 w-44 rounded-xl shadow-2xl z-20 overflow-hidden"
+                                    className="absolute right-0 top-full mt-1 w-44 rounded-lg shadow-xl z-20 overflow-hidden"
                                     style={{ background: 'var(--bg-modal)', border: '1px solid var(--border-primary)' }}
                                 >
                                     <button
                                         onClick={() => { onView(); setShowMenu(false); }}
-                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 transition-colors"
+                                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:bg-white/5 transition-colors"
                                     >
                                         <IconEye className="w-4 h-4" />
                                         View Details
                                     </button>
-                                    <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 transition-colors">
+                                    <button className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:bg-white/5 transition-colors">
                                         <IconDownload className="w-4 h-4" />
                                         Download
                                     </button>
@@ -252,6 +281,7 @@ const UploadModal = ({
     const [dragOver, setDragOver] = useState(false);
     const [files, setFiles] = useState<File[]>([]);
     const [title, setTitle] = useState("");
+    const [accessScope, setAccessScope] = useState<AccessScopeType>("public");
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
 
@@ -294,12 +324,14 @@ const UploadModal = ({
             const formData = new FormData();
             formData.append("file", files[0]);
             formData.append("title", title.trim());
+            formData.append("accessScope", accessScope);
 
             await uploadDocument(token, formData);
             onUploadComplete();
             onClose();
             setFiles([]);
             setTitle("");
+            setAccessScope("public");
         } catch (err: any) {
             setUploadError(err.response?.data?.message || err.message || "Failed to upload document");
         } finally {
@@ -324,27 +356,27 @@ const UploadModal = ({
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg z-50"
                     >
-                        <div className="rounded-2xl shadow-2xl overflow-hidden" style={{ background: 'var(--bg-modal)', border: '1px solid var(--border-primary)' }}>
+                        <div className="rounded-lg shadow-xl overflow-hidden" style={{ background: 'var(--bg-modal)', border: '1px solid var(--border-primary)' }}>
                             {/* Header */}
                             <div className="p-6" style={{ borderBottom: '1px solid var(--border-primary)' }}>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-                                            <IconCloudUpload className="w-5 h-5 text-purple-400" />
+                                        <div className="p-2 rounded-lg bg-accent/20">
+                                            <IconCloudUpload className="w-5 h-5 text-accent" />
                                         </div>
                                         <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Upload Document</h3>
                                     </div>
                                     <button
                                         onClick={onClose}
-                                        className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                                        className="p-2 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors"
                                     >
-                                        <IconX className="w-5 h-5 text-gray-400" />
+                                        <IconX className="w-5 h-5 text-gray-500 dark:text-slate-400" />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Content */}
-                            <div className="p-6 space-y-6">
+                            <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
                                 {/* Title Input */}
                                 <div>
                                     <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-muted)' }}>Document Title</label>
@@ -353,9 +385,39 @@ const UploadModal = ({
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
                                         placeholder="Enter document title..."
-                                        className="w-full px-4 py-3 rounded-xl focus:outline-none"
+                                        className="w-full px-4 py-3 rounded-lg focus:outline-none"
                                         style={{ background: 'var(--bg-input)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)' }}
                                     />
+                                </div>
+
+                                {/* Access Visibility */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-muted)' }}>Who can access this document?</label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {[
+                                            { id: "public", label: "Organization-wide", sub: "Everyone in the company can see this", icon: IconWorld },
+                                            { id: "department", label: "Department Only", sub: "Only your department members", icon: IconUsers },
+                                            { id: "restricted", label: "Private / Restricted", sub: "Only you and enterprise admins", icon: IconLock },
+                                        ].map((option) => (
+                                            <button
+                                                key={option.id}
+                                                onClick={() => setAccessScope(option.id as AccessScopeType)}
+                                                className={`flex items-start gap-4 p-4 rounded-xl border text-left transition-all ${
+                                                    accessScope === option.id 
+                                                    ? "bg-accent/10 border-accent shadow-sm" 
+                                                    : "bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 hover:border-white/20"
+                                                }`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${accessScope === option.id ? "bg-accent text-white" : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-slate-400"}`}>
+                                                    <option.icon className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold" style={{ color: accessScope === option.id ? 'var(--accent-primary)' : 'var(--text-primary)' }}>{option.label}</p>
+                                                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-disabled)' }}>{option.sub}</p>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* Drop Zone */}
@@ -363,9 +425,9 @@ const UploadModal = ({
                                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                                     onDragLeave={() => setDragOver(false)}
                                     onDrop={handleDrop}
-                                    className={`relative p-8 border-2 border-dashed rounded-xl text-center transition-all ${dragOver
-                                        ? "border-purple-500 bg-purple-500/10"
-                                        : "border-white/20 hover:border-white/30"
+                                    className={`relative p-8 border-2 border-dashed rounded-lg text-center transition-all ${dragOver
+                                        ? "border-accent bg-accent/10"
+                                        : "border-gray-300 dark:border-white/20 hover:border-white/30"
                                         }`}
                                 >
                                     <input
@@ -374,9 +436,9 @@ const UploadModal = ({
                                         className="absolute inset-0 opacity-0 cursor-pointer"
                                         accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.csv"
                                     />
-                                    <IconCloudUpload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-white font-medium">Drag & drop file here</p>
-                                    <p className="text-sm text-gray-500 mt-1">or click to browse</p>
+                                    <IconCloudUpload className="w-12 h-12 text-gray-500 dark:text-slate-400 mx-auto mb-4" />
+                                    <p className="text-gray-900 dark:text-white font-medium">Drag & drop file here</p>
+                                    <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">or click to browse</p>
                                     <p className="text-xs text-gray-600 mt-3">
                                         Supported: PDF, DOC, DOCX, TXT, XLS, XLSX, CSV
                                     </p>
@@ -385,20 +447,20 @@ const UploadModal = ({
                                 {/* Selected Files */}
                                 {files.length > 0 && (
                                     <div className="space-y-2">
-                                        <p className="text-sm font-medium text-gray-400">Selected File</p>
-                                        <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                                        <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Selected File</p>
+                                        <div className="flex items-center justify-between p-3 bg-white dark:bg-white/5 rounded-lg">
                                             <div className="flex items-center gap-3 min-w-0">
                                                 <IconFileCheck className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                                                 <div className="min-w-0">
-                                                    <p className="text-sm text-white truncate">{files[0].name}</p>
-                                                    <p className="text-xs text-gray-500">{formatFileSize(files[0].size)}</p>
+                                                    <p className="text-sm text-gray-900 dark:text-white truncate">{files[0].name}</p>
+                                                    <p className="text-xs text-gray-500 dark:text-slate-500">{formatFileSize(files[0].size)}</p>
                                                 </div>
                                             </div>
                                             <button
                                                 onClick={removeFile}
-                                                className="p-1 hover:bg-white/10 rounded transition-colors"
+                                                className="p-1 hover:bg-gray-100 dark:bg-white/10 rounded transition-colors"
                                             >
-                                                <IconX className="w-4 h-4 text-gray-400" />
+                                                <IconX className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                                             </button>
                                         </div>
                                     </div>
@@ -419,7 +481,7 @@ const UploadModal = ({
                             <div className="p-6 flex gap-3" style={{ borderTop: '1px solid var(--border-primary)' }}>
                                 <button
                                     onClick={onClose}
-                                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/10 transition-colors"
+                                    className="flex-1 px-4 py-3 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/10 transition-colors"
                                 >
                                     Cancel
                                 </button>
@@ -428,9 +490,9 @@ const UploadModal = ({
                                     whileTap={{ scale: 0.98 }}
                                     onClick={handleUpload}
                                     disabled={files.length === 0 || !title.trim() || isUploading}
-                                    className={`flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 ${files.length > 0 && title.trim() && !isUploading
-                                        ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                                        : "bg-white/10 text-gray-500 cursor-not-allowed"
+                                    className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${files.length > 0 && title.trim() && !isUploading
+                                        ? "bg-accent-gradient text-white shadow-accent"
+                                        : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-slate-500 cursor-not-allowed"
                                         }`}
                                 >
                                     {isUploading ? (
@@ -467,7 +529,6 @@ export default function DocumentsPage() {
     const userRole = getUserRole();
     const isAdmin = userRole === "ADMIN";
 
-    // Fetch documents from API
     const loadDocuments = async () => {
         try {
             setIsLoading(true);
@@ -487,9 +548,41 @@ export default function DocumentsPage() {
         }
     };
 
+    // Re-load documents silently (without full loading state)
+    const refreshDocuments = async () => {
+        try {
+            const token = getToken();
+            if (!token) return;
+            const data = await fetchDocuments(token);
+            setDocuments(data);
+        } catch (err) {
+            console.error("Failed to refresh documents:", err);
+        }
+    };
+
     useEffect(() => {
         loadDocuments();
     }, []);
+
+    // Implement Polling
+    useEffect(() => {
+        const hasProcessing = documents.some(doc => doc.status === "uploaded" || doc.status === "processing");
+        let interval: any = null;
+
+        if (hasProcessing) {
+            console.log("🔄 Starting polling for processing documents...");
+            interval = setInterval(() => {
+                refreshDocuments();
+            }, 5000); // Poll every 5 seconds
+        }
+
+        return () => {
+            if (interval) {
+                console.log("🛑 Stopping document polling.");
+                clearInterval(interval);
+            }
+        };
+    }, [documents]);
 
     // Filter documents
     const filteredDocuments = documents.filter((doc) => {
@@ -539,7 +632,7 @@ export default function DocumentsPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={loadDocuments}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors"
                         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)', color: 'var(--text-secondary)' }}
                     >
                         <IconRefresh className="w-4 h-4" />
@@ -549,7 +642,7 @@ export default function DocumentsPage() {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setShowUploadModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-sm font-medium text-white shadow-lg shadow-purple-500/25"
+                        className="flex items-center gap-2 px-4 py-2 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent"
                     >
                         <IconUpload className="w-4 h-4" />
                         Upload Document
@@ -565,18 +658,18 @@ export default function DocumentsPage() {
                 className="grid grid-cols-2 md:grid-cols-3 gap-4"
             >
                 {[
-                    { label: "Total Documents", value: stats.total, icon: IconFolder, color: "purple" },
+                    { label: "Total Documents", value: stats.total, icon: IconFolder, color: "blue" },
                     { label: "Active", value: stats.active, icon: IconCheck, color: "emerald" },
                     { label: "Processing", value: stats.processing, icon: IconClock, color: "blue" },
                 ].map((stat, index) => (
                     <div
                         key={index}
-                        className="p-4 rounded-xl"
+                        className="p-4 rounded-lg"
                         style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
                     >
                         <div className="flex items-center gap-3 mb-2">
-                            <div className={`p-2 rounded-lg bg-${stat.color}-500/20`}>
-                                <stat.icon className={`w-4 h-4 text-${stat.color}-400`} />
+                            <div className={`p-2 rounded-lg bg-accent/20`}>
+                                <stat.icon className={`w-4 h-4 text-accent`} />
                             </div>
                         </div>
                         <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
@@ -594,13 +687,13 @@ export default function DocumentsPage() {
             >
                 {/* Search */}
                 <div className="relative flex-1">
-                    <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <IconSearch className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-slate-500" />
                     <input
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search documents..."
-                        className="w-full pl-12 pr-4 py-3 rounded-xl text-sm focus:outline-none"
+                        className="w-full pl-12 pr-4 py-3 rounded-lg text-sm focus:outline-none"
                         style={{ background: 'var(--bg-input)', border: '1px solid var(--border-primary)', color: 'var(--text-primary)' }}
                     />
                 </div>
@@ -615,7 +708,8 @@ export default function DocumentsPage() {
                         { value: "all", label: "All Status" },
                         { value: "active", label: "Active" },
                         { value: "processing", label: "Processing" },
-                        { value: "uploaded", label: "Queued" }
+                        { value: "uploaded", label: "Queued" },
+                        { value: "failed", label: "Failed" }
                     ]}
                 />
 
@@ -634,17 +728,17 @@ export default function DocumentsPage() {
                 />
 
                 {/* View Toggle */}
-                <div className="flex items-center gap-1 p-1 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}>
+                <div className="flex items-center gap-1 p-1 rounded-lg" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}>
                     <button
                         onClick={() => setViewMode("list")}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-purple-500/20 text-purple-300" : "text-gray-400 hover:text-white"
+                        className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? "bg-accent/20 text-accent" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
                             }`}
                     >
                         <IconList className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => setViewMode("grid")}
-                        className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-purple-500/20 text-purple-300" : "text-gray-400 hover:text-white"
+                        className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? "bg-accent/20 text-accent" : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white"
                             }`}
                     >
                         <IconGridDots className="w-5 h-5" />
@@ -659,8 +753,8 @@ export default function DocumentsPage() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-16"
                 >
-                    <IconLoader2 className="w-12 h-12 text-purple-400 animate-spin mb-4" />
-                    <p className="text-gray-400">Loading documents...</p>
+                    <IconLoader2 className="w-12 h-12 text-accent animate-spin mb-4" />
+                    <p className="text-gray-500 dark:text-slate-400">Loading documents...</p>
                 </motion.div>
             )}
 
@@ -669,13 +763,13 @@ export default function DocumentsPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20"
+                    className="p-6 rounded-lg bg-red-500/10 border border-red-500/20"
                 >
                     <div className="flex items-center gap-3">
                         <IconAlertTriangle className="w-6 h-6 text-red-400" />
                         <div>
                             <p className="text-red-400 font-medium">Failed to load documents</p>
-                            <p className="text-sm text-gray-400 mt-1">{error}</p>
+                            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{error}</p>
                         </div>
                     </div>
                 </motion.div>
@@ -687,18 +781,18 @@ export default function DocumentsPage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="rounded-2xl overflow-hidden"
+                    className="rounded-lg overflow-hidden"
                     style={{ background: 'var(--bg-card)', border: '1px solid var(--border-primary)' }}
                 >
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
                                 <tr className="text-left" style={{ borderBottom: '1px solid var(--border-primary)' }}>
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Upload Date</th>
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Access</th>
-                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Document</th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Status</th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Upload Date</th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider">Access</th>
+                                    <th className="py-4 px-4 text-xs font-medium text-gray-500 dark:text-slate-500 uppercase tracking-wider"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -718,14 +812,14 @@ export default function DocumentsPage() {
                     {filteredDocuments.length === 0 && (
                         <div className="py-12 text-center">
                             <IconFolder className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-500">No documents found</p>
+                            <p className="text-gray-500 dark:text-slate-500">No documents found</p>
                             <p className="text-sm text-gray-600 mt-1">Upload your first document to get started</p>
                         </div>
                     )}
 
                     {/* Pagination */}
                     <div className="px-4 py-3 flex items-center justify-between" style={{ borderTop: '1px solid var(--border-primary)' }}>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-slate-500">
                             Showing {filteredDocuments.length} of {documents.length} documents
                         </p>
                     </div>

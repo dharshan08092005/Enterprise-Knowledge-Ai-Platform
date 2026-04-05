@@ -2,7 +2,7 @@
 import { cn } from "../lib/utils";
 import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { IconMenu2, IconX, IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { IconMenu2, IconX } from "@tabler/icons-react";
 import { useLocation, Link } from "react-router-dom";
 
 interface Links {
@@ -71,7 +71,11 @@ export const Sidebar = ({
   );
 };
 
-export const SidebarBody = (props: React.ComponentProps<typeof motion.div>) => {
+export const SidebarBody = (
+  props: Omit<React.ComponentProps<typeof motion.div>, "children"> & {
+    children?: React.ReactNode;
+  }
+) => {
   return (
     <>
       <DesktopSidebar {...props} />
@@ -84,13 +88,15 @@ export const DesktopSidebar = ({
   className,
   children,
   ...props
-}: React.ComponentProps<typeof motion.div>) => {
-  const { open, setOpen, animate } = useSidebar();
+}: Omit<React.ComponentProps<typeof motion.div>, "children"> & {
+  children?: React.ReactNode;
+}) => {
+  const { open, animate } = useSidebar();
 
   return (
     <motion.div
       className={cn(
-        "h-screen hidden md:flex md:flex-col flex-shrink-0 sticky top-0",
+        "h-screen hidden md:flex md:flex-col flex-shrink-0 sticky top-0 overflow-visible",
         className
       )}
       style={{ background: 'var(--bg-sidebar)', borderRight: '1px solid var(--border-secondary)' }}
@@ -104,27 +110,12 @@ export const DesktopSidebar = ({
       {...props}
     >
       {/* Gradient overlay at top */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-500/5 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col overflow-hidden">
         {children}
       </div>
-
-      {/* Toggle button */}
-      <motion.button
-        onClick={() => setOpen(!open)}
-        className="absolute top-6 -right-3 z-50 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg"
-        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-primary)', color: 'var(--text-muted)' }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-      >
-        {open ? (
-          <IconChevronLeft className="w-3 h-3" />
-        ) : (
-          <IconChevronRight className="w-3 h-3" />
-        )}
-      </motion.button>
     </motion.div>
   );
 };
@@ -133,7 +124,9 @@ export const MobileSidebar = ({
   className,
   children,
   ...props
-}: React.ComponentProps<"div">) => {
+}: Omit<React.ComponentProps<"div">, "children"> & {
+  children?: React.ReactNode;
+}) => {
   const { open, setOpen } = useSidebar();
   return (
     <>
@@ -145,7 +138,7 @@ export const MobileSidebar = ({
         {...props}
       >
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-accent-gradient flex items-center justify-center">
             <span className="text-white font-bold text-sm">E</span>
           </div>
           <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Enterprise AI</span>
@@ -154,7 +147,7 @@ export const MobileSidebar = ({
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setOpen(!open)}
-          className="p-2 rounded-xl border"
+          className="p-2 rounded-lg border"
           style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)', color: 'var(--text-muted)' }}
         >
           <IconMenu2 className="w-5 h-5" />
@@ -195,7 +188,7 @@ export const MobileSidebar = ({
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setOpen(false)}
-                  className="p-2 rounded-xl border"
+                  className="p-2 rounded-lg border"
                   style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)', color: 'var(--text-muted)' }}
                 >
                   <IconX className="w-5 h-5" />
@@ -226,7 +219,7 @@ export const SidebarLink = ({
     <Link
       to={link.href}
       className={cn(
-        "flex items-center gap-3 py-3 mx-3 rounded-xl transition-all duration-200",
+        "flex items-center gap-3 py-3 mx-3 rounded-lg transition-all duration-200",
         "group/sidebar relative overflow-hidden",
         open ? "px-4" : "px-0 justify-center",
         className
@@ -241,16 +234,16 @@ export const SidebarLink = ({
       {/* Active indicator */}
       {isActive && (
         <motion.div
-          layoutId="activeIndicator"
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-gradient-to-b from-purple-500 to-pink-500"
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+           layoutId="activeIndicator"
+           className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-accent"
+           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         />
       )}
 
       {/* Icon */}
       <div className={cn(
         "flex-shrink-0 transition-colors duration-200",
-        isActive ? "text-purple-400" : "group-hover/sidebar:text-purple-400"
+        isActive ? "text-accent" : "group-hover/sidebar:text-accent"
       )}>
         {link.icon}
       </div>
@@ -280,7 +273,7 @@ export const SidebarLink = ({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="ml-auto px-2 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30"
+            className="ml-auto px-2 py-0.5 text-xs font-medium bg-accent/20 text-accent rounded-full border border-accent/30"
           >
             {link.badge}
           </motion.span>
@@ -291,13 +284,18 @@ export const SidebarLink = ({
 };
 
 export const SidebarLogo = ({ open }: { open: boolean }) => {
+  const { setOpen } = useSidebar();
+
   return (
-    <Link to="/" className="flex items-center gap-3 px-6 py-5">
+    <div className="flex items-center gap-3 px-6 py-5">
       <motion.div
-        className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 flex-shrink-0"
+        className="relative w-10 h-10 rounded-lg bg-accent-gradient flex items-center justify-center shadow-accent flex-shrink-0 cursor-pointer"
+        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
         <span className="text-white font-bold text-lg">E</span>
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/20 to-transparent" />
+        <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
       </motion.div>
       <AnimatePresence>
         {open && (
@@ -308,14 +306,16 @@ export const SidebarLogo = ({ open }: { open: boolean }) => {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <h1 className="text-lg font-bold whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
-              Enterprise
-            </h1>
-            <p className="text-xs -mt-0.5 whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>AI Platform</p>
+            <Link to="/">
+              <h1 className="text-lg font-bold whitespace-nowrap" style={{ color: 'var(--text-primary)' }}>
+                Enterprise
+              </h1>
+              <p className="text-xs -mt-0.5 whitespace-nowrap" style={{ color: 'var(--text-muted)' }}>AI Platform</p>
+            </Link>
           </motion.div>
         )}
       </AnimatePresence>
-    </Link>
+    </div>
   );
 };
 
@@ -360,7 +360,7 @@ export const SidebarFooter = ({ open }: { open: boolean }) => {
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="p-4 rounded-xl border" style={{ background: 'var(--accent-subtle)', borderColor: 'var(--badge-border)' }}>
+            <div className="p-4 rounded-lg border" style={{ background: 'var(--accent-subtle)', borderColor: 'var(--badge-border)' }}>
               <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Need help?</p>
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
                 Check our documentation or contact support

@@ -1,10 +1,11 @@
+import "dotenv/config";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 
 import Job from "../models/Job";
 import Document from "../models/Document";
 import DocumentText from "../models/DocumentText";
 import DocumentChunk from "../models/DocumentChunk";
+import Organization from "../models/Organization";
 
 import { JOB_TYPES } from "../constants/jobTypes";
 import { AUDIT_ACTIONS } from "../constants/auditActions";
@@ -12,8 +13,8 @@ import { logAudit } from "../utils/auditLogger";
 
 import { extractPdfText } from "../services/extraction/pdfExtractor";
 import { chunkText } from "../services/chunking/chunker";
-
-dotenv.config();
+import { generateEmbeddingsBatch } from "../services/embeddings/ollamaEmbedder";
+import { upsertChunksToPinecone, deleteChunksFromPinecone } from "../services/vectorDb/pineconeService";
 
 let isConnected = false;
 
@@ -67,6 +68,9 @@ const processJob = async (job: any) => {
     job.stage = "initializing";
     await job.save();
 
+    // Update document status to processing
+    await Document.findByIdAndUpdate(job.documentId, { $set: { status: "processing" } });
+
     await logAudit({
       action: AUDIT_ACTIONS.JOB_STARTED,
       resourceType: "job",
@@ -85,6 +89,10 @@ const processJob = async (job: any) => {
 
     if (!document) throw new Error("Document not found");
 
+    const org = await Organization.findById(document.organizationId).select("+embeddingSettings.apiKey").lean();
+    const embSettings = org?.embeddingSettings;
+    const modelName = embSettings?.model || "nomic-embed-text";
+
     if (document.mimeType !== "application/pdf") {
       throw new Error("Unsupported file type");
     }
@@ -96,7 +104,27 @@ const processJob = async (job: any) => {
     job.stage = "extraction";
     await job.save();
 
-    const { text, pageCount } = await extractPdfText(document.filePath);
+    let fileData: string | Buffer;
+
+    if (document.s3Key) {
+      console.log(`☁️ Fetching PDF stream natively from AWS S3: ${document.s3Key}`);
+      const { s3 } = await import("../middleware/upload");
+      const { GetObjectCommand } = await import("@aws-sdk/client-s3");
+      
+      const getObjectParams = {
+        Bucket: process.env.AWS_S3_BUCKET_NAME as string,
+        Key: document.s3Key
+      };
+      const response = await s3.send(new GetObjectCommand(getObjectParams));
+      const arrayBuffer = await response.Body?.transformToByteArray();
+      if (!arrayBuffer) throw new Error("Failed to read S3 bucket payload.");
+      fileData = Buffer.from(arrayBuffer);
+    } else {
+      console.log(`📁 Processing local file: ${document.filePath}`);
+      fileData = document.filePath;
+    }
+
+    const { text, pageCount } = await extractPdfText(fileData);
 
     if (!text || text.length < 20) {
       throw new Error("Extracted text too short");
@@ -129,10 +157,45 @@ const processJob = async (job: any) => {
       documentId: document._id,
       chunkIndex: index,
       text: chunk.text,
-      tokenCount: chunk.tokenCount
+      tokenCount: chunk.tokenCount,
+      embeddingStatus: "pending",
+      embeddingModel: modelName
     }));
 
-    await DocumentChunk.insertMany(chunkDocs);
+    const insertedChunks = await DocumentChunk.insertMany(chunkDocs);
+
+    /* ---------------------------
+       EMBEDDING & VECTOR DB
+    --------------------------- */
+
+    job.stage = "embedding";
+    await job.save();
+
+    console.log(`🧠 Generating embeddings for ${chunks.length} chunks using ${modelName}`);
+    const textsToEmbed = insertedChunks.map(c => c.text);
+    const embeddings = await generateEmbeddingsBatch(textsToEmbed, embSettings as any);
+
+    console.log(`💾 Upserting to Pinecone`);
+    const pineconeChunks = insertedChunks.map((chunk, index) => ({
+      id: chunk._id.toString(),
+      text: chunk.text,
+      values: embeddings[index]
+    }));
+
+    await upsertChunksToPinecone(
+      document.organizationId.toString(),
+      document._id.toString(),
+      document.accessScope || "restricted",
+      document.ownerId.toString(),
+      document.departmentId ? document.departmentId.toString() : undefined,
+      pineconeChunks
+    );
+
+    // Update chunks status
+    await DocumentChunk.updateMany(
+      { documentId: document._id },
+      { $set: { embeddingStatus: "embedded" } }
+    );
 
     /* ---------------------------
        UPDATE DOCUMENT
@@ -142,6 +205,31 @@ const processJob = async (job: any) => {
     document.status = "active";
     document.pageCount = pageCount;
     await document.save();
+
+    /* ---------------------------
+       VERSION CONTROL: SUPERSEDE OLD
+    --------------------------- */
+    console.log(`🧹 Checking for old versions of ${document.fileName} to supersede...`);
+    const oldDocs = await Document.find({
+        organizationId: document.organizationId,
+        fileName: document.fileName,
+        _id: { $ne: document._id },
+        status: { $in: ["active", "failed", "deactivated"] } // Anything that isn't already superseded or current
+    });
+
+    for (const oldDoc of oldDocs) {
+        console.log(`♻️ Superseding v${oldDoc.version} with v${document.version}`);
+        oldDoc.status = "superseded";
+        oldDoc.supersededBy = document._id as any;
+        await oldDoc.save();
+
+        // Ensure old chunks are removed from Pinecone AI search
+        try {
+            await deleteChunksFromPinecone(oldDoc._id.toString());
+        } catch (pErr: any) {
+            console.error(`⚠️ Failed to purge old version chunks for ${oldDoc._id}:`, pErr.message);
+        }
+    }
 
     /* ---------------------------
        COMPLETE JOB
@@ -172,6 +260,16 @@ const processJob = async (job: any) => {
     if (job.attempts >= job.maxAttempts) {
       job.status = "DEAD";
       job.error = err.message;
+
+      // Update document status to failed
+      await Document.findByIdAndUpdate(job.documentId, { $set: { status: "failed" } });
+
+      // 🧹 Cleanup Pinecone if we already sent chunks
+      try {
+        await deleteChunksFromPinecone(job.documentId.toString());
+      } catch (pErr: any) {
+        console.error(`⚠️ Failed to cleanup Pinecone for failed job ${job._id}:`, pErr.message);
+      }
 
       await logAudit({
         action: AUDIT_ACTIONS.JOB_FAILED,

@@ -39,18 +39,18 @@ const StatCard = ({
     whileHover={{ y: -4, scale: 1.02 }}
     className="relative group"
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-    <div className="relative p-6 rounded-2xl border backdrop-blur-xl overflow-hidden" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
+    <div className="absolute inset-0 bg-accent/20 rounded-lg blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="relative p-6 rounded-lg border backdrop-blur-xl overflow-hidden" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}>
       {/* Background gradient orb */}
-      <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full ${gradient} opacity-20 blur-3xl`} />
+      <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full ${gradient} opacity-20 blur-2xl`} />
 
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
-          <div className={`p-3 rounded-xl ${gradient}`}>
-            <Icon className="w-6 h-6 text-white" />
+          <div className={`p-3 rounded-lg ${gradient}`}>
+            <Icon className="w-6 h-6 text-gray-900 dark:text-white" />
           </div>
-          <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
-            <IconDots className="w-4 h-4 text-gray-400" />
+          <button className="p-1.5 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors">
+            <IconDots className="w-4 h-4 text-gray-500 dark:text-slate-400" />
           </button>
         </div>
 
@@ -88,10 +88,10 @@ const ActivityItem = ({
 }) => (
   <motion.div
     whileHover={{ x: 4 }}
-    className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
+    className="flex items-start gap-4 p-4 rounded-lg hover:bg-white dark:bg-white/5 transition-colors cursor-pointer"
   >
-    <div className={`p-2.5 rounded-xl ${iconBg}`}>
-      <Icon className="w-5 h-5 text-white" />
+    <div className={`p-2.5 rounded-lg ${iconBg}`}>
+      <Icon className="w-5 h-5 text-gray-900 dark:text-white" />
     </div>
     <div className="flex-1 min-w-0">
       <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{title}</p>
@@ -110,7 +110,7 @@ const MiniChart = () => (
         initial={{ height: 0 }}
         animate={{ height: `${height}%` }}
         transition={{ duration: 0.5, delay: i * 0.05 }}
-        className="flex-1 rounded-t bg-gradient-to-t from-purple-500 to-pink-500 opacity-80 hover:opacity-100 transition-opacity"
+        className="flex-1 rounded-t bg-accent-gradient opacity-80 hover:opacity-100 transition-opacity"
       />
     ))}
   </div>
@@ -131,13 +131,13 @@ const QuickActionCard = ({
   <motion.button
     whileHover={{ scale: 1.02, y: -2 }}
     whileTap={{ scale: 0.98 }}
-    className="relative group p-5 rounded-2xl border text-left overflow-hidden transition-colors"
+    className="relative group p-5 rounded-lg border text-left overflow-hidden transition-colors"
     style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
   >
     <div className={`absolute inset-0 ${gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
     <div className="relative z-10">
-      <div className={`inline-flex p-2.5 rounded-xl ${gradient} mb-3`}>
-        <Icon className="w-5 h-5 text-white" />
+      <div className={`inline-flex p-2.5 rounded-lg ${gradient} mb-3`}>
+        <Icon className="w-5 h-5 text-gray-900 dark:text-white" />
       </div>
       <h4 className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>{title}</h4>
       <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{description}</p>
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
       change: "+12.5%",
       changeType: "up" as const,
       icon: IconMessageCircle,
-      gradient: "bg-gradient-to-br from-purple-500 to-purple-600",
+      gradient: "bg-accent-gradient",
     },
     {
       title: "Knowledge Items",
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
       change: "+8.2%",
       changeType: "up" as const,
       icon: IconDatabase,
-      gradient: "bg-gradient-to-br from-blue-500 to-cyan-500",
+      gradient: "bg-accent-gradient",
     },
     {
       title: "AI Models Active",
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
       change: "+2",
       changeType: "up" as const,
       icon: IconBrain,
-      gradient: "bg-gradient-to-br from-pink-500 to-rose-500",
+      gradient: "bg-gradient-to-br from-sky-500 to-rose-500",
     },
     {
       title: "Accuracy Rate",
@@ -187,14 +187,14 @@ export default function AdminDashboard() {
       title: "New document uploaded",
       description: "Q4 Financial Report.pdf added to knowledge base",
       time: "2 min ago",
-      iconBg: "bg-gradient-to-br from-blue-500 to-cyan-500",
+      iconBg: "bg-accent-gradient",
     },
     {
       icon: IconBrain,
       title: "Model training completed",
       description: "GPT-4 fine-tuned on company data",
       time: "1 hour ago",
-      iconBg: "bg-gradient-to-br from-purple-500 to-pink-500",
+      iconBg: "bg-accent-gradient",
     },
     {
       icon: IconUsers,
@@ -217,13 +217,13 @@ export default function AdminDashboard() {
       icon: IconSparkles,
       title: "Ask AI",
       description: "Start a conversation with AI",
-      gradient: "bg-gradient-to-br from-purple-500 to-pink-500",
+      gradient: "bg-accent-gradient",
     },
     {
       icon: IconDatabase,
       title: "Add Knowledge",
       description: "Upload documents or data",
-      gradient: "bg-gradient-to-br from-blue-500 to-cyan-500",
+      gradient: "bg-accent-gradient",
     },
     {
       icon: IconBrain,
@@ -249,11 +249,11 @@ export default function AdminDashboard() {
         style={{ background: 'var(--gradient-card)', borderColor: 'var(--border-primary)' }}
       >
         {/* Background decorations */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-pink-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/15 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-2 text-purple-300 mb-2">
+          <div className="flex items-center gap-2 text-accent mb-2 opacity-80">
             <IconClock className="w-4 h-4" />
             <span className="text-sm">Good morning</span>
           </div>
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
           </h1>
           <p className="max-w-xl" style={{ color: 'var(--text-secondary)' }}>
             Your enterprise AI platform is running smoothly. You have{" "}
-            <span className="text-purple-400 font-medium">3 pending tasks</span> and{" "}
+            <span className="text-accent font-medium">3 pending tasks</span> and{" "}
             <span className="text-emerald-400 font-medium">5 new insights</span> waiting for you.
           </p>
 
@@ -270,14 +270,14 @@ export default function AdminDashboard() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-sm font-medium text-white shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 transition-shadow"
+              className="px-6 py-2.5 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent transition-shadow"
             >
               Start Exploring
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-6 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm font-medium text-white hover:bg-white/20 transition-colors"
+              className="px-6 py-2.5 bg-gray-100 dark:bg-white/10 border border-gray-300 dark:border-white/20 rounded-lg text-sm font-medium text-gray-900 dark:text-white hover:bg-white/20 transition-colors"
             >
               View Tutorial
             </motion.button>
@@ -299,7 +299,7 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="lg:col-span-2 p-6 rounded-2xl border backdrop-blur-xl"
+          className="lg:col-span-2 p-6 rounded-lg border backdrop-blur-xl"
           style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
         >
           <div className="flex items-center justify-between mb-6">
@@ -308,13 +308,13 @@ export default function AdminDashboard() {
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Last 30 days performance</p>
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-3 py-1.5 text-xs font-medium text-purple-400 bg-purple-500/20 rounded-lg border border-purple-500/30">
+              <button className="px-3 py-1.5 text-xs font-medium text-accent bg-accent/20 rounded-lg border border-accent/30">
                 Daily
               </button>
-              <button className="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+              <button className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10 rounded-lg transition-colors">
                 Weekly
               </button>
-              <button className="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+              <button className="px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-gray-100 dark:bg-white/10 rounded-lg transition-colors">
                 Monthly
               </button>
             </div>
@@ -345,12 +345,12 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="p-6 rounded-2xl border backdrop-blur-xl"
+          className="p-6 rounded-lg border backdrop-blur-xl"
           style={{ background: 'var(--bg-card)', borderColor: 'var(--border-primary)' }}
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Recent Activity</h3>
-            <button className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
+            <button className="text-sm text-accent hover:opacity-80 transition-colors">
               View all
             </button>
           </div>
@@ -382,15 +382,15 @@ export default function AdminDashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="relative overflow-hidden rounded-2xl p-6"
+        className="relative overflow-hidden rounded-lg p-6"
         style={{ border: '1px solid var(--border-primary)', background: 'var(--gradient-card)' }}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 via-pink-600/10 to-blue-600/10" />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-accent/5 backdrop-blur-sm" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-2xl" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 animate-float">
+            <div className="p-3 rounded-lg bg-accent-gradient animate-float">
               <IconSparkles className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -403,7 +403,7 @@ export default function AdminDashboard() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl text-sm font-medium text-white shadow-lg shadow-purple-500/25 whitespace-nowrap"
+            className="px-6 py-2.5 bg-accent-gradient rounded-lg text-sm font-medium text-white shadow-accent whitespace-nowrap"
           >
             View Insights
           </motion.button>

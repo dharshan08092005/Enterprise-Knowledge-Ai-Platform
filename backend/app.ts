@@ -11,8 +11,22 @@ import cookieParser from "cookie-parser";
 const app = express();
 
 // Global middleware
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://enterprise-knowledge-ai-platform-frontend.vercel.app", // Placeholder
+  process.env.CORS_ORIGIN
+].filter(Boolean) as string[];
+
 app.use(cors({
-  origin: "http://localhost:5173", // Vite default
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes("*")) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 

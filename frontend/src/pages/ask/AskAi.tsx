@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import ReactMarkdown from "react-markdown";
 import {
   IconSend,
   IconHistory,
@@ -27,6 +28,13 @@ import {
   IconLink,
   IconRefresh,
 } from "@tabler/icons-react";
+import {
+  sendChatQuery,
+  getChatSessions,
+  getChatSessionById,
+  deleteChatSessionById,
+  type ChatSessionSummary,
+} from "../../services/chatService";
 
 // Types
 interface Message {
@@ -47,31 +55,6 @@ interface Source {
   relevance: number;
 }
 
-interface ChatSession {
-  id: string;
-  title: string;
-  lastMessage: string;
-  timestamp: Date;
-  messageCount: number;
-}
-
-// Mock data for chat history
-const mockChatHistory: ChatSession[] = [
-  { id: "1", title: "Q4 Financial Analysis", lastMessage: "The Q4 revenue increased by 15%...", timestamp: new Date(Date.now() - 1000 * 60 * 30), messageCount: 8 },
-  { id: "2", title: "Employee Benefits Policy", lastMessage: "According to the policy document...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), messageCount: 5 },
-  { id: "3", title: "Product Roadmap 2024", lastMessage: "The key milestones for Q1 include...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), messageCount: 12 },
-  { id: "4", title: "Security Compliance", lastMessage: "Based on the SOC 2 guidelines...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48), messageCount: 6 },
-  { id: "5", title: "Marketing Strategy", lastMessage: "The target audience analysis shows...", timestamp: new Date(Date.now() - 1000 * 60 * 60 * 72), messageCount: 10 },
-];
-
-// Mock sources data
-const mockSources: Source[] = [
-  { id: "1", title: "Q4 Financial Report 2024.pdf", type: "pdf", excerpt: "Revenue growth exceeded expectations with a 15% YoY increase, primarily driven by enterprise sales...", page: 12, relevance: 95 },
-  { id: "2", title: "Company Knowledge Base", type: "database", excerpt: "Historical financial data indicates consistent growth patterns across all business units...", relevance: 88 },
-  { id: "3", title: "Market Analysis Report.docx", type: "doc", excerpt: "Industry benchmarks show our performance is in the top quartile for SaaS companies...", page: 5, relevance: 76 },
-  { id: "4", title: "Internal Wiki - Finance", type: "webpage", excerpt: "Quarterly reporting guidelines and metrics definitions...", url: "/wiki/finance", relevance: 65 },
-];
-
 // Helper function
 const formatTime = (date: Date) => {
   const now = new Date();
@@ -89,7 +72,7 @@ const SourceIcon = ({ type }: { type: Source["type"] }) => {
   const icons = {
     pdf: <IconFileTypePdf className="w-5 h-5 text-red-400" />,
     doc: <IconFileTypeDoc className="w-5 h-5 text-blue-400" />,
-    webpage: <IconLink className="w-5 h-5 text-purple-400" />,
+    webpage: <IconLink className="w-5 h-5 text-blue-400" />,
     database: <IconFile className="w-5 h-5 text-emerald-400" />,
   };
   return icons[type];
@@ -110,39 +93,39 @@ const SourceCard = ({ source }: { source: Source }) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.01 }}
-      className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-all cursor-pointer"
+      className="p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:border-blue-500/30 transition-all cursor-pointer"
     >
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-white/5">
+        <div className="p-2 rounded-lg bg-white dark:bg-white/5">
           <SourceIcon type={source.type} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h4 className="text-sm font-medium text-white truncate">{source.title}</h4>
+              <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">{source.title}</h4>
               {source.page && (
-                <span className="text-xs text-gray-500">Page {source.page}</span>
+                <span className="text-xs text-gray-500 dark:text-slate-500">Page {source.page}</span>
               )}
             </div>
             <div className="flex items-center gap-1">
               <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${source.relevance >= 90 ? "bg-emerald-500/20 text-emerald-400" :
-                  source.relevance >= 70 ? "bg-blue-500/20 text-blue-400" :
+                  source.relevance >= 70 ? "bg-accent/20 text-accent" :
                     "bg-amber-500/20 text-amber-400"
                 }`}>
                 {source.relevance}%
               </span>
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-2 line-clamp-2">{source.excerpt}</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 line-clamp-2">{source.excerpt}</p>
           <div className="flex items-center gap-2 mt-3">
             <button
               onClick={handleCopy}
-              className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-white bg-white/5 rounded-lg transition-colors"
+              className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white bg-white dark:bg-white/5 rounded-lg transition-colors"
             >
               {copied ? <IconCheck className="w-3 h-3" /> : <IconCopy className="w-3 h-3" />}
               {copied ? "Copied" : "Copy"}
             </button>
-            <button className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-white bg-white/5 rounded-lg transition-colors">
+            <button className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white bg-white dark:bg-white/5 rounded-lg transition-colors">
               <IconExternalLink className="w-3 h-3" />
               View
             </button>
@@ -163,32 +146,38 @@ const ChatMessage = ({ message }: { message: Message }) => {
       animate={{ opacity: 1, y: 0 }}
       className={`flex gap-4 ${message.role === "user" ? "flex-row-reverse" : ""}`}
     >
-      <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${message.role === "user"
-          ? "bg-gradient-to-br from-purple-500 to-pink-500"
-          : "bg-gradient-to-br from-blue-500 to-cyan-500"
+      <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${message.role === "user"
+          ? "bg-accent-gradient"
+          : "bg-accent-gradient"
         }`}>
         {message.role === "user" ? (
-          <IconUser className="w-5 h-5 text-white" />
+          <IconUser className="w-5 h-5 text-gray-900 dark:text-white" />
         ) : (
-          <IconRobot className="w-5 h-5 text-white" />
+          <IconRobot className="w-5 h-5 text-gray-900 dark:text-white" />
         )}
       </div>
 
       <div className={`flex-1 max-w-[80%] ${message.role === "user" ? "text-right" : ""}`}>
-        <div className={`inline-block p-4 rounded-2xl ${message.role === "user"
-            ? "bg-gradient-to-br from-purple-600/30 to-pink-600/30 border border-purple-500/20"
-            : "bg-white/5 border border-white/10"
+        <div className={`inline-block p-4 rounded-lg ${message.role === "user"
+            ? "bg-accent/25 border border-accent/20"
+            : "bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10"
           }`}>
-          <p className="text-sm text-white whitespace-pre-wrap">{message.content}</p>
+          {message.role === "assistant" ? (
+            <div className="text-sm text-gray-900 dark:text-white markdown-body">
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-900 dark:text-white whitespace-pre-wrap">{message.content}</p>
+          )}
         </div>
 
         <div className={`flex items-center gap-2 mt-2 ${message.role === "user" ? "justify-end" : ""}`}>
-          <span className="text-xs text-gray-500">{formatTime(message.timestamp)}</span>
+          <span className="text-xs text-gray-500 dark:text-slate-500">{formatTime(message.timestamp)}</span>
 
           {message.role === "assistant" && message.sources && message.sources.length > 0 && (
             <button
               onClick={() => setShowSources(!showSources)}
-              className="flex items-center gap-1 px-2 py-1 text-xs text-purple-400 hover:text-purple-300 bg-purple-500/10 rounded-lg transition-colors"
+              className="flex items-center gap-1 px-2 py-1 text-xs text-accent hover:opacity-80 bg-accent/10 rounded-lg transition-colors"
             >
               <IconFileText className="w-3 h-3" />
               {message.sources.length} sources
@@ -224,7 +213,7 @@ const ChatHistoryItem = ({
   onClick,
   onDelete,
 }: {
-  session: ChatSession;
+  session: ChatSessionSummary;
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;
@@ -235,30 +224,30 @@ const ChatHistoryItem = ({
     <motion.div
       whileHover={{ x: 4 }}
       onClick={onClick}
-      className={`relative group p-3 rounded-xl cursor-pointer transition-all ${isActive
-          ? "bg-purple-500/20 border border-purple-500/30"
-          : "bg-white/5 border border-transparent hover:border-white/10"
+      className={`relative group p-3 rounded-lg cursor-pointer transition-all ${isActive
+          ? "bg-accent/20 border border-accent/25"
+          : "bg-white dark:bg-white/5 border border-transparent hover:border-gray-200 dark:border-white/10"
         }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-medium text-white truncate">{session.title}</h4>
-          <p className="text-xs text-gray-500 truncate mt-1">{session.lastMessage}</p>
+          <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">{session.title}</h4>
+          <p className="text-xs text-gray-500 dark:text-slate-500 truncate mt-1">{session.lastMessage}</p>
         </div>
         <button
           onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-          className="p-1 rounded-lg hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="p-1 rounded-lg hover:bg-gray-100 dark:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
         >
-          <IconDotsVertical className="w-4 h-4 text-gray-400" />
+          <IconDotsVertical className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
       </div>
       <div className="flex items-center gap-2 mt-2">
-        <span className="text-xs text-gray-500 flex items-center gap-1">
+        <span className="text-xs text-gray-500 dark:text-slate-500 flex items-center gap-1">
           <IconClock className="w-3 h-3" />
-          {formatTime(session.timestamp)}
+          {formatTime(new Date(session.timestamp))}
         </span>
         <span className="text-xs text-gray-600">•</span>
-        <span className="text-xs text-gray-500">{session.messageCount} messages</span>
+        <span className="text-xs text-gray-500 dark:text-slate-500">{session.messageCount} messages</span>
       </div>
 
       <AnimatePresence>
@@ -269,13 +258,13 @@ const ChatHistoryItem = ({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="absolute right-0 top-8 w-36 bg-[#1a1a2e] border border-white/10 rounded-xl shadow-2xl z-20 overflow-hidden"
+              className="absolute right-0 top-8 w-36 bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl z-20 overflow-hidden"
             >
-              <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-white/5 transition-colors">
+              <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:bg-white/5 transition-colors">
                 <IconBookmark className="w-4 h-4" />
                 Save
               </button>
-              <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-300 hover:bg-white/5 transition-colors">
+              <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:bg-white/5 transition-colors">
                 <IconDownload className="w-4 h-4" />
                 Export
               </button>
@@ -308,8 +297,9 @@ export default function AskAI() {
   const [isLoading, setIsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(true);
   const [showSources, setShowSources] = useState(true);
-  const [chatHistory, setChatHistory] = useState<ChatSession[]>(mockChatHistory);
-  const [activeSession, setActiveSession] = useState<string | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatSessionSummary[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -318,6 +308,49 @@ export default function AskAI() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Load chat history on mount
+  useEffect(() => {
+    loadChatHistory();
+  }, []);
+
+  const loadChatHistory = async () => {
+    try {
+      setIsLoadingHistory(true);
+      const sessions = await getChatSessions();
+      setChatHistory(sessions);
+    } catch (err) {
+      console.error("Failed to load chat history:", err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  // Load a specific session
+  const loadSession = async (sessionId: string) => {
+    try {
+      setActiveSessionId(sessionId);
+      const session = await getChatSessionById(sessionId);
+
+      const loadedMessages: Message[] = session.messages.map((msg, idx) => ({
+        id: `${sessionId}-${idx}`,
+        role: msg.role,
+        content: msg.content,
+        timestamp: new Date(msg.createdAt),
+        sources: msg.sources?.map((s, sIdx) => ({
+          id: s.documentId || sIdx.toString(),
+          title: s.title || "Retrieved Document",
+          type: "pdf" as const,
+          excerpt: s.excerpt || `Retrieval Score: ${((s.score || 0) * 100).toFixed(2)}%`,
+          relevance: Math.round((s.score || 0) * 100),
+        })),
+      }));
+
+      setMessages(loadedMessages);
+    } catch (err) {
+      console.error("Failed to load session:", err);
+    }
+  };
 
   // Handle send message
   const handleSend = async () => {
@@ -334,18 +367,46 @@ export default function AskAI() {
     setInput("");
     setIsLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const response = await sendChatQuery(userMessage.content, activeSessionId || undefined);
+
+      const mappedSources: Source[] = response.sources.map((s: any, idx: number) => ({
+        id: s.documentId || idx.toString(),
+        title: s.title || "Retrieved Document",
+        type: "pdf",
+        excerpt: s.excerpt || `Retrieval Score: ${(s.score * 100).toFixed(2)}%`,
+        relevance: Math.round(s.score * 100)
+      }));
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `Based on my analysis of your knowledge base, I found relevant information regarding your question about "${input.trim().substring(0, 50)}...".\n\nThe Q4 2024 financial report indicates a strong performance with revenue increasing by 15% year-over-year. This growth was primarily driven by:\n\n• Enterprise sales growing by 23%\n• New customer acquisition up by 18%\n• Customer retention rate at 94%\n\nThe company exceeded market expectations and outperformed industry benchmarks in most key metrics.`,
+        content: response.answer,
         timestamp: new Date(),
-        sources: mockSources,
+        sources: mappedSources,
       };
+
       setMessages((prev) => [...prev, aiMessage]);
+
+      // Update active session ID (for new sessions)
+      if (!activeSessionId && response.sessionId) {
+        setActiveSessionId(response.sessionId);
+      }
+
+      // Refresh the sidebar history
+      await loadChatHistory();
+    } catch (err) {
+      console.error(err);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Sorry, I am facing an issue at the moment. Please try again later.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   // Handle key press
@@ -359,15 +420,20 @@ export default function AskAI() {
   // Start new chat
   const handleNewChat = () => {
     setMessages([]);
-    setActiveSession(null);
+    setActiveSessionId(null);
   };
 
   // Delete chat
-  const handleDeleteChat = (id: string) => {
-    setChatHistory(chatHistory.filter((c) => c.id !== id));
-    if (activeSession === id) {
-      setMessages([]);
-      setActiveSession(null);
+  const handleDeleteChat = async (id: string) => {
+    try {
+      await deleteChatSessionById(id);
+      setChatHistory((prev) => prev.filter((c) => c.id !== id));
+      if (activeSessionId === id) {
+        setMessages([]);
+        setActiveSessionId(null);
+      }
+    } catch (err) {
+      console.error("Failed to delete session:", err);
     }
   };
 
@@ -392,50 +458,61 @@ export default function AskAI() {
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 320, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="flex-shrink-0 flex flex-col bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
+            className="flex-shrink-0 flex flex-col bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden"
           >
             {/* History Header */}
-            <div className="p-4 border-b border-white/10">
+            <div className="p-4 border-b border-gray-200 dark:border-white/10">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <IconHistory className="w-5 h-5 text-purple-400" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <IconHistory className="w-5 h-5 text-accent" />
                   Chat History
                 </h3>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleNewChat}
-                  className="p-2 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors"
+                  className="p-2 rounded-lg bg-accent/20 text-accent hover:opacity-80 transition-colors"
                 >
                   <IconPlus className="w-4 h-4" />
                 </motion.button>
               </div>
               <div className="relative">
-                <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-slate-500" />
                 <input
                   type="text"
                   value={searchHistory}
                   onChange={(e) => setSearchHistory(e.target.value)}
                   placeholder="Search chats..."
-                  className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50"
+                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50"
                 />
               </div>
             </div>
 
             {/* History List */}
             <div className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-thin">
-              {filteredHistory.map((session) => (
-                <ChatHistoryItem
-                  key={session.id}
-                  session={session}
-                  isActive={activeSession === session.id}
-                  onClick={() => setActiveSession(session.id)}
-                  onDelete={() => handleDeleteChat(session.id)}
-                />
-              ))}
-              {filteredHistory.length === 0 && (
+              {isLoadingHistory ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <IconLoader2 className="w-6 h-6 text-accent animate-spin mb-2" />
+                  <p className="text-xs text-gray-500 dark:text-slate-500">Loading chats...</p>
+                </div>
+              ) : filteredHistory.length > 0 ? (
+                filteredHistory.map((session) => (
+                  <ChatHistoryItem
+                    key={session.id}
+                    session={session}
+                    isActive={activeSessionId === session.id}
+                    onClick={() => loadSession(session.id)}
+                    onDelete={() => handleDeleteChat(session.id)}
+                  />
+                ))
+              ) : (
                 <div className="text-center py-8">
-                  <p className="text-sm text-gray-500">No chats found</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-500">
+                    {searchHistory ? "No chats found" : "No chat history yet"}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">
+                    {!searchHistory && "Start a conversation to see it here"}
+                  </p>
                 </div>
               )}
             </div>
@@ -446,22 +523,22 @@ export default function AskAI() {
       {/* Toggle History Button */}
       <button
         onClick={() => setShowHistory(!showHistory)}
-        className="absolute left-6 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-white/10 border border-white/10 text-gray-400 hover:text-white hover:bg-white/20 transition-all"
+        className="absolute left-6 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white hover:bg-white/20 transition-all"
       >
         {showHistory ? <IconChevronLeft className="w-4 h-4" /> : <IconChevronRight className="w-4 h-4" />}
       </button>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+      <div className="flex-1 flex flex-col bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden">
         {/* Chat Header */}
-        <div className="p-4 border-b border-white/10 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-              <IconSparkles className="w-5 h-5 text-purple-400" />
+            <div className="p-2 rounded-lg bg-accent/20">
+              <IconSparkles className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h2 className="font-semibold text-white">Enterprise AI Assistant</h2>
-              <p className="text-xs text-gray-400">Powered by your knowledge base</p>
+              <h2 className="font-semibold text-gray-900 dark:text-white">Enterprise AI Assistant</h2>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Powered by your knowledge base</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -470,8 +547,8 @@ export default function AskAI() {
               whileTap={{ scale: 0.95 }}
               onClick={() => setShowSources(!showSources)}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${showSources
-                  ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
-                  : "bg-white/5 text-gray-400 border border-white/10"
+                  ? "bg-accent/20 text-accent border border-accent/25"
+                  : "bg-white dark:bg-white/5 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-white/10"
                 }`}
             >
               <IconFileText className="w-4 h-4" />
@@ -481,7 +558,7 @@ export default function AskAI() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleNewChat}
-              className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-colors"
+              className="p-2 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white transition-colors"
             >
               <IconRefresh className="w-4 h-4" />
             </motion.button>
@@ -496,12 +573,12 @@ export default function AskAI() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", duration: 0.5 }}
-                className="p-6 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/20 mb-6"
+                className="p-6 rounded-3xl bg-accent/20 border border-accent/25 mb-6"
               >
-                <IconSparkles className="w-12 h-12 text-purple-400" />
+                <IconSparkles className="w-12 h-12 text-accent" />
               </motion.div>
-              <h3 className="text-xl font-semibold text-white mb-2">How can I help you today?</h3>
-              <p className="text-gray-400 mb-8 max-w-md">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">How can I help you today?</h3>
+              <p className="text-gray-500 dark:text-slate-400 mb-8 max-w-md">
                 Ask me anything about your enterprise knowledge base. I'll find the most relevant information and cite my sources.
               </p>
               <div className="grid grid-cols-2 gap-3 max-w-lg">
@@ -513,7 +590,7 @@ export default function AskAI() {
                     transition={{ delay: index * 0.1 }}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => setInput(question)}
-                    className="p-3 text-left text-sm text-gray-300 bg-white/5 border border-white/10 rounded-xl hover:border-purple-500/30 hover:bg-white/10 transition-all"
+                    className="p-3 text-left text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:border-accent hover:bg-accent/10 transition-all font-medium"
                   >
                     {question}
                   </motion.button>
@@ -531,13 +608,13 @@ export default function AskAI() {
                   animate={{ opacity: 1 }}
                   className="flex gap-4"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-lg bg-accent-gradient flex items-center justify-center">
                     <IconRobot className="w-5 h-5 text-white" />
                   </div>
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="p-4 rounded-lg bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
                     <div className="flex items-center gap-2">
-                      <IconLoader2 className="w-4 h-4 text-purple-400 animate-spin" />
-                      <span className="text-sm text-gray-400">Thinking...</span>
+                      <IconLoader2 className="w-4 h-4 text-accent animate-spin" />
+                      <span className="text-sm text-gray-500 dark:text-slate-400">Thinking...</span>
                     </div>
                   </div>
                 </motion.div>
@@ -548,7 +625,7 @@ export default function AskAI() {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-gray-200 dark:border-white/10">
           <div className="flex gap-3">
             <div className="flex-1 relative">
               <textarea
@@ -558,7 +635,7 @@ export default function AskAI() {
                 onKeyDown={handleKeyPress}
                 placeholder="Ask anything about your knowledge base..."
                 rows={1}
-                className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 resize-none"
+                className="w-full px-4 py-3 pr-12 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 resize-none"
                 style={{ minHeight: "48px", maxHeight: "120px" }}
               />
               <motion.button
@@ -567,15 +644,15 @@ export default function AskAI() {
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
                 className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${input.trim() && !isLoading
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                    : "bg-white/10 text-gray-500"
+                    ? "bg-accent-gradient text-white shadow-accent"
+                    : "bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-slate-500"
                   }`}
               >
                 <IconSend className="w-5 h-5" />
               </motion.button>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2 text-center">
+          <p className="text-xs text-gray-500 dark:text-slate-500 mt-2 text-center">
             Press Enter to send • Shift + Enter for new line
           </p>
         </div>
@@ -588,23 +665,23 @@ export default function AskAI() {
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 320, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
-            className="flex-shrink-0 flex flex-col bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
+            className="flex-shrink-0 flex flex-col bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden"
           >
             {/* Sources Header */}
-            <div className="p-4 border-b border-white/10">
+            <div className="p-4 border-b border-gray-200 dark:border-white/10">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <IconFileText className="w-5 h-5 text-emerald-400" />
                   Document Sources
                 </h3>
                 <button
                   onClick={() => setShowSources(false)}
-                  className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                  className="p-1 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors"
                 >
-                  <IconX className="w-4 h-4 text-gray-400" />
+                  <IconX className="w-4 h-4 text-gray-500 dark:text-slate-400" />
                 </button>
               </div>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                 {currentSources.length} sources referenced
               </p>
             </div>
@@ -617,11 +694,11 @@ export default function AskAI() {
             </div>
 
             {/* Sources Footer */}
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-gray-200 dark:border-white/10">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-2.5 text-sm font-medium text-purple-400 bg-purple-500/10 border border-purple-500/20 rounded-xl hover:bg-purple-500/20 transition-colors"
+                className="w-full py-2.5 text-sm font-medium text-accent bg-accent/10 border border-accent/25 rounded-lg hover:bg-accent/20 transition-colors"
               >
                 View All Sources
               </motion.button>

@@ -53,16 +53,16 @@ const SECTIONS: SectionConfig[] = [
         label: "LLM Provider",
         description: "Large Language Model configuration",
         icon: IconBrain,
-        color: "purple",
-        gradient: "from-purple-500/20 to-pink-500/10",
+        color: "accent",
+        gradient: "bg-accent/10",
     },
     {
         key: "embedding",
         label: "Embeddings",
         description: "Text embedding model configuration",
         icon: IconVectorTriangle,
-        color: "blue",
-        gradient: "from-blue-500/20 to-cyan-500/10",
+        color: "accent",
+        gradient: "bg-accent/10",
     },
     {
         key: "vectorDb",
@@ -86,15 +86,15 @@ const SECTIONS: SectionConfig[] = [
         description: "JWT, authentication and security policies",
         icon: IconLock,
         color: "red",
-        gradient: "from-red-500/20 to-pink-500/10",
+        gradient: "from-red-500/20 to-sky-500/10",
     },
     {
         key: "email",
         label: "Email / SMTP",
         description: "Email sending and notification settings",
         icon: IconMail,
-        color: "pink",
-        gradient: "from-pink-500/20 to-rose-500/10",
+        color: "sky",
+        gradient: "from-sky-500/20 to-rose-500/10",
     },
     {
         key: "general",
@@ -148,6 +148,7 @@ const SECTION_FIELDS: Record<string, FieldDef[]> = {
                 { label: "OpenAI", value: "openai" },
                 { label: "Cohere", value: "cohere" },
                 { label: "HuggingFace", value: "huggingface" },
+                { label: "Ollama (Local)", value: "ollama" },
                 { label: "Custom", value: "custom" },
             ]
         },
@@ -238,12 +239,12 @@ const PasswordField = ({
                 value={value || ""}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full px-4 py-2.5 pr-10 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors font-mono"
+                className="w-full px-4 py-2.5 pr-10 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-colors font-mono"
             />
             <button
                 type="button"
                 onClick={() => setVisible(!visible)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-500 hover:text-gray-700 dark:text-gray-300 transition-colors"
             >
                 {visible ? <IconEyeOff className="w-4 h-4" /> : <IconEye className="w-4 h-4" />}
             </button>
@@ -275,7 +276,7 @@ const SettingsSection = ({
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden"
+            className="rounded-lg bg-white/[0.03] border border-gray-200 dark:border-white/10 overflow-hidden"
         >
             {/* Section Header */}
             <button
@@ -283,19 +284,19 @@ const SettingsSection = ({
                 className="w-full p-5 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
             >
                 <div className="flex items-center gap-4">
-                    <div className={`p-2.5 rounded-xl bg-gradient-to-br ${section.gradient} border border-white/10`}>
+                    <div className={`p-2.5 rounded-lg bg-gradient-to-br ${section.gradient} border border-gray-200 dark:border-white/10`}>
                         <Icon className={`w-5 h-5 text-${section.color}-400`} />
                     </div>
                     <div className="text-left">
-                        <h3 className="text-sm font-semibold text-white">{section.label}</h3>
-                        <p className="text-xs text-gray-500 mt-0.5">{section.description}</p>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{section.label}</h3>
+                        <p className="text-xs text-gray-500 dark:text-slate-500 mt-0.5">{section.description}</p>
                     </div>
                 </div>
                 <motion.div
                     animate={{ rotate: isExpanded ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                 >
-                    <IconChevronDown className="w-5 h-5 text-gray-400" />
+                    <IconChevronDown className="w-5 h-5 text-gray-500 dark:text-slate-400" />
                 </motion.div>
             </button>
 
@@ -309,11 +310,11 @@ const SettingsSection = ({
                         transition={{ duration: 0.25 }}
                         className="overflow-hidden"
                     >
-                        <div className="px-5 pb-5 space-y-4 border-t border-white/5 pt-4">
+                        <div className="px-5 pb-5 space-y-4 border-t border-gray-100 dark:border-white/5 pt-4">
                             {fields.map((field) => (
                                 <div key={field.key}>
                                     <label className="flex items-center justify-between mb-1.5">
-                                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">{field.label}</span>
+                                        <span className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">{field.label}</span>
                                         {field.sensitive && (
                                             <span className="text-xs text-amber-400/60 flex items-center gap-1">
                                                 <IconLock className="w-3 h-3" />
@@ -336,7 +337,7 @@ const SettingsSection = ({
                                             value={data[field.key] || ""}
                                             onChange={(e) => onChange(field.key, e.target.value)}
                                             placeholder={field.placeholder}
-                                            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                                            className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-colors"
                                         />
                                     )}
 
@@ -349,7 +350,7 @@ const SettingsSection = ({
                                             min={field.min}
                                             max={field.max}
                                             step={field.step}
-                                            className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                                            className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:border-accent/50 transition-colors"
                                         />
                                     )}
 
@@ -358,20 +359,20 @@ const SettingsSection = ({
                                             <select
                                                 value={data[field.key] || ""}
                                                 onChange={(e) => onChange(field.key, e.target.value)}
-                                                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white appearance-none focus:outline-none focus:border-purple-500/50 transition-colors"
+                                                className="w-full px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-900 dark:text-white appearance-none focus:outline-none focus:border-accent/50 transition-colors"
                                             >
                                                 {field.options?.map((opt) => (
                                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                                                 ))}
                                             </select>
-                                            <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                            <IconChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 dark:text-slate-400 pointer-events-none" />
                                         </div>
                                     )}
 
                                     {field.type === "toggle" && (
                                         <button
                                             onClick={() => onChange(field.key, !data[field.key])}
-                                            className={`relative w-12 h-6 rounded-full transition-colors ${data[field.key] ? "bg-purple-500" : "bg-white/10"
+                                            className={`relative w-12 h-6 rounded-full transition-colors ${data[field.key] ? "bg-accent" : "bg-gray-100 dark:bg-white/10"
                                                 }`}
                                         >
                                             <motion.div
@@ -383,20 +384,20 @@ const SettingsSection = ({
                                     )}
 
                                     {field.helperText && (
-                                        <p className="text-xs text-gray-500 mt-1">{field.helperText}</p>
+                                        <p className="text-xs text-gray-500 dark:text-slate-500 mt-1">{field.helperText}</p>
                                     )}
                                 </div>
                             ))}
 
                             {/* Test Connection Button */}
                             {["database", "llm", "embedding", "vectorDb", "storage", "email"].includes(section.key) && (
-                                <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                                <div className="pt-2 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
                                     <motion.button
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         onClick={onTestConnection}
                                         disabled={isTesting}
-                                        className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 hover:bg-white/10 transition-colors disabled:opacity-50"
+                                        className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/10 transition-colors disabled:opacity-50"
                                     >
                                         {isTesting ? (
                                             <IconLoader2 className="w-4 h-4 animate-spin" />
@@ -538,12 +539,12 @@ export default function AdminSettingsPage() {
                 className="flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
                 <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/10 border border-white/10">
-                        <IconSettings className="w-7 h-7 text-purple-400" />
+                    <div className="p-3 rounded-lg bg-accent/10 border border-gray-200 dark:border-white/10">
+                        <IconSettings className="w-7 h-7 text-accent" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Platform Settings</h1>
-                        <p className="text-gray-400 mt-0.5">Configure integrations, security and application behavior</p>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Platform Settings</h1>
+                        <p className="text-gray-500 dark:text-slate-400 mt-0.5">Configure integrations, security and application behavior</p>
                     </div>
                 </div>
 
@@ -553,7 +554,7 @@ export default function AdminSettingsPage() {
                         whileTap={{ scale: 0.98 }}
                         onClick={loadSettings}
                         disabled={isLoading}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 hover:bg-white/10 transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:bg-white/10 transition-colors disabled:opacity-50"
                     >
                         <IconRefresh className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
                         Reload
@@ -563,9 +564,9 @@ export default function AdminSettingsPage() {
                         whileTap={{ scale: 0.98 }}
                         onClick={handleSave}
                         disabled={isSaving || !hasChanges}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${hasChanges
-                            ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/25"
-                            : "bg-white/5 text-gray-500 border border-white/10 cursor-not-allowed"
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${hasChanges
+                            ? "bg-accent-gradient text-white shadow-accent"
+                            : "bg-white dark:bg-white/5 text-gray-500 dark:text-slate-500 border border-gray-200 dark:border-white/10 cursor-not-allowed"
                             }`}
                     >
                         {isSaving ? (
@@ -590,7 +591,7 @@ export default function AdminSettingsPage() {
                         initial={{ opacity: 0, y: -10, height: 0 }}
                         animate={{ opacity: 1, y: 0, height: "auto" }}
                         exit={{ opacity: 0, y: -10, height: 0 }}
-                        className={`p-4 rounded-xl border flex items-center gap-3 ${saveMessage.type === "success"
+                        className={`p-4 rounded-lg border flex items-center gap-3 ${saveMessage.type === "success"
                             ? "bg-emerald-500/10 border-emerald-500/20"
                             : "bg-red-500/10 border-red-500/20"
                             }`}
@@ -614,7 +615,7 @@ export default function AdminSettingsPage() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-2"
+                        className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2"
                     >
                         <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                         <span className="text-sm text-amber-400">You have unsaved changes</span>
@@ -629,8 +630,8 @@ export default function AdminSettingsPage() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-20"
                 >
-                    <IconLoader2 className="w-12 h-12 text-purple-400 animate-spin mb-4" />
-                    <p className="text-gray-400">Loading settings...</p>
+                    <IconLoader2 className="w-12 h-12 text-accent animate-spin mb-4" />
+                    <p className="text-gray-500 dark:text-slate-400">Loading settings...</p>
                 </motion.div>
             )}
 
@@ -639,13 +640,13 @@ export default function AdminSettingsPage() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-6 rounded-2xl bg-red-500/10 border border-red-500/20"
+                    className="p-6 rounded-lg bg-red-500/10 border border-red-500/20"
                 >
                     <div className="flex items-center gap-3">
                         <IconAlertTriangle className="w-6 h-6 text-red-400" />
                         <div>
                             <p className="text-red-400 font-medium">Failed to load settings</p>
-                            <p className="text-sm text-gray-400 mt-1">{error}</p>
+                            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{error}</p>
                         </div>
                     </div>
                 </motion.div>

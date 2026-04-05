@@ -24,6 +24,11 @@ import {
 } from "@tabler/icons-react";
 import { Outlet, useLocation } from "react-router-dom";
 import { getUserFromToken } from "@/lib/auth";
+import { getMyOrganization } from "@/services/organizationService";
+import { useEffect } from "react";
+import { useTheme } from "@/lib/ThemeContext";
+
+
 
 export default function DashboardLayout() {
   const [open, setOpen] = useState(true);
@@ -32,6 +37,18 @@ export default function DashboardLayout() {
   const userRole = userData?.role || null;
   const isGlobalAdmin = userRole === "ADMIN" && !userData?.organizationId;
 
+  const { updateBranding } = useTheme();
+
+  useEffect(() => {
+    if (userData?.organizationId) {
+      getMyOrganization().then(org => {
+        if (org.themeColor) {
+          updateBranding(org.themeColor);
+        }
+      }).catch(err => console.error("Failed to apply theme", err));
+    }
+  }, [userData?.organizationId, updateBranding]);
+
   // Get page title based on current route
   const getPageInfo = () => {
     switch (location.pathname) {
@@ -39,6 +56,8 @@ export default function DashboardLayout() {
         return { title: "Dashboard", subtitle: "Welcome back! Here's your overview" };
       case "/ask":
         return { title: "Ask AI", subtitle: "Chat with your enterprise knowledge base" };
+      case "/channels":
+        return { title: "Team Channels", subtitle: "Collaborate securely right alongside the AI" };
       case "/knowledge":
         return { title: "Knowledge Base", subtitle: "Manage your documents and data sources" };
       case "/documents":
@@ -73,7 +92,9 @@ export default function DashboardLayout() {
     { label: "Dashboard", href: "/", icon: <IconHome className="w-5 h-5" /> },
     // Auditors and Global Admins don't get the AI chat
     ...(!isGlobalAdmin && userRole !== "AUDITOR"
-      ? [{ label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" />, badge: "New" }]
+      ? [
+          { label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" /> },
+        ]
       : []),
     ...(!isGlobalAdmin
       ? [

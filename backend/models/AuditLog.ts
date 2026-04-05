@@ -26,7 +26,7 @@ const auditLogSchema = new Schema(
     },
 
     resourceId: {
-      type: Types.ObjectId
+      type: String
     },
 
     metadata: {

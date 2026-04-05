@@ -20,6 +20,12 @@ import DepartmentsPage from "@/pages/admin/DepartmentsPage";
 // Documents page
 import DocumentsPage from "@/pages/documents/DocumentsPage";
 
+// Channels page
+import ChannelList from "@/pages/channels/ChannelList";
+import ChannelChat from "@/pages/channels/ChannelChat";
+import SettingsPage from "@/pages/settings/SettingsPage";
+import ModelsPage from "@/pages/models/ModelsPage";
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -37,6 +43,10 @@ export default function AppRoutes() {
           <Route path="/ask" element={<AskAI />} />
           <Route path="/knowledge" element={<KnowledgeBase />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/channels" element={<ChannelList />} />
+          <Route path="/channels/:channelId" element={<ChannelChat />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/models" element={<ModelsPage />} />
 
           {/* Admin routes */}
           <Route path="/manage-users" element={<ManageUsersPage />} />

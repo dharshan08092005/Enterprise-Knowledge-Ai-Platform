@@ -3,8 +3,14 @@ import { PDFParse } from "pdf-parse";
 
 
 
-export const extractPdfText = async (filePath: string) => {
-    const buffer = fs.readFileSync(filePath);
+export const extractPdfText = async (input: string | Buffer) => {
+    let buffer: Buffer;
+    
+    if (Buffer.isBuffer(input)) {
+        buffer = input;
+    } else {
+        buffer = fs.readFileSync(input as string);
+    }
 
     const parser = new PDFParse({ data: buffer });
     const result = await parser.getText();
