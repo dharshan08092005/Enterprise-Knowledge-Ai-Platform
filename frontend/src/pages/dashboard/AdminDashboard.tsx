@@ -9,7 +9,6 @@ import {
   IconDots,
   IconSparkles,
   IconClock,
-  IconUsers,
   IconFileText,
   IconChartBar,
 } from "@tabler/icons-react";
@@ -145,72 +144,99 @@ const QuickActionCard = ({
   </motion.button>
 );
 
+import React, { useEffect, useState } from "react";
+import dashboardService from "@/services/dashboardService";
+import type { AdminDashboardData } from "@/services/dashboardService";
+import { formatDistanceToNow } from "date-fns";
+import { getUserFromToken } from "@/lib/auth";
+
 export default function AdminDashboard() {
-  const stats = [
+  const user = getUserFromToken();
+  const userName = user?.name || "Admin";
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+  const greeting = getGreeting();
+  const [data, setData] = useState<AdminDashboardData | null>(null);
+  const [, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await dashboardService.getAdminStats();
+        setData(res);
+      } catch (error) {
+        console.error("Failed to fetch admin stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const defaultStats = [
     {
       title: "Total Queries",
-      value: "12,847",
-      change: "+12.5%",
+      value: "Loading...",
+      change: "0%",
       changeType: "up" as const,
       icon: IconMessageCircle,
       gradient: "bg-accent-gradient",
     },
     {
       title: "Knowledge Items",
-      value: "1,234",
-      change: "+8.2%",
+      value: "Loading...",
+      change: "0%",
       changeType: "up" as const,
       icon: IconDatabase,
       gradient: "bg-accent-gradient",
     },
     {
-      title: "AI Models Active",
-      value: "8",
-      change: "+2",
+      title: "Total Users",
+      value: "Loading...",
+      change: "0",
       changeType: "up" as const,
       icon: IconBrain,
       gradient: "bg-gradient-to-br from-sky-500 to-rose-500",
     },
     {
-      title: "Accuracy Rate",
-      value: "94.7%",
-      change: "-0.3%",
-      changeType: "down" as const,
+      title: "Organizations",
+      value: "Loading...",
+      change: "0",
+      changeType: "up" as const,
       icon: IconTrendingUp,
       gradient: "bg-gradient-to-br from-amber-500 to-orange-500",
     },
   ];
 
-  const recentActivity = [
+  const stats = data ? data.stats.map((stat, i) => ({
+    ...stat,
+    icon: defaultStats[i % defaultStats.length].icon,
+    gradient: defaultStats[i % defaultStats.length].gradient
+  })) : defaultStats;
+
+  const defaultRecentActivity = [
     {
       icon: IconFileText,
-      title: "New document uploaded",
-      description: "Q4 Financial Report.pdf added to knowledge base",
-      time: "2 min ago",
+      title: "No recent activity",
+      description: "Data will appear here once actions are taken",
+      time: "",
       iconBg: "bg-accent-gradient",
-    },
-    {
-      icon: IconBrain,
-      title: "Model training completed",
-      description: "GPT-4 fine-tuned on company data",
-      time: "1 hour ago",
-      iconBg: "bg-accent-gradient",
-    },
-    {
-      icon: IconUsers,
-      title: "New team member",
-      description: "Sarah joined the Enterprise AI team",
-      time: "3 hours ago",
-      iconBg: "bg-gradient-to-br from-emerald-500 to-teal-500",
-    },
-    {
-      icon: IconMessageCircle,
-      title: "1,000 queries milestone",
-      description: "Your team reached 1,000 AI queries this month",
-      time: "Yesterday",
-      iconBg: "bg-gradient-to-br from-amber-500 to-orange-500",
-    },
+    }
   ];
+
+  const recentActivity = data && data.recentActivity.length > 0 ? data.recentActivity.map((activity, i) => ({
+    icon: i % 2 === 0 ? IconFileText : IconBrain,
+    iconBg: i % 2 === 0 ? "bg-accent-gradient" : "bg-gradient-to-br from-emerald-500 to-teal-500",
+    title: activity.title,
+    description: activity.description,
+    time: activity.time ? formatDistanceToNow(new Date(activity.time), { addSuffix: true }) : ""
+  })) : defaultRecentActivity;
 
   const quickActions = [
     {
@@ -255,15 +281,15 @@ export default function AdminDashboard() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 text-accent mb-2 opacity-80">
             <IconClock className="w-4 h-4" />
-            <span className="text-sm">Good morning</span>
+            <span className="text-sm">{greeting}</span>
           </div>
           <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            Welcome back, <span className="gradient-text">Dharshan</span> 👋
+            Welcome back, <span className="gradient-text">{userName}</span> 👋
           </h1>
           <p className="max-w-xl" style={{ color: 'var(--text-secondary)' }}>
             Your enterprise AI platform is running smoothly. You have{" "}
-            <span className="text-accent font-medium">3 pending tasks</span> and{" "}
-            <span className="text-emerald-400 font-medium">5 new insights</span> waiting for you.
+            <span className="text-accent font-medium">{data?.recentActivity?.length || 0} recent activities</span> and{" "}
+            <span className="text-emerald-400 font-medium">{data?.stats?.length || 0} key metrics</span> waiting for you.
           </p>
 
           <div className="flex flex-wrap gap-3 mt-6">
