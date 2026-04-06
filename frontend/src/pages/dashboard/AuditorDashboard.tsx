@@ -16,7 +16,12 @@ import {
     IconSearch,
     IconChevronRight,
 } from "@tabler/icons-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { fetchAuditLogs } from "@/services/adminService";
+import type { AuditLogEntry } from "@/services/adminService";
+import dashboardService from "@/services/dashboardService";
+import type { AdminDashboardData } from "@/services/dashboardService";
+import { formatDistanceToNow } from "date-fns";
 
 // Stat Card Component
 const StatCard = ({
@@ -173,49 +178,67 @@ const SecurityAlert = ({
 
 export default function AuditorDashboard() {
     const [selectedPeriod, setSelectedPeriod] = useState("7d");
+    const [logs, setLogs] = useState<AuditLogEntry[]>([]);
+    const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
 
-    const stats = [
+    useEffect(() => {
+        const token = localStorage.getItem("token") || localStorage.getItem("accessToken") || "";
+        Promise.all([
+            fetchAuditLogs(token, { limit: 10 }).then(res => setLogs(res.logs)),
+            dashboardService.getAdminStats().then(setDashboardData)
+        ]).catch(err => console.error("Failed to load auditor dashboard data", err));
+    }, []);
+
+    const defaultStats = [
         {
             title: "Total Audit Events",
-            value: "24,847",
-            change: "+18.2%",
+            value: "Loading...",
+            change: "0%",
             changeType: "up" as const,
             icon: IconFileAnalytics,
             gradient: "bg-accent-gradient",
         },
         {
             title: "Active Users",
-            value: "1,234",
-            change: "+5.4%",
+            value: "Loading...",
+            change: "0%",
             changeType: "up" as const,
             icon: IconUsers,
             gradient: "bg-accent-gradient",
         },
         {
             title: "Security Alerts",
-            value: "12",
-            change: "-3",
+            value: "0",
+            change: "0",
             changeType: "down" as const,
             icon: IconAlertTriangle,
             gradient: "bg-gradient-to-br from-amber-500 to-orange-500",
         },
         {
             title: "Compliance Score",
-            value: "98.5%",
-            change: "+0.5%",
+            value: "100%",
+            change: "0%",
             changeType: "up" as const,
             icon: IconShieldCheck,
             gradient: "bg-gradient-to-br from-emerald-500 to-teal-500",
         },
     ];
 
-    const auditLogs = [
-        { action: "Document Upload", user: "John Doe", resource: "Q4_Report.pdf", timestamp: "2 min ago", status: "success" as const },
-        { action: "AI Query", user: "Sarah Smith", resource: "Knowledge Base", timestamp: "5 min ago", status: "success" as const },
-        { action: "Failed Login", user: "Unknown", resource: "Auth System", timestamp: "12 min ago", status: "error" as const },
-        { action: "Permission Change", user: "Admin", resource: "User: mike@corp.com", timestamp: "1 hour ago", status: "warning" as const },
-        { action: "Model Training", user: "System", resource: "GPT-4 Fine-tune", timestamp: "2 hours ago", status: "success" as const },
-        { action: "Data Export", user: "Jane Wilson", resource: "Analytics Report", timestamp: "3 hours ago", status: "success" as const },
+    const stats = dashboardData ? [
+        { ...defaultStats[0], value: dashboardData.stats.find(s => s.title === "Total Queries")?.value || "0" },
+        { ...defaultStats[1], value: dashboardData.stats.find(s => s.title === "Total Users")?.value || "0" },
+        defaultStats[2],
+        defaultStats[3]
+    ] : defaultStats;
+
+    const auditLogs = logs.length > 0 ? logs.map(log => ({
+        action: log.action,
+        user: log.userId?.name || log.userId?.email || "System",
+        resource: log.resourceType || "System",
+        timestamp: formatDistanceToNow(new Date(log.createdAt), { addSuffix: true }),
+        status: "success" as const // Could map logically
+    })) : [
+        { action: "No recent events", user: "System", resource: "N/A", timestamp: "", status: "success" as const }
     ];
 
     const securityAlerts = [

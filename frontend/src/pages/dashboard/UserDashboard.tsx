@@ -104,16 +104,40 @@ const SuggestedTopic = ({
     </motion.div>
 );
 
+import React, { useEffect, useState } from "react";
+import dashboardService from "@/services/dashboardService";
+import type { UserDashboardData } from "@/services/dashboardService";
+import { formatDistanceToNow } from "date-fns";
+
 export default function UserDashboard() {
-    const recentQueries = [
-        { query: "What are the Q4 revenue projections?", time: "10 min ago", category: "Finance" },
-        { query: "Summarize the latest product updates", time: "1 hour ago", category: "Product" },
-        { query: "Company policy on remote work", time: "2 hours ago", category: "HR" },
-        { query: "Technical documentation for API v2", time: "Yesterday", category: "Engineering" },
+    const [data, setData] = useState<UserDashboardData | null>(null);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await dashboardService.getUserStats();
+                setData(res);
+            } catch (error) {
+                console.error("Failed to fetch user stats", error);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    const defaultRecentQueries = [
+        { query: "No recent queries found", time: "", category: "Start chatting!" },
     ];
 
+    const recentQueries = data?.recentQueries?.length 
+        ? data.recentQueries.map(q => ({
+            query: q.query,
+            time: q.time ? formatDistanceToNow(new Date(q.time), { addSuffix: true }) : "",
+            category: q.category
+        }))
+        : defaultRecentQueries;
+
     const suggestedTopics = [
-        { title: "Financial Reports", queries: 156, icon: IconFileText },
+        { title: "Financial Reports", queries: data ? data.stats.docsCount || 15 : 156, icon: IconFileText },
         { title: "Product Documentation", queries: 89, icon: IconDatabase },
         { title: "HR Policies", queries: 45, icon: IconBulb },
     ];
