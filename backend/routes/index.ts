@@ -11,6 +11,7 @@ import chatRoutes from "./chat.routes";
 
 import channelRoutes from "./channels.routes";
 import userRoutes from "./user.routes";
+import dashboardRoutes from "./dashboard.routes";
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use("/departments", departmentRoutes);
 router.use("/chat", chatRoutes);
 router.use("/channels", channelRoutes);
 router.use("/users", userRoutes);
+router.use("/dashboard", dashboardRoutes);
 
 export default router;
