@@ -91,10 +91,10 @@ const SignUp = () => {
               <div className="w-6 h-6 border-2 border-white rounded-lg"></div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-3xl font-bold text-white mb-2">
                 Create your account
               </h1>
-              <p className="text-gray-500 dark:text-slate-400">
+              <p className="text-slate-400">
                 Join thousands of teams already using our platform
               </p>
             </div>
@@ -113,7 +113,7 @@ const SignUp = () => {
                 Full name
               </label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-slate-500" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type="text"
                   name="name"
@@ -125,7 +125,7 @@ const SignUp = () => {
                   className={`w-full bg-slate-800/50 border ${focusedField === "name"
                       ? "border-accent ring-2 ring-accent/20"
                       : "border-slate-700"
-                    } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
+                    } rounded-lg px-12 py-3.5 text-white placeholder-slate-500
                              focus:outline-none transition-all duration-200`}
                   placeholder="John Doe"
                 />
@@ -137,7 +137,7 @@ const SignUp = () => {
                 Email address
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-slate-500" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type="email"
                   name="email"
@@ -149,7 +149,7 @@ const SignUp = () => {
                   className={`w-full bg-slate-800/50 border ${focusedField === "email"
                       ? "border-accent ring-2 ring-accent/20"
                       : "border-slate-700"
-                    } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
+                    } rounded-lg px-12 py-3.5 text-white placeholder-slate-500
                              focus:outline-none transition-all duration-200`}
                   placeholder="you@company.com"
                 />
@@ -161,7 +161,7 @@ const SignUp = () => {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-slate-500" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type="password"
                   name="password"
@@ -173,12 +173,12 @@ const SignUp = () => {
                   className={`w-full bg-slate-800/50 border ${focusedField === "password"
                       ? "border-accent ring-2 ring-accent/20"
                       : "border-slate-700"
-                    } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
+                    } rounded-lg px-12 py-3.5 text-white placeholder-slate-500
                              focus:outline-none transition-all duration-200`}
                   placeholder="Create a strong password"
                 />
               </div>
-              <p className="text-xs text-gray-500 dark:text-slate-500 mt-2">
+              <p className="text-xs text-slate-500 mt-2">
                 Must be at least 8 characters
               </p>
             </div>
@@ -194,7 +194,7 @@ const SignUp = () => {
                     Organization Name
                   </label>
                   <div className="relative">
-                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-slate-500" />
+                    <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <input
                       type="text"
                       name="organizationName"
@@ -205,7 +205,7 @@ const SignUp = () => {
                       className={`w-full bg-slate-800/50 border ${focusedField === "orgName"
                           ? "border-accent ring-2 ring-accent/20"
                           : "border-slate-700"
-                        } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
+                        } rounded-lg px-12 py-3.5 text-white placeholder-slate-500
                                  focus:outline-none transition-all duration-200`}
                       placeholder="Acme Inc."
                     />
@@ -217,7 +217,7 @@ const SignUp = () => {
                     Portal Slug
                   </label>
                   <div className="relative">
-                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 dark:text-slate-500" />
+                    <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <input
                       type="text"
                       name="organizationSlug"
@@ -228,12 +228,12 @@ const SignUp = () => {
                       className={`w-full bg-slate-800/50 border ${focusedField === "orgSlug"
                           ? "border-accent ring-2 ring-accent/20"
                           : "border-slate-700"
-                        } rounded-lg px-12 py-3.5 text-gray-900 dark:text-white placeholder-slate-500
+                        } rounded-lg px-12 py-3.5 text-white placeholder-slate-500
                                  focus:outline-none transition-all duration-200 text-sm font-mono`}
                       placeholder="acme-inc"
                     />
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-slate-500 mt-2">
+                  <p className="text-xs text-slate-500 mt-2">
                     Your portal will be at: {form.organizationSlug || "slug"}.platform.com
                   </p>
                 </div>
@@ -243,11 +243,11 @@ const SignUp = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`group w-full rounded-lg py-3.5 text-sm font-semibold text-gray-900 dark:text-white
+              className={`group w-full rounded-lg py-3.5 text-sm font-semibold text-white
                 transition-all duration-200 flex items-center justify-center gap-2
                 ${loading
-                  ? "bg-slate-600 cursor-not-allowed"
-                  : "bg-accent-gradient shadow-accent shadow-lg"
+                  ? "bg-slate-700 cursor-not-allowed text-slate-400"
+                  : "bg-accent-gradient shadow-accent shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                 }
               `}
             >
@@ -264,7 +264,7 @@ const SignUp = () => {
               <div className="w-full border-t border-slate-700"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-slate-700 rounded-lg justify-center text-gray-500 dark:text-slate-400">
+              <span className="px-4 bg-slate-900/50 text-slate-500 rounded-lg justify-center">
                 Or continue with
               </span>
             </div>
@@ -302,7 +302,7 @@ const SignUp = () => {
           </div>
 
           {/* Footer */}
-          <p className="text-sm text-gray-500 dark:text-slate-400 text-center mt-6">
+          <p className="text-sm text-slate-400 text-center mt-6">
             Already have an account?{" "}
             <Link
               to="/login"
@@ -329,10 +329,10 @@ const SignUp = () => {
       <div className="hidden lg:flex flex-1 items-center justify-center p-8 bg-accent/5 backdrop-blur-2xl border-l border-slate-800/50">
         <div className="max-w-md">
           <div className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-3xl font-bold text-white mb-4">
               Everything you need to succeed
             </h2>
-            <p className="text-gray-500 dark:text-slate-400 text-lg">
+            <p className="text-slate-400 text-lg">
               Join our platform and unlock powerful features designed to accelerate your growth
             </p>
           </div>
@@ -344,8 +344,8 @@ const SignUp = () => {
                   <Check className="w-5 h-5 text-accent" />
                 </div>
                 <div>
-                  <h3 className="text-gray-900 dark:text-white font-semibold mb-1">{feature}</h3>
-                  <p className="text-gray-500 dark:text-slate-400 text-sm">
+                  <h3 className="text-white font-semibold mb-1">{feature}</h3>
+                  <p className="text-slate-400 text-sm">
                     Get access to premium features that help you work smarter
                   </p>
                 </div>
@@ -361,8 +361,8 @@ const SignUp = () => {
                 className="w-12 h-12 rounded-full border-2 border-accent/50"
               />
               <div>
-                <div className="text-gray-900 dark:text-white font-semibold">Sarah Johnson</div>
-                <div className="text-gray-500 dark:text-slate-400 text-sm">Product Designer</div>
+                <div className="text-white font-semibold">Sarah Johnson</div>
+                <div className="text-slate-400 text-sm">Product Designer</div>
               </div>
             </div>
             <p className="text-slate-300 text-sm italic">

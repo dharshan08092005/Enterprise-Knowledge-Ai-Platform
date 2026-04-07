@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import ReactMarkdown from "react-markdown";
 import {
@@ -23,6 +24,7 @@ import {
   IconRobot,
   IconUser,
   IconFile,
+  IconWorld,
   IconFileTypePdf,
   IconFileTypeDoc,
   IconLink,
@@ -35,6 +37,8 @@ import {
   deleteChatSessionById,
   type ChatSessionSummary,
 } from "../../services/chatService";
+import { viewDocument } from "../../services/documentService";
+import { getToken } from "../../lib/auth";
 
 // Types
 interface Message {
@@ -79,7 +83,7 @@ const SourceIcon = ({ type }: { type: Source["type"] }) => {
 };
 
 // Source Card Component
-const SourceCard = ({ source }: { source: Source }) => {
+const SourceCard = ({ source, onView }: { source: Source; onView: (source: Source) => void }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -125,7 +129,10 @@ const SourceCard = ({ source }: { source: Source }) => {
               {copied ? <IconCheck className="w-3 h-3" /> : <IconCopy className="w-3 h-3" />}
               {copied ? "Copied" : "Copy"}
             </button>
-            <button className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white bg-white dark:bg-white/5 rounded-lg transition-colors">
+            <button
+              onClick={() => onView(source)}
+              className="flex items-center gap-1 px-2 py-1 text-xs text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:text-white bg-white dark:bg-white/5 rounded-lg transition-colors"
+            >
               <IconExternalLink className="w-3 h-3" />
               View
             </button>
@@ -137,7 +144,7 @@ const SourceCard = ({ source }: { source: Source }) => {
 };
 
 // Chat Message Component
-const ChatMessage = ({ message }: { message: Message }) => {
+const ChatMessage = ({ message, onViewSource }: { message: Message; onViewSource: (source: Source) => void }) => {
   const [showSources, setShowSources] = useState(false);
 
   return (
@@ -196,7 +203,7 @@ const ChatMessage = ({ message }: { message: Message }) => {
               className="mt-3 space-y-2 overflow-hidden"
             >
               {message.sources.map((source) => (
-                <SourceCard key={source.id} source={source} />
+                <SourceCard key={source.id} source={source} onView={onViewSource} />
               ))}
             </motion.div>
           )}
@@ -301,6 +308,9 @@ export default function AskAI() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [searchHistory, setSearchHistory] = useState("");
+  const [viewingSource, setViewingSource] = useState<Source | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -325,6 +335,36 @@ export default function AskAI() {
       setIsLoadingHistory(false);
     }
   };
+
+  // Load PDF when viewing source changes
+  useEffect(() => {
+    let objectUrl = "";
+    if (viewingSource) {
+      const fetchPdf = async () => {
+         try {
+           setIsPdfLoading(true);
+           const token = getToken();
+           if (!token) throw new Error("No token");
+           const blob = await viewDocument(token, viewingSource.id);
+           objectUrl = URL.createObjectURL(blob);
+           const firstWords = viewingSource.excerpt.replace(/[\n\r]/g, " ").replace(/"/g, "").split(/\s+/).slice(0, 10).join(" ");
+           const finalUrl = `${objectUrl}#search=${encodeURIComponent(firstWords)}&view=FitH`;
+           setPdfUrl(finalUrl);
+         } catch (e) {
+           console.error("Failed to load PDF:", e);
+         } finally {
+           setIsPdfLoading(false);
+         }
+      };
+      if (viewingSource.id.length > 10) { // crude check for valid mongo id
+        fetchPdf();
+      }
+    }
+    return () => {
+       if (objectUrl) URL.revokeObjectURL(objectUrl);
+       setPdfUrl(null);
+    };
+  }, [viewingSource]);
 
   // Load a specific session
   const loadSession = async (sessionId: string) => {
@@ -600,7 +640,7 @@ export default function AskAI() {
           ) : (
             <>
               {messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+                <ChatMessage key={message.id} message={message} onViewSource={setViewingSource} />
               ))}
               {isLoading && (
                 <motion.div
@@ -689,7 +729,7 @@ export default function AskAI() {
             {/* Sources List */}
             <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin">
               {currentSources.map((source) => (
-                <SourceCard key={source.id} source={source} />
+                <SourceCard key={source.id} source={source} onView={setViewingSource} />
               ))}
             </div>
 
@@ -706,6 +746,105 @@ export default function AskAI() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* View Source Modal */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {viewingSource && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setViewingSource(null)}
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999]"
+              />
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed right-0 top-0 bottom-0 w-full max-w-4xl z-[1000] flex flex-col shadow-[-10px_0_40px_rgba(0,0,0,0.3)]"
+              >
+                <div className="bg-[#1a1a2e] border-l border-white/10 flex flex-col h-full">
+                  {/* Header */}
+                  <div className="p-5 border-b border-white/10 flex items-center justify-between bg-black/20">
+                    <div className="flex items-center gap-4">
+                      <div className="p-2.5 rounded-xl bg-accent/20">
+                        <SourceIcon type={viewingSource.type} />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <h3 className="text-lg font-bold text-white truncate max-w-sm md:max-w-xl" title={viewingSource.title}>
+                          {viewingSource.title}
+                        </h3>
+                        <p className="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                          {viewingSource.page ? `Page ${viewingSource.page}` : "Extracted Chunk"} • <span className="text-emerald-400 font-medium">{viewingSource.relevance}% Match</span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => pdfUrl && window.open(pdfUrl)}
+                        className="p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-all"
+                        title="Open in new tab"
+                      >
+                        <IconWorld className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => setViewingSource(null)}
+                        className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all"
+                      >
+                        <IconX className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Viewer Content */}
+                  <div className="flex-1 overflow-hidden bg-black/40 relative">
+                    {isPdfLoading && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                            <IconLoader2 className="w-12 h-12 animate-spin mb-4 text-accent" />
+                            <p className="text-sm font-medium">Fetching original document & finding match...</p>
+                        </div>
+                    )}
+
+                    {!isPdfLoading && !pdfUrl && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-12 text-center">
+                            <IconFileText className="w-16 h-16 text-accent mb-6" />
+                            <p className="text-2xl font-bold">Standard Preview Unavailable</p>
+                            <p className="text-gray-400 mt-3 text-center max-w-sm">
+                                We can't render a direct preview for this source. It might be manually added text or an unsupported format.
+                            </p>
+                            
+                            <div className="mt-8 text-left max-w-2xl bg-white/5 border border-white/10 p-6 rounded-xl w-full">
+                               <div className="mb-4 text-sm font-medium text-gray-400 tracking-wider uppercase">
+                                  Relevant Excerpt Highlight
+                               </div>
+                               <div className="p-6 rounded-lg bg-accent/10 border border-accent/20 relative">
+                                  <div className="absolute top-0 left-0 w-1 h-full bg-accent rounded-l-lg"></div>
+                                  <p className="text-gray-200 leading-relaxed whitespace-pre-wrap font-medium text-base">
+                                     {viewingSource.excerpt}
+                                  </p>
+                               </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {pdfUrl && !isPdfLoading && (
+                        <iframe
+                            src={pdfUrl}
+                            className="w-full h-full border-none"
+                            title={viewingSource.title}
+                        />
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
