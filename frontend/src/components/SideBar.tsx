@@ -234,9 +234,9 @@ export const SidebarLink = ({
       {/* Active indicator */}
       {isActive && (
         <motion.div
-           layoutId="activeIndicator"
-           className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-accent"
-           transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          layoutId="activeIndicator"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-accent"
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
         />
       )}
 
@@ -370,6 +370,7 @@ export const SidebarFooter = ({ open }: { open: boolean }) => {
                 whileTap={{ scale: 0.98 }}
                 className="mt-3 w-full py-2 text-xs font-medium rounded-lg transition-colors"
                 style={{ color: 'var(--accent-primary)', background: 'var(--badge-bg)', border: '1px solid var(--badge-border)' }}
+                onClick={() => window.open("https://github.com/dharshan08092005/Enterprise-Knowledge-Ai-Platform", "_blank")}
               >
                 View Documentation
               </motion.button>
