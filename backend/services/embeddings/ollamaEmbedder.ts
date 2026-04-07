@@ -9,6 +9,9 @@ export interface EmbeddingSettings {
 /**
  * Universal embedding generator that supports Ollama and Google Gemini Embeddings.
  */
+
+const baseUrl = process.env.OLLAMA_API_URL || "http://localhost:11434";
+
 export const generateEmbedding = async (text: string, settings?: EmbeddingSettings): Promise<number[]> => {
   if (!text || text.trim().length === 0) {
     throw new Error("❌ Text is empty");
@@ -28,7 +31,7 @@ export const generateEmbedding = async (text: string, settings?: EmbeddingSettin
   }
 
   // Fallback to Ollama (default)
-  const response = await fetch("http://localhost:11434/api/embeddings", {
+  const response = await fetch(`${baseUrl}/api/embeddings`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

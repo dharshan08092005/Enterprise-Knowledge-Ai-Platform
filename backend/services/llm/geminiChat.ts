@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export interface ConversationMessage {
-  role: "user" | "assistant";
-  content: string;
+    role: "user" | "assistant";
+    content: string;
 }
 
 export interface AiSettings {
@@ -17,19 +17,21 @@ export const generateRAGResponse = async (
   conversationHistory: ConversationMessage[] = [],
   aiSettings?: AiSettings
 ): Promise<string> => {
-    const key = aiSettings?.apiKey || process.env.GEMINI_API_KEY;
-    const modelName = aiSettings?.model || "gemini-1.5-flash"; // Default to a stable model
-
-    if (!key) {
-        throw new Error("AI API Key is missing");
+    // 1. Determine Gemini Settings
+    const apiKey = aiSettings?.apiKey || process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        throw new Error("Gemini API key is not configured. Please set GEMINI_API_KEY as an environment variable.");
     }
-
-    const genAI = new GoogleGenerativeAI(key);
+    
+    const modelName = aiSettings?.model || "gemini-1.5-flash";
+    const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: modelName });
 
-    const contextText = contextChunks.map((c, i) => `[Document Chunk ${i + 1}]:\n${c}`).join("\n\n");
+    console.log(`✨ Generating response via Gemini API: [${modelName}]`);
 
-    // Build conversation history string (last 10 messages to keep context manageable)
+    // 2. Format Context and History
+    const contextText = contextChunks.map((c, i) => `[Document Chunk ${i + 1}]:\n${c}`).join("\n\n");
+    
     const recentHistory = conversationHistory.slice(-10);
     let historyText = "";
     if (recentHistory.length > 0) {
@@ -53,7 +55,12 @@ ${query}
 --- ANSWER ---
 `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
+    // 3. Call Gemini API
+    try {
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+    } catch (error: any) {
+        console.error("❌ Gemini Fetch Error:", error.message);
+        throw new Error(`Failed to generate response using Gemini API: ${error.message}`);
+    }
 };
