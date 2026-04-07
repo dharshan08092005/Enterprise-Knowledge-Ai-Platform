@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import {
     IconSearch,
@@ -151,23 +152,29 @@ const AuditorRow = ({
             <td className="py-4 px-4">
                 <div className="relative">
                     <motion.button
+                        id={`action-trigger-${auditor.id}`}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setShowMenu(!showMenu)}
-                        className="p-2 rounded-lg hover:bg-gray-100 dark:bg-white/10 transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-2.5 rounded-xl border border-transparent active:border-white/10 group h-10 w-10 flex items-center justify-center"
                     >
-                        <IconDotsVertical className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+                        <IconDotsVertical className="w-5 h-5 text-gray-600 dark:text-slate-400 group-hover:text-accent transition-colors" />
                     </motion.button>
 
                     <AnimatePresence>
                         {showMenu && (
                             <>
-                                <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
+                                <div className="fixed inset-0 z-[1001]" onClick={() => setShowMenu(false)} />
+                                {typeof document !== 'undefined' && createPortal(
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                    className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl z-20 overflow-hidden"
+                                    className="fixed w-48 bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.3)] z-[1002] overflow-hidden py-1"
+                                    style={{
+                                        top: (document.getElementById(`action-trigger-${auditor.id}`)?.getBoundingClientRect().bottom || 0) + 8,
+                                        left: (document.getElementById(`action-trigger-${auditor.id}`)?.getBoundingClientRect().right || 0) - 192,
+                                    }}
                                 >
                                     <button
                                         onClick={() => { onEdit(auditor); setShowMenu(false); }}
@@ -205,7 +212,9 @@ const AuditorRow = ({
                                         <IconTrash className="w-4 h-4" />
                                         Remove Auditor
                                     </button>
-                                </motion.div>
+                                </motion.div>,
+                                document.body
+                                )}
                             </>
                         )}
                     </AnimatePresence>

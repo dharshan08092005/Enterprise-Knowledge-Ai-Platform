@@ -824,7 +824,7 @@ export default function KnowledgeBase() {
         const matchesStatus = statusFilter === "all" || doc.status === statusFilter;
         const matchesScope = scopeFilter === "all" || doc.accessScope === scopeFilter;
         return matchesSearch && matchesStatus && matchesScope;
-    });
+    }).sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
 
     // Stats
     const stats = {
