@@ -242,8 +242,9 @@ const ChatHistoryItem = ({
           <p className="text-xs text-gray-500 dark:text-slate-500 truncate mt-1">{session.lastMessage}</p>
         </div>
         <button
+          id={`action-trigger-${session.id}`}
           onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-          className="p-1 rounded-lg hover:bg-gray-100 dark:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="p-2.5 rounded-xl border border-transparent active:border-white/10 group h-10 w-10 flex items-center justify-center"
         >
           <IconDotsVertical className="w-4 h-4 text-gray-500 dark:text-slate-400" />
         </button>
@@ -260,13 +261,18 @@ const ChatHistoryItem = ({
       <AnimatePresence>
         {showMenu && (
           <>
-            <div className="fixed inset-0 z-10" onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="absolute right-0 top-8 w-36 bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-lg shadow-xl z-20 overflow-hidden"
-            >
+            <div className="fixed inset-0 z-[1001]" onClick={(e) => { e.stopPropagation(); setShowMenu(false); }} />
+            {typeof document !== 'undefined' && createPortal(
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="fixed w-40 bg-white dark:bg-[#1a1a2e] border border-gray-200 dark:border-white/10 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.3)] z-[1002] overflow-hidden py-1"
+                style={{
+                  top: (document.getElementById(`action-trigger-${session.id}`)?.getBoundingClientRect().bottom || 0) + 8,
+                  left: (document.getElementById(`action-trigger-${session.id}`)?.getBoundingClientRect().right || 0) - 160,
+                }}
+              >
               <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-white dark:bg-white/5 transition-colors">
                 <IconBookmark className="w-4 h-4" />
                 Save
@@ -282,7 +288,9 @@ const ChatHistoryItem = ({
                 <IconTrash className="w-4 h-4" />
                 Delete
               </button>
-            </motion.div>
+              </motion.div>,
+              document.body
+            )}
           </>
         )}
       </AnimatePresence>
