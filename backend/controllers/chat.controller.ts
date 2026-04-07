@@ -137,7 +137,7 @@ export const handleChatQuery = async (
     });
 
   } catch (error: any) {
-    console.error("Chat error:", error.message);
+    console.error("Chat error:", error);
     res.status(500).json({ message: "Failed to process chat query." });
   }
 };

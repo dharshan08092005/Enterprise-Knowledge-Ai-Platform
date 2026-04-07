@@ -2,8 +2,7 @@ import "dotenv/config";
 import http from "http";
 import mongoose from "mongoose";
 
-// Add a simple server to satisfy Render's port check
-const PORT = process.env.PORT || 8001;
+const PORT = process.env.OLLAMA_PORT || process.env.PORT || 8001;
 http.createServer((req, res) => {
   res.writeHead(200);
   res.end("Worker is Running");
