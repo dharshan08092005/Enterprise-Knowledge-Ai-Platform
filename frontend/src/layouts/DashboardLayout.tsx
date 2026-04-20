@@ -15,7 +15,7 @@ import {
   IconMessageCircle,
   IconSettings,
   IconUsers,
-  IconChartBar,
+  // IconChartBar,
   IconFolder,
   IconKey,
   IconFileAnalytics,
@@ -93,8 +93,8 @@ export default function DashboardLayout() {
     // Auditors and Global Admins don't get the AI chat
     ...(!isGlobalAdmin && userRole !== "AUDITOR"
       ? [
-          { label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" /> },
-        ]
+        { label: "Ask AI", href: "/ask", icon: <IconMessageCircle className="w-5 h-5" /> },
+      ]
       : []),
     ...(!isGlobalAdmin
       ? [
@@ -107,7 +107,7 @@ export default function DashboardLayout() {
   // Workspace links (Admin only)
   const workspaceLinks = [
     ...(!isGlobalAdmin ? [{ label: "AI Models", href: "/models", icon: <IconBrain className="w-5 h-5" /> }] : []),
-    { label: "Analytics", href: "/analytics", icon: <IconChartBar className="w-5 h-5" /> },
+    // { label: "Analytics", href: "/analytics", icon: <IconChartBar className="w-5 h-5" /> },
   ];
 
   // Audit links (Auditor and Admin)
