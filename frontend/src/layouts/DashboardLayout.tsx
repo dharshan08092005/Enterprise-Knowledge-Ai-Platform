@@ -15,7 +15,7 @@ import {
   IconMessageCircle,
   IconSettings,
   IconUsers,
-  IconChartBar,
+  // IconChartBar,
   IconFolder,
   IconKey,
   IconFileAnalytics,
