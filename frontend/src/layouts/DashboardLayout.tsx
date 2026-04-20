@@ -64,8 +64,8 @@ export default function DashboardLayout() {
         return { title: "Documents", subtitle: "View and manage all uploaded documents" };
       case "/models":
         return { title: "AI Models", subtitle: "Configure and deploy AI models" };
-      case "/analytics":
-        return { title: "Analytics", subtitle: "Insights and performance metrics" };
+      // case "/analytics":
+      //   return { title: "Analytics", subtitle: "Insights and performance metrics" };
       case "/audit":
         return { title: "Audit Logs", subtitle: "System activity and security monitoring" };
       case "/team":
