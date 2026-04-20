@@ -15,7 +15,6 @@ server.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
 
-/* -------------------- GRACEFUL SHUTDOWN -------------------- */
 process.on("SIGTERM", () => {
   console.log("SIGTERM received. Shutting down server...");
   server.close(() => {
